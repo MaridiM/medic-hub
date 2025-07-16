@@ -17,11 +17,6 @@
     "importOrder": [
         "<THIRD_PARTY_MODULES>",
         "^@/app/(.*)$",
-        "^@/screens/(.*)$",
-        "^@/widgets/(.*)$",
-        "^@/features/(.*)$",
-        "^@/entities/(.*)$",
-        "^@/shared/(.*)$",
         "^@/modules/(.*)$",
         "^@/packages/(.*)$",
         "^@/auth/(.*)$",
@@ -29,9 +24,5 @@
         "^./(.*)$",
         "(.scss)$"
     ],
-    "plugins": [
-        "@trivago/prettier-plugin-sort-imports",
-        "prettier-plugin-tailwindcss"
-    ]
-    
+    "plugins": ["@trivago/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"]
 }

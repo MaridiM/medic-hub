@@ -12,8 +12,7 @@
             "@/packages/*": ["./src/packages/*"],
 
             // auth
-            "@/auth/*": ["./src/modules/auth/*"],
-            "@/auth/widgets/*": ["./src/modules/auth/widgets/*"]
+            "@/auth/*": ["./src/modules/auth/*"]
         }
     },
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
