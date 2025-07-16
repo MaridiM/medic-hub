@@ -7,14 +7,14 @@ import { cn } from '@/packages/utils/index'
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
 
 const buttonVariants = cva(
-    'flex justify-center items-center rounded-md transition-all duration-300 ease-in-out [&_svg]:pointer-events-none [&_svg]:size-6 [&_svg]:shrink-0 gap-1',
+    'flex justify-center items-center rounded-md transition-all duration-300 ease-in-out [&_svg]:pointer-events-none [&_svg]:size-6 [&_svg]:shrink-0 gap-1 disabled:opacity-50 disabled:cursor-not-allowed  disabled:pointer-events-none',
     {
         variants: {
             variant: {
                 default: '',
-                primary: 'bg-primary !text-primary-foreground hover:bg-primary-hover',
-                outline: 'bg-transparent !text-text-primary hover:bg-hover',
-                ghost: 'border border-border/10 bg-transparent !text-text-primary hover:bg-hover hover:border-border/20 text-text'
+                primary: 'bg-primary !text-primary-foreground hover:bg-primary-hover disabled:hover:bg-primary',
+                outline: 'bg-transparent !text-text-primary hover:bg-hover disabled:hover:bg-transparent',
+                ghost: 'border border-border/10 bg-transparent !text-text-primary hover:bg-hover hover:border-border/20 text-text disabled:hover:bg-transparent'
             },
             size: {
                 default: 'h-10 px-4 text-button-md [&_svg]:size-6',

@@ -1,4 +1,3 @@
-import core from './core.ru.json'
-import organizations from './organizations.ru.json'
+import core from './core.json'
 
-export default { core, organizations }
+export default { core }

@@ -6,7 +6,7 @@ import { CreateAccount } from '@/modules/auth'
 import { NO_INDEX_PAGE } from '@/packages/constants'
 
 export async function generateMetadata(): Promise<Metadata> {
-    const t = await getTranslations('core.auth.createAccount')
+    const t = await getTranslations('auth.createAccount')
 
     return {
         title: t('heading'),

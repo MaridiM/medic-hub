@@ -1,2 +1,4 @@
+export * from './auth-form-footer'
+export * from './auth-form-header'
 export * from './auth-footer'
 export * from './auth-header'

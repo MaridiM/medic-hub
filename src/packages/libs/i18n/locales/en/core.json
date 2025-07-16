@@ -1,14 +1,4 @@
 {
-    "auth": {
-        "login": {
-            "heading": "Login",
-            "description": "Login to your account"
-        },
-        "createAccount": {
-            "heading": "Create Account",
-            "description": "Create an account to get started"
-        }
-    },
     "organizationMenu": {
         "title": "Organizations",
         "button": "Create organization"

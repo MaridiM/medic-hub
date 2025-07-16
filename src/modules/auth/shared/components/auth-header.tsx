@@ -1,3 +1,5 @@
+'use client'
+
 import { ChangeLanguage, ChangeTheme, LogoIcon } from '@/packages/components'
 
 export const AuthHeader = () => {

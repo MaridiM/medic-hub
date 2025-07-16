@@ -73,7 +73,7 @@ export function ChangeLanguage({ className }: IProps) {
                             <SelectContent
                                 classNameViewport='flex flex-col gap-0.5'
                                 className='min-w-[1rem]'
-                                align='center'  
+                                align='center'
                             >
                                 {languages.map(language => {
                                     const currentLanguage = language === (locale ?? 'en')

@@ -1,14 +1,4 @@
 {
-    "auth": {
-        "login": {
-            "heading": "Вход",
-            "description": "Вход в систему"
-        },
-        "createAccount": {
-            "heading": "Создание аккаунта",
-            "description": "Создание аккаунта"
-        }
-    },
     "organizationMenu": {
         "title": "Организации",
         "button": "Создать организацию"

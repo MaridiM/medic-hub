@@ -4,7 +4,7 @@ import { AuthForm } from '@/auth/widgets'
 export const CreateAccount = () => {
     return (
         <AuthWrapper>
-            <AuthForm />
+            <AuthForm type='createAccount' />
         </AuthWrapper>
     )
 }

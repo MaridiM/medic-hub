@@ -1,4 +1,3 @@
-import core from './core.en.json'
-import organizations from './organizations.en.json'
+import core from './core.json'
 
-export default { core, organizations }
+export default { core }
