@@ -21,8 +21,6 @@ import {
 import { ContactForm } from './contact-form'
 import { PasswordForm } from './password-form'
 
-// components/CreateAccountForm.tsx
-
 export const CreateAccountForm = () => {
     const { passwordStep, setPasswordStep } = useAuthStore()
     const t = useTranslations('auth.createAccount')

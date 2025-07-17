@@ -1,10 +1,8 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import {
@@ -18,13 +16,11 @@ import {
     FormMessage,
     Input
 } from '@/packages/components'
-import { PATHS } from '@/packages/config'
 import { useAutoValidateForm } from '@/packages/hooks'
 
-import { AuthFormLink, AuthSocial } from '@/auth/shared/components'
 import { TForgotPasswordFormSchema, makeForgotPasswordFormSchema } from '@/auth/shared/schemas'
 
-export const ForgotPasswordForm = ({}: ComponentProps<'div'>) => {
+export const ForgotPasswordForm = () => {
     const t = useTranslations('auth.forgotPassword')
     const forgotPasswordFormSchema = useMemo(() => makeForgotPasswordFormSchema(t), [t])
 
