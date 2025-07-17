@@ -13,7 +13,7 @@ interface IProps extends PropsWithChildren<Omit<ComponentProps<'form'>, 'onSubmi
     t: TUseTranslations
 }
 
-export const ContactInfoForm = ({ children, form, t, ...props }: IProps) => {
+export const ContactForm = ({ children, form, t, ...props }: IProps) => {
     return (
         <Form key='contact-info-form' {...form}>
             <form className='space-y-4' {...props}>
@@ -24,11 +24,7 @@ export const ContactInfoForm = ({ children, form, t, ...props }: IProps) => {
                         <FormItem>
                             <FormLabel>{t('inputs.fullName.label')}</FormLabel>
                             <FormControl>
-                                <Input
-                                    placeholder={t('inputs.fullName.placeholder')}
-                                    autoComplete='full-name'
-                                    {...field}
-                                />
+                                <Input placeholder={t('inputs.fullName.placeholder')} autoComplete='name' {...field} />
                             </FormControl>
                             <FormMessage className='!text-p-xs' />
                         </FormItem>

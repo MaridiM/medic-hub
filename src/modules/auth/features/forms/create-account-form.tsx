@@ -2,12 +2,12 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { ComponentProps, useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Button, CardContent } from '@/packages/components'
 import { PATHS } from '@/packages/config'
+import { useAutoValidateForm } from '@/packages/hooks'
 
 import { AuthFormLink, AuthSocial } from '@/auth/shared/components'
 import { useAuthStore } from '@/auth/shared/libs/store'
@@ -18,79 +18,79 @@ import {
     makePasswordFormSchema
 } from '@/auth/shared/schemas'
 
-import { ContactInfoForm } from './contact-info-form'
+import { ContactForm } from './contact-form'
 import { PasswordForm } from './password-form'
 
-export const CreateAccountForm = ({ className, ...props }: ComponentProps<'div'>) => {
-    const router = useRouter()
+// components/CreateAccountForm.tsx
 
+export const CreateAccountForm = () => {
     const { passwordStep, setPasswordStep } = useAuthStore()
-
     const t = useTranslations('auth.createAccount')
-    const createAccountFormSchema = useMemo(() => makeCreateAccountFormSchema(t), [t])
-    const passwordFormSchema = useMemo(() => makePasswordFormSchema(t), [t])
 
-    const contactInfoForm = useForm<TCreateAccountFormSchema>({
-        resolver: zodResolver(createAccountFormSchema),
-        defaultValues: {
-            fullName: '',
-            email: '',
-            phone: ''
-        },
+    const contactSchema = useMemo(() => makeCreateAccountFormSchema(t), [t])
+    const passwordSchema = useMemo(() => makePasswordFormSchema(t), [t])
+
+    const contactForm = useForm<TCreateAccountFormSchema>({
+        resolver: zodResolver(contactSchema),
+        defaultValues: { fullName: '', email: '', phone: '' },
         mode: 'onTouched',
         reValidateMode: 'onChange'
     })
     const passwordForm = useForm<TPasswordFormSchema>({
-        resolver: zodResolver(passwordFormSchema),
-        defaultValues: {
-            password: '',
-            confirmPassword: ''
-        },
+        resolver: zodResolver(passwordSchema),
+        defaultValues: { password: '', confirmPassword: '' },
         mode: 'onTouched',
         reValidateMode: 'onChange'
     })
 
-    const { isValid: isValidContactInfo } = contactInfoForm.formState
-    const { isValid: isValidPassword } = passwordForm.formState
+    // Включаем автовалидатор для каждого шага
+    useAutoValidateForm(contactForm, ['fullName', 'email', 'phone'])
+    useAutoValidateForm(passwordForm, ['password', 'confirmPassword'])
+
+    const { isValid: validContact } = contactForm.formState
+    const { isValid: validPassword } = passwordForm.formState
 
     const onSubmit = useCallback(
         (data: TPasswordFormSchema) => {
-            console.log('CREATE ACCOUNT FORM DATA:', { ...data, ...contactInfoForm.getValues() })
-            contactInfoForm.reset()
-            passwordForm.reset()
+            console.log('SUBMIT:', { ...contactForm.getValues(), ...data })
+
+            // TODO: add login action
+
+            setTimeout(() => {
+                contactForm.reset()
+                passwordForm.reset()
+            }, 500)
+
+            setPasswordStep(false)
         },
-        [contactInfoForm, passwordForm]
+        [contactForm, passwordForm, setPasswordStep]
     )
 
     return (
         <CardContent className='flex flex-col gap-6'>
             {!passwordStep && <AuthSocial t={t} />}
+
             {passwordStep ? (
                 <PasswordForm form={passwordForm} onSubmit={onSubmit} t={t}>
-                    <Button type='submit' variant='primary' className='mt-6 w-full' disabled={!isValidPassword}>
+                    <Button type='submit' variant='primary' className='w-full' disabled={!validPassword}>
                         {t('form.sign_up')}
                     </Button>
-                    <Button
-                        type='button'
-                        variant={'ghost'}
-                        className='mt-6 w-full'
-                        onClick={() => setPasswordStep(false)}
-                    >
+                    <Button type='button' variant='ghost' className='w-full' onClick={() => setPasswordStep(false)}>
                         {t('form.back')}
                     </Button>
                 </PasswordForm>
             ) : (
-                <ContactInfoForm form={contactInfoForm} t={t}>
+                <ContactForm form={contactForm} t={t}>
                     <Button
                         type='button'
-                        variant={'primary'}
-                        className='mt-6 w-full'
+                        variant='primary'
+                        className='w-full'
                         onClick={() => setPasswordStep(true)}
-                        disabled={!isValidContactInfo}
+                        disabled={!validContact}
                     >
                         {t('form.next')}
                     </Button>
-                </ContactInfoForm>
+                </ContactForm>
             )}
 
             <AuthFormLink
@@ -100,27 +100,11 @@ export const CreateAccountForm = ({ className, ...props }: ComponentProps<'div'>
                 onClick={() => {
                     setPasswordStep(false)
                     setTimeout(() => {
-                        contactInfoForm.reset()
+                        contactForm.reset()
                         passwordForm.reset()
                     }, 500)
                 }}
             />
-            {/* <footer className='text-text text-p-sm flex items-center justify-center gap-1'>
-                {t('form.have_account')}
-                <Button
-                    className='text-primary hover:text-primary-700 p-0 hover:bg-transparent'
-                    onClick={() => {
-                        router.push(PATHS.auth())
-                        setTimeout(() => {
-                            setPasswordStep(false)
-                            contactInfoForm.reset()
-                            passwordForm.reset()
-                        }, 500)
-                    }}
-                >
-                    {t('form.sign_in')}
-                </Button>
-            </footer> */}
         </CardContent>
     )
 }
