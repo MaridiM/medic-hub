@@ -4,9 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { ComponentProps, useCallback, useMemo, useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import {
     Button,
@@ -58,8 +57,6 @@ export const LoginForm = ({}: ComponentProps<'div'>) => {
 
     return (
         <CardContent className='flex flex-col gap-6'>
-            <AuthSocial t={t} />
-
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
                     <FormField
@@ -128,18 +125,6 @@ export const LoginForm = ({}: ComponentProps<'div'>) => {
                     </Button>
                 </form>
             </Form>
-
-            {/* Link to sign up */}
-            <AuthFormLink
-                href={PATHS.auth('create-account')}
-                text={t('form.no_account')}
-                buttonText={t('form.sign_up')}
-                onClick={() => {
-                    // Reset the store and form when navigating away
-                    setPasswordStep(false)
-                    setTimeout(() => form.reset(), 500)
-                }}
-            />
         </CardContent>
     )
 }

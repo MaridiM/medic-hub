@@ -22,6 +22,7 @@ export const AuthFormHeader = ({ className, t, type, ...props }: IProps) => {
             <CardDescription className='!text-text-tertiary text-p-xs'>
                 {type === 'login' && t('form.description')}
                 {type === 'createAccount' && (passwordStep ? t('form.description_password') : t('form.description'))}
+                {type === 'forgotPassword' && t('form.description')}
             </CardDescription>
         </CardHeader>
     )

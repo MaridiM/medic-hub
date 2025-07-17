@@ -6,7 +6,7 @@ import { ComponentProps } from 'react'
 import { Card } from '@/packages/components'
 import { cn } from '@/packages/utils'
 
-import { CreateAccountForm, LoginForm } from '@/auth/features'
+import { CreateAccountForm, ForgotPasswordForm, LoginForm } from '@/auth/features'
 import { AuthFormFooter, AuthFormHeader } from '@/auth/shared/components'
 import { TAuthFormType } from '@/auth/shared/types'
 
@@ -24,8 +24,9 @@ export const AuthForm = ({ className, type = 'login', ...props }: IProps) => {
 
                 {type === 'login' && <LoginForm />}
                 {type === 'createAccount' && <CreateAccountForm />}
+                {type === 'forgotPassword' && <ForgotPasswordForm />}
             </Card>
-            <AuthFormFooter t={t} />
+            {(type === 'login' || type === 'createAccount') && <AuthFormFooter t={t} />}
         </div>
     )
 }
