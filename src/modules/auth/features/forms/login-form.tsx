@@ -4,10 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ComponentProps, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { Google } from '@/packages/assets/icons'
 import {
     Button,
     CardContent,
@@ -21,11 +21,14 @@ import {
 } from '@/packages/components'
 import { PATHS } from '@/packages/config'
 
+import { AuthFormLink, AuthSocial } from '@/auth/shared/components'
+import { useAuthStore } from '@/auth/shared/libs/store'
 import { TLoginFormSchema, makeLoginFormSchema } from '@/auth/shared/schemas'
 
-export const LoginForm = ({ className, ...props }: ComponentProps<'div'>) => {
-    const [wasSubmitted, setWasSubmitted] = useState(false)
+export const LoginForm = ({}: ComponentProps<'div'>) => {
+    const router = useRouter()
     const [showPassword, setShowPassword] = useState(false)
+    const { setPasswordStep } = useAuthStore()
 
     const t = useTranslations('auth.login')
     const loginFormSchema = useMemo(() => makeLoginFormSchema(t), [t])
@@ -41,34 +44,18 @@ export const LoginForm = ({ className, ...props }: ComponentProps<'div'>) => {
     })
 
     useEffect(() => {
-        if (wasSubmitted) {
-            form.trigger()
-        } else {
-            form.clearErrors()
-        }
+        // form.clearErrors()
     }, [loginFormSchema])
 
     const { isValid } = form.formState
 
     function onSubmit(data: TLoginFormSchema) {
-        setWasSubmitted(true)
         console.log('LOGIN FORM DATA:', data)
     }
     return (
         <CardContent className='flex flex-col gap-6'>
-            <div className='flex flex-col gap-6'>
-                <div className='flex flex-col gap-2'>
-                    <Button variant='ghost' className='w-full gap-2 tracking-wide'>
-                        <Google className='!size-4' />
-                        {t('form.login_with_google')}
-                    </Button>
-                </div>
-                <div className='after:border-border/20 text-p-sm relative text-center after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t'>
-                    <span className='bg-card text-text-tertiary relative z-10 px-2'>{t('form.or_continue')}</span>
-                </div>
-            </div>
+            <AuthSocial t={t} />
 
-            {/* Форма */}
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
                     <FormField
@@ -78,7 +65,12 @@ export const LoginForm = ({ className, ...props }: ComponentProps<'div'>) => {
                             <FormItem>
                                 <FormLabel>{t('inputs.email.label')}</FormLabel>
                                 <FormControl>
-                                    <Input placeholder={t('inputs.email.placeholder')} {...field} />
+                                    <Input
+                                        type='email'
+                                        placeholder={t('inputs.email.placeholder')}
+                                        autoComplete='email'
+                                        {...field}
+                                    />
                                 </FormControl>
                                 <FormMessage className='!text-p-xs' />
                             </FormItem>
@@ -106,6 +98,7 @@ export const LoginForm = ({ className, ...props }: ComponentProps<'div'>) => {
                                                 type={showPassword ? 'text' : 'password'}
                                                 placeholder={t('inputs.password.placeholder')}
                                                 className='pr-14'
+                                                autoComplete='current-password'
                                                 {...field}
                                             />
                                             <Button
@@ -132,13 +125,32 @@ export const LoginForm = ({ className, ...props }: ComponentProps<'div'>) => {
                 </form>
             </Form>
 
-            {/* Footer */}
-            <footer className='text-text text-p-sm flex items-center justify-center gap-1'>
+            <AuthFormLink
+                href={PATHS.auth('create-account')}
+                text={t('form.no_account')}
+                buttonText={t('form.sign_up')}
+                onClick={() => {
+                    setPasswordStep(false)
+                    setTimeout(() => {
+                        form.reset()
+                    }, 500)
+                }}
+            />
+            {/* <footer className='text-text text-p-sm flex items-center justify-center gap-1'>
                 {t('form.no_account')}
-                <Link href={PATHS.auth('create-account')} className='text-primary hover:text-primary-700'>
-                    {t('form.sign_up')}
-                </Link>
-            </footer>
+                <Button
+                    className='text-primary hover:text-primary-700 p-0 hover:bg-transparent'
+                    onClick={() => {
+                        router.push(PATHS.auth('create-account'))
+                        setTimeout(() => {
+                            setPasswordStep(false)
+                            form.reset()
+                        }, 500)
+                    }}
+                >
+                    {t('form.sign_in')}
+                </Button>
+            </footer> */}
         </CardContent>
     )
 }
