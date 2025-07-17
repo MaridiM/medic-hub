@@ -3,14 +3,14 @@
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
 import { ComponentProps } from 'react'
 
-import { cn } from '@/packages/utils'
+import { cn } from '@/packages/utils/index'
 
 function ScrollArea({ className, children, ...props }: ComponentProps<typeof ScrollAreaPrimitive.Root>) {
     return (
         <ScrollAreaPrimitive.Root data-slot='scroll-area' className={cn('relative', className)} {...props}>
             <ScrollAreaPrimitive.Viewport
                 data-slot='scroll-area-viewport'
-                className='focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1'
+                className='size-full rounded-[inherit] border-border/20 transition-[color,box-shadow] outline-none focus-visible:outline-1'
             >
                 {children}
             </ScrollAreaPrimitive.Viewport>
@@ -39,7 +39,7 @@ function ScrollBar({
         >
             <ScrollAreaPrimitive.ScrollAreaThumb
                 data-slot='scroll-area-thumb'
-                className='bg-border relative flex-1 rounded-full'
+                className='bg-border/20 relative flex-1 rounded-full'
             />
         </ScrollAreaPrimitive.ScrollAreaScrollbar>
     )

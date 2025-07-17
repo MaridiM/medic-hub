@@ -1,10 +1,10 @@
 import { AuthWrapper } from '@/auth/features'
 import { AuthForm } from '@/auth/widgets'
 
-export const ForgotPassword = () => {
+export const ResetPassword = () => {
     return (
         <AuthWrapper>
-            <AuthForm type='forgotPassword' />
+            <AuthForm type='resetPassword' />
         </AuthWrapper>
     )
 }

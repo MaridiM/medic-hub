@@ -1,2 +1,2 @@
 export type TOrganizationRoutes = 'create' | ''
-export type TAuthRoutes = 'create-account' | 'verify' | 'forgot-password' | 'change-password' | ''
+export type TAuthRoutes = 'create-account' | 'verify' | 'recovery' | 'change-password' | ''

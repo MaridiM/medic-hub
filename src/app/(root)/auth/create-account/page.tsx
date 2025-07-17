@@ -15,6 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
     }
 }
 
-export default function Auth() {
+export default function CreateAccountPage() {
     return <CreateAccount />
 }

@@ -1,12 +1,12 @@
 import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 
-import { Login } from '@/modules/auth'
+import { ChangePassword } from '@/modules/auth'
 
 import { NO_INDEX_PAGE } from '@/packages/constants'
 
 export async function generateMetadata(): Promise<Metadata> {
-    const t = await getTranslations('auth.login')
+    const t = await getTranslations('auth.changePassword')
 
     return {
         title: t('heading'),
@@ -15,6 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
     }
 }
 
-export default function LoginPage() {
-    return <Login />
+export default function ChangePasswordPage() {
+    return <ChangePassword />
 }

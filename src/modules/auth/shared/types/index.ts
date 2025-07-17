@@ -1,1 +1,1 @@
-export type TAuthFormType = 'login' | 'createAccount' | 'forgotPassword'
+export type TAuthFormType = 'login' | 'createAccount' | 'resetPassword' | 'changePassword'

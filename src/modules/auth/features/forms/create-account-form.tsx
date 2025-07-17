@@ -70,19 +70,21 @@ export const CreateAccountForm = () => {
 
             {passwordStep ? (
                 <PasswordForm form={passwordForm} onSubmit={onSubmit} t={t}>
-                    <Button type='submit' variant='primary' className='w-full' disabled={!validPassword}>
-                        {t('form.sign_up')}
-                    </Button>
-                    <Button type='button' variant='ghost' className='w-full' onClick={() => setPasswordStep(false)}>
-                        {t('form.back')}
-                    </Button>
+                    <div className='mt-6 flex flex-col gap-6'>
+                        <Button type='submit' variant='primary' className='w-full' disabled={!validPassword}>
+                            {t('form.signUp')}
+                        </Button>
+                        <Button type='button' variant='ghost' className='w-full' onClick={() => setPasswordStep(false)}>
+                            {t('form.back')}
+                        </Button>
+                    </div>
                 </PasswordForm>
             ) : (
                 <ContactForm form={contactForm} t={t}>
                     <Button
                         type='button'
                         variant='primary'
-                        className='w-full'
+                        className='mt-6 w-full'
                         onClick={() => setPasswordStep(true)}
                         disabled={!validContact}
                     >
@@ -93,8 +95,8 @@ export const CreateAccountForm = () => {
 
             <AuthFormLink
                 href={PATHS.auth()}
-                text={t('form.have_account')}
-                buttonText={t('form.sign_in')}
+                text={t('form.haveAccount')}
+                buttonText={t('form.signIn')}
                 onClick={() => {
                     setPasswordStep(false)
                     setTimeout(() => {

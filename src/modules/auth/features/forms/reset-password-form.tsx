@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -16,17 +17,20 @@ import {
     FormMessage,
     Input
 } from '@/packages/components'
+import { PATHS } from '@/packages/config'
 import { useAutoValidateForm } from '@/packages/hooks'
 
-import { TForgotPasswordFormSchema, makeForgotPasswordFormSchema } from '@/auth/shared/schemas'
+import { TResetPasswordFormSchema, makeResetPasswordFormSchema } from '@/auth/shared/schemas'
 
-export const ForgotPasswordForm = () => {
-    const t = useTranslations('auth.forgotPassword')
-    const forgotPasswordFormSchema = useMemo(() => makeForgotPasswordFormSchema(t), [t])
+export const ResetPasswordForm = () => {
+    const router = useRouter()
+
+    const t = useTranslations('auth.resetPassword')
+    const resetPasswordFormSchema = useMemo(() => makeResetPasswordFormSchema(t), [t])
 
     // RHF form hook with Zod resolver for schema validation.
-    const form = useForm<TForgotPasswordFormSchema>({
-        resolver: zodResolver(forgotPasswordFormSchema),
+    const form = useForm<TResetPasswordFormSchema>({
+        resolver: zodResolver(resetPasswordFormSchema),
         defaultValues: { email: '' },
         mode: 'onTouched',
         reValidateMode: 'onChange'
@@ -36,8 +40,8 @@ export const ForgotPasswordForm = () => {
 
     const { isValid } = form.formState
 
-    const onSubmit = useCallback((data: TForgotPasswordFormSchema) => {
-        console.log('FORGOT PASSWORD FORM DATA:', data)
+    const onSubmit = useCallback((data: TResetPasswordFormSchema) => {
+        console.log('RESET PASSWORD FORM DATA:', data)
 
         // TODO: add login action
 
@@ -70,9 +74,9 @@ export const ForgotPasswordForm = () => {
                     />
 
                     <Button type='submit' variant='primary' className='mt-6 w-full' disabled={!isValid}>
-                        {t('form.send_reset_link')}
+                        {t('form.sendResetLink')}
                     </Button>
-                    <Button type='button' variant='ghost' className='w-full' onClick={() => {}}>
+                    <Button type='button' variant='ghost' className='w-full' onClick={() => router.push(PATHS.auth())}>
                         {t('form.back')}
                     </Button>
                 </form>

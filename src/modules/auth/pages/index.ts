@@ -1,3 +1,4 @@
-export * from './login'
+export * from './change-password'
 export * from './create-account'
-export * from './forgot-password'
+export * from './reset-password'
+export * from './login'

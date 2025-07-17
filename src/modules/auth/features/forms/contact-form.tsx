@@ -1,7 +1,7 @@
 import React, { ComponentProps, PropsWithChildren } from 'react'
 import { UseFormReturn } from 'react-hook-form'
 
-import { FormControl, FormItem, FormLabel, FormMessage, Input } from '@/packages/components'
+import { FormControl, FormItem, FormLabel, FormMessage, Input, PhoneInput } from '@/packages/components'
 import { Form } from '@/packages/components'
 import { FormField } from '@/packages/components'
 import { TUseTranslations } from '@/packages/libs/i18n'
@@ -55,12 +55,7 @@ export const ContactForm = ({ children, form, t, ...props }: IProps) => {
                         <FormItem>
                             <FormLabel>{t('inputs.phone.label')}</FormLabel>
                             <FormControl>
-                                <Input
-                                    type='tel'
-                                    placeholder={t('inputs.phone.placeholder')}
-                                    autoComplete='tel'
-                                    {...field}
-                                />
+                                <PhoneInput placeholder={t('inputs.phone.placeholder')} autoComplete='tel' {...field} />
                             </FormControl>
                             <FormMessage className='!text-p-xs' />
                         </FormItem>

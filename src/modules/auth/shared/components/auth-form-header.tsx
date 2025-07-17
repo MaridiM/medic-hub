@@ -13,7 +13,7 @@ interface IProps extends ComponentProps<'div'> {
     type: TAuthFormType
 }
 
-export const AuthFormHeader = ({ className, t, type, ...props }: IProps) => {
+export const AuthFormHeader = ({ t, type }: IProps) => {
     const { passwordStep } = useAuthStore()
 
     return (
@@ -21,8 +21,9 @@ export const AuthFormHeader = ({ className, t, type, ...props }: IProps) => {
             <CardTitle className='text-xl uppercase'>{t('form.title')}</CardTitle>
             <CardDescription className='!text-text-tertiary text-p-xs'>
                 {type === 'login' && t('form.description')}
-                {type === 'createAccount' && (passwordStep ? t('form.description_password') : t('form.description'))}
-                {type === 'forgotPassword' && t('form.description')}
+                {type === 'createAccount' && (passwordStep ? t('form.descriptionPassword') : t('form.description'))}
+                {type === 'resetPassword' && t('form.description')}
+                {type === 'changePassword' && t('form.description')}
             </CardDescription>
         </CardHeader>
     )

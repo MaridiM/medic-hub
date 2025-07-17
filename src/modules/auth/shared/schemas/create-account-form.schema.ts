@@ -9,12 +9,12 @@ export function makeCreateAccountFormSchema(t: TUseTranslations) {
         email: z
             .string()
             .nonempty({ message: t('validation.required', { field: t('inputs.email.label') }) })
-            .pipe(z.email({ message: t('validation.invalid_email') })),
+            .pipe(z.email({ message: t('validation.invalidEmail') })),
 
         phone: z
             .string()
             .nonempty({ message: t('validation.required', { field: t('inputs.phone.label') }) })
-            .regex(/^\+[1-9]\d{1,14}$/, { message: t('validation.invalid_phone') })
+            .regex(/^\+[1-9]\d{1,14}$/, { message: t('validation.invalidPhone') })
     })
 }
 
