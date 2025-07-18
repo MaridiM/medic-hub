@@ -8,6 +8,7 @@ import { cn } from '@/packages/utils'
 
 import { ChangePasswordForm, CreateAccountForm, LoginForm, ResetPasswordForm } from '@/auth/features'
 import { AuthFormFooter, AuthFormHeader } from '@/auth/shared/components'
+import { useAuthStore } from '@/auth/shared/libs/store'
 import { TAuthFormType } from '@/auth/shared/types'
 
 interface IProps extends ComponentProps<'div'> {
@@ -16,9 +17,10 @@ interface IProps extends ComponentProps<'div'> {
 
 export const AuthForm = ({ className, type = 'login', ...props }: IProps) => {
     const t = useTranslations(`auth.${type}`)
+    const { isShowTwoFactor } = useAuthStore()
 
     return (
-        <div className={cn('flex w-full max-w-[420px] min-w-[320px] flex-col gap-6', className)} {...props}>
+        <div className={cn('flex w-full max-w-[400px] min-w-[320px] flex-col gap-6', className)} {...props}>
             <Card>
                 <AuthFormHeader t={t} type={type} />
 
@@ -27,7 +29,7 @@ export const AuthForm = ({ className, type = 'login', ...props }: IProps) => {
                 {type === 'resetPassword' && <ResetPasswordForm />}
                 {type === 'changePassword' && <ChangePasswordForm />}
             </Card>
-            {(type === 'login' || type === 'createAccount') && <AuthFormFooter t={t} />}
+            {((type === 'login' && !isShowTwoFactor) || type === 'createAccount') && <AuthFormFooter t={t} />}
         </div>
     )
 }

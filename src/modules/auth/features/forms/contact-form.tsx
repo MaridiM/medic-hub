@@ -26,7 +26,7 @@ export const ContactForm = ({ children, form, t, ...props }: IProps) => {
                             <FormControl>
                                 <Input placeholder={t('inputs.fullName.placeholder')} autoComplete='name' {...field} />
                             </FormControl>
-                            <FormMessage className='!text-p-xs' />
+                             <FormMessage className='!text-p-xs text-destructive' />
                         </FormItem>
                     )}
                 />
@@ -44,7 +44,7 @@ export const ContactForm = ({ children, form, t, ...props }: IProps) => {
                                     {...field}
                                 />
                             </FormControl>
-                            <FormMessage className='!text-p-xs' />
+                             <FormMessage className='!text-p-xs text-destructive' />
                         </FormItem>
                     )}
                 />
@@ -57,7 +57,7 @@ export const ContactForm = ({ children, form, t, ...props }: IProps) => {
                             <FormControl>
                                 <PhoneInput placeholder={t('inputs.phone.placeholder')} autoComplete='tel' {...field} />
                             </FormControl>
-                            <FormMessage className='!text-p-xs' />
+                             <FormMessage className='!text-p-xs text-destructive' />
                         </FormItem>
                     )}
                 />

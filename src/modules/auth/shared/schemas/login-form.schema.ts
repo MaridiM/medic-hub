@@ -14,5 +14,11 @@ export function makeLoginFormSchema(t: TUseTranslations) {
             .min(8, { message: t('validation.minLength', { min: 8 }) })
     })
 }
+export function makeOtpFormSchema(t: TUseTranslations) {
+    return z.object({
+        pin: z.string().min(6, { message: t('validation.minLength', { min: 6 }) })
+    })
+}
 
 export type TLoginFormSchema = z.infer<ReturnType<typeof makeLoginFormSchema>>
+export type TOtpFormSchema = z.infer<ReturnType<typeof makeOtpFormSchema>>

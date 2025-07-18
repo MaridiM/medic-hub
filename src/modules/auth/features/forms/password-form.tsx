@@ -47,7 +47,7 @@ export const PasswordForm = ({ children, form, onSubmit, t, ...props }: IProps) 
                                     </Button>
                                 </div>
                             </FormControl>
-                            <FormMessage className='!text-p-xs' />
+                             <FormMessage className='!text-p-xs text-destructive' />
                         </FormItem>
                     )}
                 />
@@ -80,7 +80,7 @@ export const PasswordForm = ({ children, form, onSubmit, t, ...props }: IProps) 
                                     </Button>
                                 </div>
                             </FormControl>
-                            <FormMessage className='!text-p-xs' />
+                             <FormMessage className='!text-p-xs text-destructive' />
                         </FormItem>
                     )}
                 />

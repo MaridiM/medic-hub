@@ -68,13 +68,13 @@ export const ResetPasswordForm = () => {
                                         {...field}
                                     />
                                 </FormControl>
-                                <FormMessage className='!text-p-xs' />
+                                 <FormMessage className='!text-p-xs text-destructive' />
                             </FormItem>
                         )}
                     />
 
                     <Button type='submit' variant='primary' className='mt-6 w-full' disabled={!isValid}>
-                        {t('form.sendResetLink')}
+                        {t('form.submit')}
                     </Button>
                     <Button type='button' variant='ghost' className='w-full' onClick={() => router.push(PATHS.auth())}>
                         {t('form.back')}

@@ -42,7 +42,7 @@ function InputOTPSlot({
             data-slot='input-otp-slot'
             data-active={isActive}
             className={cn(
-                'aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive dark:bg-input/30 border-input text-p-sm relative flex h-9 w-9 items-center justify-center border-y border-r shadow-xs transition-all outline-none first:rounded-l-md first:border-l last:rounded-r-md data-[active=true]:z-10',
+                'aria-invalid:border-destructive border-border/20 data-[active=true]:aria-invalid:border-destructive dark:bg-input/30 text-p-sm relative flex h-9 w-9 items-center justify-center border border-y border-r shadow-xs transition-all outline-none first:rounded-l-md first:border-l last:rounded-r-md data-[active=true]:z-10',
                 className
             )}
             {...props}
@@ -60,7 +60,7 @@ function InputOTPSlot({
 function InputOTPSeparator({ ...props }: ComponentProps<'div'>) {
     return (
         <div data-slot='input-otp-separator' role='separator' {...props}>
-            <MinusIcon />
+            <MinusIcon className='stroke-border/40' />
         </div>
     )
 }

@@ -14,13 +14,20 @@ interface IProps extends ComponentProps<'div'> {
 }
 
 export const AuthFormHeader = ({ t, type }: IProps) => {
-    const { passwordStep } = useAuthStore()
+    const { passwordStep, isShowTwoFactor, isTotpEnabled } = useAuthStore()
 
     return (
         <CardHeader className='text-center'>
-            <CardTitle className='text-xl uppercase'>{t('form.title')}</CardTitle>
+            <CardTitle className='text-xl uppercase'>
+                {type === 'login' && isShowTwoFactor ? t('form.pinTitle') : t('form.title')}
+            </CardTitle>
             <CardDescription className='!text-text-tertiary text-p-xs'>
-                {type === 'login' && t('form.description')}
+                {type === 'login' &&
+                    (isShowTwoFactor
+                        ? isTotpEnabled
+                            ? t('form.pinDescriptionTOTP')
+                            : t('form.pinDescriptionOTP')
+                        : t('form.description'))}
                 {type === 'createAccount' && (passwordStep ? t('form.descriptionPassword') : t('form.description'))}
                 {type === 'resetPassword' && t('form.description')}
                 {type === 'changePassword' && t('form.description')}

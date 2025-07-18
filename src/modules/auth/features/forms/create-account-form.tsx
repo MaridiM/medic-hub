@@ -72,7 +72,7 @@ export const CreateAccountForm = () => {
                 <PasswordForm form={passwordForm} onSubmit={onSubmit} t={t}>
                     <div className='mt-6 flex flex-col gap-6'>
                         <Button type='submit' variant='primary' className='w-full' disabled={!validPassword}>
-                            {t('form.signUp')}
+                            {t('form.submit')}
                         </Button>
                         <Button type='button' variant='ghost' className='w-full' onClick={() => setPasswordStep(false)}>
                             {t('form.back')}
