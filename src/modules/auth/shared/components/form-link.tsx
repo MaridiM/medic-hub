@@ -12,7 +12,7 @@ interface IProps extends ComponentProps<'div'> {
     onClick?: () => void
 }
 
-export const AuthFormLink = ({ href, buttonText, text, onClick, ...props }: IProps) => {
+export const FormLink = ({ href, buttonText, text, onClick, ...props }: IProps) => {
     const router = useRouter()
     return (
         <footer className='text-text text-p-sm flex items-center justify-center gap-1' {...props}>

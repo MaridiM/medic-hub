@@ -9,7 +9,7 @@ import { Button, CardContent } from '@/packages/components'
 import { PATHS } from '@/packages/config'
 import { useAutoValidateForm } from '@/packages/hooks'
 
-import { AuthFormLink, AuthSocial } from '@/auth/shared/components'
+import { FormLink, Social } from '@/auth/shared/components'
 import { useAuthStore } from '@/auth/shared/libs/store'
 import {
     TCreateAccountFormSchema,
@@ -66,7 +66,7 @@ export const CreateAccountForm = () => {
 
     return (
         <CardContent className='flex flex-col gap-6'>
-            {!passwordStep && <AuthSocial t={t} />}
+            {!passwordStep && <Social t={t} />}
 
             {passwordStep ? (
                 <PasswordForm form={passwordForm} onSubmit={onSubmit} t={t}>
@@ -93,7 +93,7 @@ export const CreateAccountForm = () => {
                 </ContactForm>
             )}
 
-            <AuthFormLink
+            <FormLink
                 href={PATHS.auth()}
                 text={t('form.haveAccount')}
                 buttonText={t('form.signIn')}

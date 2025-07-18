@@ -7,7 +7,7 @@ interface IProps extends ComponentProps<'div'> {
     t: TUseTranslations
 }
 
-export const AuthFormFooter = ({ className, t, ...props }: IProps) => {
+export const FormFooter = ({ className, t, ...props }: IProps) => {
     return (
         <div className='text-text-tertiary *:[a]:hover:text-primary text-p-xs px-4 text-center text-balance *:[a]:underline *:[a]:underline-offset-4'>
             {t('agreement.prefix')} <Link href='#'>{t('agreement.terms')}</Link> {t('agreement.and')}{' '}

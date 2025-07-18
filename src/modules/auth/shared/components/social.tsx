@@ -8,7 +8,7 @@ interface IProps extends ComponentProps<'div'> {
     t: TUseTranslations
 }
 
-export const AuthSocial = ({ t, ...props }: IProps) => {
+export const Social = ({ t, ...props }: IProps) => {
     return (
         <div className='flex flex-col gap-6' {...props}>
             <div className='flex flex-col gap-2'>

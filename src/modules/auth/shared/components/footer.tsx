@@ -1,4 +1,4 @@
-export const AuthFooter = () => {
+export const Footer = () => {
     return (
         <footer className='flex h-16 items-center justify-center px-4'>
             <div className='flex flex-col items-center px-2'>

@@ -29,5 +29,35 @@
     },
     "notifications": "Уведомления",
     "addNewAppointment": "Добавить новую запись",
-    "addNewPatient": "Добавить нового пациента"
+    "addNewPatient": "Добавить нового пациента",
+    "time": {
+        "seconds": {
+            "short": "с",
+            "long": "секунд"
+        },
+        "minutes": {
+            "short": "м",
+            "long": "минут"
+        },
+        "hours": {
+            "short": "ч",
+            "long": "часов"
+        },
+        "days": {
+            "short": "д",
+            "long": "дней"
+        },
+        "weeks": {
+            "short": "н",
+            "long": "недель"
+        },
+        "months": {
+            "short": "м",
+            "long": "месяцев"
+        },
+        "years": {
+            "short": "г",
+            "long": "лет"
+        }
+    }
 }

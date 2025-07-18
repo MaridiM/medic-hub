@@ -29,5 +29,35 @@
     },
     "notifications": "Notifications",
     "addNewAppointment": "Add new appointment",
-    "addNewPatient": "Add new patient"
+    "addNewPatient": "Add new patient",
+    "time": {
+        "seconds": {
+            "short": "s",
+            "long": "seconds"
+        },
+        "minutes": {
+            "short": "m",
+            "long": "minutes"
+        },
+        "hours": {
+            "short": "h",
+            "long": "hours"
+        },
+        "days": {
+            "short": "d",
+            "long": "days"
+        },
+        "weeks": {
+            "short": "w",
+            "long": "weeks"
+        },
+        "months": {
+            "short": "m",
+            "long": "months"
+        },
+        "years": {
+            "short": "y",
+            "long": "years"
+        }
+    }
 }

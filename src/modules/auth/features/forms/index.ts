@@ -1,5 +1,6 @@
 export * from './contact-form'
 export * from './login-form'
+export * from './otp-form'
 export * from './password-form'
 export * from './create-account-form'
 export * from './reset-password-form'

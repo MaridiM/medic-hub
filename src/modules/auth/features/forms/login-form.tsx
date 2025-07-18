@@ -12,143 +12,132 @@ import {
     CardContent,
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
-    Input,
-    InputOTP,
-    InputOTPGroup,
-    InputOTPSeparator,
-    InputOTPSlot
+    Input
 } from '@/packages/components'
 import { PATHS } from '@/packages/config'
 import { useAutoValidateForm } from '@/packages/hooks'
 
-import { AuthFormLink, AuthSocial } from '@/auth/shared/components'
+import { FormLink, Social, type TStatus, TryAgain } from '@/auth/shared/components'
 import { useAuthStore } from '@/auth/shared/libs/store'
 import { TLoginFormSchema, TOtpFormSchema, makeLoginFormSchema, makeOtpFormSchema } from '@/auth/shared/schemas'
 
+import { OtpForm } from './otp-form'
+
 export const LoginForm = () => {
-    const [showPassword, setShowPassword] = useState(false)
-
-    const { setPasswordStep, isShowTwoFactor, setIsShowTwoFactor } = useAuthStore()
-
     const t = useTranslations('auth.login')
-    const loginFormSchema = useMemo(() => makeLoginFormSchema(t), [t])
-    const otpFormSchema = useMemo(() => makeOtpFormSchema(t), [t])
+    const [showPassword, setShowPassword] = useState(false)
+    const { setPasswordStep, isShowTwoFactor, setIsShowTwoFactor, isTotpEnabled } = useAuthStore()
 
-    // RHF form hook with Zod resolver for schema validation.
+    // Form
+    const loginSchema = useMemo(() => makeLoginFormSchema(t), [t])
+    const otpSchema = useMemo(() => makeOtpFormSchema(t), [t])
+
     const loginForm = useForm<TLoginFormSchema>({
-        resolver: zodResolver(loginFormSchema),
+        resolver: zodResolver(loginSchema),
         defaultValues: { email: '', password: '' },
         mode: 'onTouched',
         reValidateMode: 'onChange'
     })
     const otpForm = useForm<TOtpFormSchema>({
-        resolver: zodResolver(otpFormSchema),
-        defaultValues: { pin: '' },
+        resolver: zodResolver(otpSchema),
+        defaultValues: { code: '' },
         mode: 'onTouched',
         reValidateMode: 'onChange'
     })
 
     useAutoValidateForm(loginForm, ['email', 'password'])
-    useAutoValidateForm(otpForm, ['pin'])
+    useAutoValidateForm(otpForm, ['code'])
 
     const { isValid: isValidLogin } = loginForm.formState
     const { isValid: isValidOtp } = otpForm.formState
 
-    const onSubmit = useCallback((data: TLoginFormSchema) => {
-        console.log('LOGIN FORM DATA:', data)
+    // 2FA state
+    const [OTPStatus, setOTPStatus] = useState<TStatus | null>(null)
+    const [remaining, setRemaining] = useState(0)
+    const [hasRedirected, setRedirected] = useState(false)
 
-        // TODO: add login action
-        setIsShowTwoFactor(true)
-        setTimeout(() => {
+    const COUNTDOWN = 3 // seconds
+
+    // Submit login → show OTP form
+    const onLoginSubmit = useCallback(
+        (data: TLoginFormSchema) => {
+            console.log('LOGIN DATA', data)
+            setIsShowTwoFactor(true)
             loginForm.reset()
-        }, 500)
-    }, [])
+        },
+        [setIsShowTwoFactor, loginForm]
+    )
 
+    // When OTP form valid → start success flow
     useEffect(() => {
         if (isShowTwoFactor && isValidOtp) {
-            console.log('OTP FORM DATA:', otpForm.getValues())
+            console.log('OTP DATA', otpForm.getValues())
+            setOTPStatus('success')
+            setRemaining(COUNTDOWN)
+            setRedirected(false)
+            otpForm.reset()
         }
-    }, [isShowTwoFactor, isValidOtp])
+    }, [isShowTwoFactor, isValidOtp, otpForm])
+
+    // Countdown tick
+    useEffect(() => {
+        if (OTPStatus !== 'success' || remaining <= 0) return
+        const id = window.setTimeout(() => setRemaining(r => r - 1), 1000)
+        return () => clearTimeout(id)
+    }, [OTPStatus, remaining])
+
+    // One‑time redirect when reaches zero
+    useEffect(() => {
+        if (OTPStatus === 'success' && remaining === 0 && !hasRedirected) {
+            console.log('Redirect to dashboard')
+            setRedirected(true)
+            setIsShowTwoFactor(false)
+            setOTPStatus(null)
+            // TODO: actual redirect, e.g. router.push('/dashboard')
+        }
+    }, [OTPStatus, remaining, hasRedirected, setIsShowTwoFactor])
 
     return (
         <CardContent className='flex flex-col gap-6'>
-            {!isShowTwoFactor && <AuthSocial t={t} />}
+            {!isShowTwoFactor && <Social t={t} />}
 
             {isShowTwoFactor ? (
-                <Form {...otpForm}>
-                    <form className='space-y-4'>
-                        <FormField
-                            control={otpForm.control}
-                            name='pin'
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <InputOTP
-                                            maxLength={6}
-                                            {...field}
-                                            containerClassName='flex w-full justify-center'
-                                        >
-                                            <InputOTPGroup className='flex w-full justify-between'>
-                                                <InputOTPSlot
-                                                    index={0}
-                                                    className='size-12 rounded-md'
-                                                    aria-invalid={isValidOtp}
-                                                />
-                                                <InputOTPSlot
-                                                    index={1}
-                                                    className='size-12 rounded-md'
-                                                    aria-invalid={isValidOtp}
-                                                />
-                                                <InputOTPSlot
-                                                    index={2}
-                                                    className='size-12 rounded-md'
-                                                    aria-invalid={isValidOtp}
-                                                />
-                                            </InputOTPGroup>
-                                            <InputOTPSeparator />
-                                            <InputOTPGroup className='flex w-full justify-between'>
-                                                <InputOTPSlot
-                                                    index={3}
-                                                    className='size-12 rounded-md'
-                                                    aria-invalid={isValidOtp}
-                                                />
-                                                <InputOTPSlot
-                                                    index={4}
-                                                    className='size-12 rounded-md'
-                                                    aria-invalid={isValidOtp}
-                                                />
-                                                <InputOTPSlot
-                                                    index={5}
-                                                    className='size-12 rounded-md'
-                                                    aria-invalid={isValidOtp}
-                                                />
-                                            </InputOTPGroup>
-                                        </InputOTP>
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        />
+                <OtpForm form={otpForm} t={t} status={OTPStatus} alertDuration={remaining}>
+                    <div className='mt-6 flex flex-col items-center gap-6'>
+                        {!isTotpEnabled && (
+                            <TryAgain
+                                text={t('2fa.tryAgain.text')}
+                                link={t('2fa.tryAgain.link')}
+                                onClick={
+                                    !isTotpEnabled
+                                        ? () => {
+                                              console.log('RESEND CODE')
+                                              otpForm.reset()
+                                          }
+                                        : undefined
+                                }
+                            />
+                        )}
                         <Button
                             type='button'
                             variant='ghost'
-                            className='mt-6 w-full'
+                            className='mx-auto w-fit'
                             onClick={() => {
                                 setIsShowTwoFactor(false)
-                                setTimeout(() => otpForm.reset(), 500)
+                                otpForm.reset()
                             }}
                         >
                             {t('form.back')}
                         </Button>
-                    </form>
-                </Form>
+                    </div>
+                </OtpForm>
             ) : (
                 <Form key='login-form' {...loginForm}>
-                    <form onSubmit={loginForm.handleSubmit(onSubmit)} className='space-y-4'>
+                    <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className='space-y-4'>
                         <FormField
                             control={loginForm.control}
                             name='email'
@@ -185,18 +174,16 @@ export const LoginForm = () => {
                                     <FormControl>
                                         <div className='relative'>
                                             <Input
-                                                id='password'
                                                 type={showPassword ? 'text' : 'password'}
                                                 placeholder={t('inputs.password.placeholder')}
-                                                className='pr-14'
                                                 autoComplete='current-password'
-                                                // aria-invalid={!!loginForm.formState.errors.password}
+                                                className='pr-14'
                                                 {...field}
                                             />
                                             <Button
                                                 type='button'
-                                                className='absolute top-0 right-0 size-10 h-full min-w-10 rounded-l-none bg-transparent hover:bg-transparent'
-                                                onClick={() => setShowPassword(!showPassword)}
+                                                className='absolute top-0 right-0 size-10 h-full min-w-10 rounded-l-none bg-transparent'
+                                                onClick={() => setShowPassword(p => !p)}
                                             >
                                                 {showPassword ? (
                                                     <Eye className='!size-4' />
@@ -218,14 +205,13 @@ export const LoginForm = () => {
             )}
 
             {!isShowTwoFactor && (
-                <AuthFormLink
+                <FormLink
                     href={PATHS.auth('create-account')}
                     text={t('form.noAccount')}
                     buttonText={t('form.signUp')}
                     onClick={() => {
-                        // Reset the store and form when navigating away
                         setPasswordStep(false)
-                        setTimeout(() => loginForm.reset(), 500)
+                        loginForm.reset()
                     }}
                 />
             )}

@@ -16,7 +16,7 @@ export function makeLoginFormSchema(t: TUseTranslations) {
 }
 export function makeOtpFormSchema(t: TUseTranslations) {
     return z.object({
-        pin: z.string().min(6, { message: t('validation.minLength', { min: 6 }) })
+        code: z.string().min(6, { message: t('validation.minLength', { min: 6 }) })
     })
 }
 
