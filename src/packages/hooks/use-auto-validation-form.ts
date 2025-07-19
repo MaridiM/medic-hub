@@ -49,5 +49,5 @@ export function useAutoValidateForm<T extends FieldValues>(
             triggerDebounced(toTrigger)
         }
         // Депсы: watchedValues, form.formState.errors, triggerDebounced, fieldNames
-    }, [watchedValues, form.formState.errors, triggerDebounced, fieldNames])
+    }, [watchedValues, form.formState.errors, triggerDebounced, fieldNames, form])
 }

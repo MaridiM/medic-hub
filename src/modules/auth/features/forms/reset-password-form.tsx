@@ -48,7 +48,7 @@ export const ResetPasswordForm = () => {
         setTimeout(() => {
             form.reset()
         }, 500)
-    }, [])
+    }, [form])
 
     return (
         <CardContent className='flex flex-col gap-6'>

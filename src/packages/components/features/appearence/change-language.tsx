@@ -13,7 +13,6 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue
 } from '@/packages/components'
 import { languages, setLanguage } from '@/packages/libs/i18n'
 import { type TChangeLanguageSchema, changeLanguageSchema } from '@/packages/schemas'

@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/packages/components'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/packages/components'
 
 import { SendMessageIcon } from '@/auth/shared/assets/icons'
 
@@ -11,8 +11,8 @@ export const AuthStatusMessage = () => {
                     Confirmation code sent <br />
                     to your E-Mail
                 </CardTitle>
-                <CardDescription className='!text-text-tertiary text-p-xs text-center'>
-                    We have sent a confirmation code to your email address. If you don't see the email with the code in
+                <CardDescription className='text-text-tertiary text-p-xs text-center'>
+                    We have sent a confirmation code to your email address. If you don&apos;t see the email with the code in
                     your inbox, please check your spam folder. After successful confirmation, you will be able to change
                     your password.
                 </CardDescription>
