@@ -76,7 +76,7 @@ const CountrySelect = ({ disabled, value: selectedCountry, options: countryList,
                     disabled={disabled}
                 >
                     <FlagComponent country={selectedCountry} countryName={selectedCountry} />
-                    <ChevronsUpDown className={cn('-mr-2 size-4 opacity-50', disabled ? 'hidden' : 'opacity-100')} />
+                    <ChevronsUpDown className={cn('-mr-2 !size-4 !opacity-50', disabled ? 'hidden' : 'opacity-100')} />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className='w-[300px] p-0' align='start'>

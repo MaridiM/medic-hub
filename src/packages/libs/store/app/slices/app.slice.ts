@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand'
 
 import { IAppSlice } from '../types'
 
-export const appSlice: StateCreator<IAppSlice> = (set, get) => ({
+export const appSlice: StateCreator<IAppSlice> = (set) => ({
     // States
     isSidebarOpen: true,
 

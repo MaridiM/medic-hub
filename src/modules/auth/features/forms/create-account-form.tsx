@@ -65,7 +65,7 @@ export const CreateAccountForm = () => {
     )
 
     return (
-        <CardContent className='flex flex-col gap-6'>
+        <CardContent key='create-account-form' className='flex flex-col gap-6'>
             {!passwordStep && <Social t={t} />}
 
             {passwordStep ? (

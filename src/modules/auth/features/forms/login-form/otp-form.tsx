@@ -11,10 +11,11 @@ import {
     InputOTPSeparator,
     InputOTPSlot
 } from '@/packages/components'
-import { TUseTranslations } from '@/packages/libs/i18n'
+import { type TUseTranslations } from '@/packages/libs/i18n'
 
-import { OtpAlert, type TStatus } from '@/auth/shared/components'
+import { OtpAlert } from '@/auth/shared/components'
 import { TOtpFormSchema } from '@/auth/shared/schemas'
+import { type TStatus } from '@/auth/shared/types'
 
 interface IProps extends PropsWithChildren<ComponentProps<'form'>> {
     form: UseFormReturn<TOtpFormSchema>
@@ -43,33 +44,15 @@ export const OtpForm = ({ children, form, t, status, alertDuration, ...props }: 
                                             containerClassName='flex w-full justify-center'
                                         >
                                             <InputOTPGroup className='flex w-full justify-between'>
-                                                <InputOTPSlot
-                                                    index={0}
-                                                    className='size-12 rounded-md'
-                                                />
-                                                <InputOTPSlot
-                                                    index={1}
-                                                    className='size-12 rounded-md'
-                                                />
-                                                <InputOTPSlot
-                                                    index={2}
-                                                    className='size-12 rounded-md'
-                                                />
+                                                <InputOTPSlot index={0} className='size-12 rounded-md' />
+                                                <InputOTPSlot index={1} className='size-12 rounded-md' />
+                                                <InputOTPSlot index={2} className='size-12 rounded-md' />
                                             </InputOTPGroup>
                                             <InputOTPSeparator />
                                             <InputOTPGroup className='flex w-full justify-between'>
-                                                <InputOTPSlot
-                                                    index={3}
-                                                    className='size-12 rounded-md'
-                                                />
-                                                <InputOTPSlot
-                                                    index={4}
-                                                    className='size-12 rounded-md'
-                                                />
-                                                <InputOTPSlot
-                                                    index={5}
-                                                    className='size-12 rounded-md'
-                                                />
+                                                <InputOTPSlot index={3} className='size-12 rounded-md' />
+                                                <InputOTPSlot index={4} className='size-12 rounded-md' />
+                                                <InputOTPSlot index={5} className='size-12 rounded-md' />
                                             </InputOTPGroup>
                                         </InputOTP>
                                     </FormControl>

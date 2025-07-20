@@ -5,12 +5,13 @@ import { CircleCheckBig } from 'lucide-react'
 import { ComponentProps } from 'react'
 
 import { Alert, AlertTitle, Countdown } from '@/packages/components'
+import { cn } from '@/packages/utils'
 
-export type TStatus = 'success' | 'failed'
+import { type TStatus } from '@/auth/shared/types'
 
 interface IStatusParamsItem {
     icon: LucideIcon
-    color: string
+    styles: Record<string, string>
 }
 
 type TStatusParams = Record<TStatus, IStatusParamsItem>
@@ -26,20 +27,28 @@ export const OtpAlert = ({ status, title, duration = 3, ...props }: OtpAlertProp
     const statusParams: TStatusParams = {
         success: {
             icon: CircleCheckBig,
-            color: 'positive'
+            styles: {
+                alert: `border-positive/50 dark:border-positive bg-positive/10`,
+                icon: `stroke-positive`,
+                title: `text-positive`
+            }
         },
         failed: {
             icon: CircleX,
-            color: 'destructive'
+            styles: {
+                alert: `border-destructive/50 dark:border-destructive bg-destructive/10`,
+                icon: `stroke-destructive`,
+                title: `text-destructive`
+            }
         }
     }
 
-    const { icon: Icon, color } = statusParams[status]
+    const { icon: Icon, styles } = statusParams[status]
 
     return (
-        <Alert className={`border-${color}/50 dark:border-${color} bg-${color}/10`} {...props}>
-            <Icon className={`stroke-${color} size-4`} />
-            <AlertTitle className={`text-${color} flex items-center justify-between`}>
+        <Alert className={styles.alert} {...props}>
+            <Icon className={cn(styles.icon, 'size-4')} />
+            <AlertTitle className={cn(styles.title, 'flex items-center justify-between')}>
                 {title}
                 {status === 'success' && <Countdown duration={duration} className='!text-positive' />}
             </AlertTitle>

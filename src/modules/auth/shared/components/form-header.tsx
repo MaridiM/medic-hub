@@ -1,37 +1,87 @@
 'use client'
 
-import { ComponentProps } from 'react'
+import { ComponentProps, useMemo } from 'react'
 
 import { CardDescription, CardHeader, CardTitle } from '@/packages/components'
 import { TUseTranslations } from '@/packages/libs/i18n'
+import { cn } from '@/packages/utils'
 
+import { SendMailFailedIcon, SendMailSuccessIcon } from '@/auth/shared/assets/icons'
 import { useAuthStore } from '@/auth/shared/libs/store'
-import { TAuthFormType } from '@/auth/shared/types'
+
+type TAuthFormType = 'login' | 'createAccount' | 'resetPassword' | 'changePassword'
+type TStatus = 'success' | 'failed' | null
 
 interface IProps extends ComponentProps<'div'> {
     t: TUseTranslations
     type: TAuthFormType
+    status?: TStatus
 }
 
-export const FormHeader = ({ t, type }: IProps) => {
+export const FormHeader = ({ t, type, status }: IProps) => {
     const { passwordStep, isShowTwoFactor, isTotpEnabled } = useAuthStore()
+    const hasStatus = Boolean(status)
+
+    // Pick icon if we have status
+    const Icon = useMemo(() => {
+        if (status === 'success') return SendMailSuccessIcon
+        if (status === 'failed') return SendMailFailedIcon
+        return null
+    }, [status])
+
+    // Compute title string (may contain \n for multi‑line)
+    const title = useMemo(() => {
+        if (type === 'login' && isShowTwoFactor) {
+            return t('2fa.title')
+        }
+        if (type === 'resetPassword' && status === 'success') {
+            return `${t('confirmation.successTitle.0')}\n${t('confirmation.successTitle.1')}`
+        }
+        return t('form.title')
+    }, [type, isShowTwoFactor, status, t])
+
+    // Compute the one description string
+    const description = useMemo(() => {
+        switch (type) {
+            case 'login':
+                return isShowTwoFactor
+                    ? isTotpEnabled
+                        ? t('2fa.descriptionTOTP')
+                        : t('2fa.descriptionOTP')
+                    : t('form.description')
+            case 'createAccount':
+                return passwordStep ? t('form.descriptionPassword') : t('form.description')
+            case 'resetPassword':
+                if (status === 'success') return t('confirmation.successDescription')
+                if (status === 'failed') return t('confirmation.failedDescription')
+                return t('form.description')
+            case 'changePassword':
+                return t('form.description')
+            default:
+                return null
+        }
+    }, [type, isShowTwoFactor, isTotpEnabled, passwordStep, status, t])
 
     return (
-        <CardHeader className='text-center'>
-            <CardTitle className='text-p-lg'>
-                {type === 'login' && isShowTwoFactor ? t('2fa.title') : t('form.title')}
+        <CardHeader
+            key={`header-${type}-${status}`}
+            className={cn('text-center', hasStatus && 'flex flex-col items-center justify-start gap-4')}
+        >
+            {Icon && <Icon />}
+
+            <CardTitle className='text-h4 text-center leading-6'>
+                {title.split('\n').map((line, i) => (
+                    <span key={i} style={{ display: 'block' }}>
+                        {line}
+                    </span>
+                ))}
             </CardTitle>
-            <CardDescription className='!text-text-tertiary text-p-xs'>
-                {type === 'login' &&
-                    (isShowTwoFactor
-                        ? isTotpEnabled
-                            ? t('2fa.descriptionTOTP')
-                            : t('2fa.descriptionOTP')
-                        : t('form.description'))}
-                {type === 'createAccount' && (passwordStep ? t('form.descriptionPassword') : t('form.description'))}
-                {type === 'resetPassword' && t('form.description')}
-                {type === 'changePassword' && t('form.description')}
-            </CardDescription>
+
+            {description && (
+                <CardDescription className='!text-text-tertiary text-p-sm px-2 text-center'>
+                    {description}
+                </CardDescription>
+            )}
         </CardHeader>
     )
 }

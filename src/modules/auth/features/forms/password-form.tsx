@@ -35,7 +35,7 @@ export const PasswordForm = ({ children, form, onSubmit, t, ...props }: IProps) 
                                         type={showPassword ? 'text' : 'password'}
                                         placeholder={t('inputs.password.placeholder')}
                                         className='pr-14'
-                                        autoComplete='current-password'
+                                        autoComplete='off'
                                         {...field}
                                     />
                                     <Button
@@ -47,7 +47,7 @@ export const PasswordForm = ({ children, form, onSubmit, t, ...props }: IProps) 
                                     </Button>
                                 </div>
                             </FormControl>
-                             <FormMessage className='!text-p-xs text-destructive' />
+                            <FormMessage className='!text-p-xs text-destructive' />
                         </FormItem>
                     )}
                 />
@@ -64,7 +64,7 @@ export const PasswordForm = ({ children, form, onSubmit, t, ...props }: IProps) 
                                         type={showConfirmPassword ? 'text' : 'password'}
                                         placeholder={t('inputs.confirmPassword.placeholder')}
                                         className='pr-14'
-                                        autoComplete='confirm-password'
+                                        autoComplete='off'
                                         {...field}
                                     />
                                     <Button
@@ -80,7 +80,7 @@ export const PasswordForm = ({ children, form, onSubmit, t, ...props }: IProps) 
                                     </Button>
                                 </div>
                             </FormControl>
-                             <FormMessage className='!text-p-xs text-destructive' />
+                            <FormMessage className='!text-p-xs text-destructive' />
                         </FormItem>
                     )}
                 />

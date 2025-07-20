@@ -1,3 +1,3 @@
-export * from './auth-status-message'
-export * from './auth-wrapper'
+export * from './status-message'
+export * from './wrapper'
 export * from './forms'

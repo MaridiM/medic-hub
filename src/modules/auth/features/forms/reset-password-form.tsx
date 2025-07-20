@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo } from 'react'
+import { ComponentProps, useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import {
@@ -21,8 +21,13 @@ import { PATHS } from '@/packages/config'
 import { useAutoValidateForm } from '@/packages/hooks'
 
 import { TResetPasswordFormSchema, makeResetPasswordFormSchema } from '@/auth/shared/schemas'
+import type { TStatus } from '@/auth/shared/types'
 
-export const ResetPasswordForm = () => {
+interface IProps extends ComponentProps<typeof CardContent> {
+    setStatusPage: (statusPage: TStatus | null) => void
+}
+
+export const ResetPasswordForm = ({ setStatusPage }: IProps) => {
     const router = useRouter()
 
     const t = useTranslations('auth.resetPassword')
@@ -40,18 +45,22 @@ export const ResetPasswordForm = () => {
 
     const { isValid } = form.formState
 
-    const onSubmit = useCallback((data: TResetPasswordFormSchema) => {
-        console.log('RESET PASSWORD FORM DATA:', data)
+    const onSubmit = useCallback(
+        (data: TResetPasswordFormSchema) => {
+            console.log('RESET PASSWORD FORM DATA:', data)
 
-        // TODO: add login action
+            // TODO: add login action
+            setStatusPage('success')
 
-        setTimeout(() => {
-            form.reset()
-        }, 500)
-    }, [form])
+            setTimeout(() => {
+                form.reset()
+            }, 500)
+        },
+        [form, setStatusPage]
+    )
 
     return (
-        <CardContent className='flex flex-col gap-6'>
+        <CardContent key='reset-password-form' className='flex flex-col gap-6'>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
                     <FormField
@@ -68,7 +77,7 @@ export const ResetPasswordForm = () => {
                                         {...field}
                                     />
                                 </FormControl>
-                                 <FormMessage className='!text-p-xs text-destructive' />
+                                <FormMessage className='!text-p-xs text-destructive' />
                             </FormItem>
                         )}
                     />
@@ -76,7 +85,17 @@ export const ResetPasswordForm = () => {
                     <Button type='submit' variant='primary' className='mt-6 w-full' disabled={!isValid}>
                         {t('form.submit')}
                     </Button>
-                    <Button type='button' variant='ghost' className='w-full' onClick={() => router.push(PATHS.auth())}>
+                    <Button
+                        type='button'
+                        variant='ghost'
+                        className='mx-auto w-fit'
+                        onClick={() => {
+                            router.push(PATHS.auth())
+                            setTimeout(() => {
+                                setStatusPage(null)
+                            }, 500)
+                        }}
+                    >
                         {t('form.back')}
                     </Button>
                 </form>

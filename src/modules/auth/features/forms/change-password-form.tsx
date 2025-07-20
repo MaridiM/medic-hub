@@ -20,16 +20,16 @@ export const ChangePasswordForm = () => {
 
     const passwordSchema = useMemo(() => makePasswordFormSchema(t), [t])
 
-    const passwordForm = useForm<TPasswordFormSchema>({
+    const form = useForm<TPasswordFormSchema>({
         resolver: zodResolver(passwordSchema),
         defaultValues: { password: '', confirmPassword: '' },
         mode: 'onTouched',
         reValidateMode: 'onChange'
     })
 
-    useAutoValidateForm(passwordForm, ['password', 'confirmPassword'])
+    useAutoValidateForm(form, ['password', 'confirmPassword'])
 
-    const { isValid: validPassword } = passwordForm.formState
+    const { isValid: validPassword } = form.formState
 
     const onSubmit = useCallback(
         (data: TPasswordFormSchema) => {
@@ -38,20 +38,30 @@ export const ChangePasswordForm = () => {
             // TODO: add login action
 
             setTimeout(() => {
-                passwordForm.reset()
+                form.reset()
             }, 500)
         },
-        [passwordForm]
+        [form]
     )
 
     return (
-        <CardContent className='flex flex-col gap-6'>
-            <PasswordForm form={passwordForm} onSubmit={onSubmit} t={t}>
-                <div className='mt-6 flex flex-col gap-6'>
+        <CardContent key='change-password-form' className='flex flex-col gap-6'>
+            <PasswordForm form={form} onSubmit={onSubmit} t={t}>
+                <div className='mt-6 flex flex-col items-center gap-6'>
                     <Button type='submit' variant='primary' className='w-full' disabled={!validPassword}>
                         {t('form.submit')}
                     </Button>
-                    <Button type='button' variant='ghost' className='w-full' onClick={() => router.push(PATHS.auth())}>
+                    <Button
+                        type='button'
+                        variant='ghost'
+                        className='w-fit'
+                        onClick={() => {
+                            router.push(PATHS.auth())
+                            setTimeout(() => {
+                                form.reset()
+                            }, 500)
+                        }}
+                    >
                         {t('form.back')}
                     </Button>
                 </div>

@@ -1,10 +1,10 @@
-import { AuthWrapper } from '@/auth/features'
+import { Wrapper } from '@/auth/features'
 import { AuthForm } from '@/auth/widgets'
 
 export const CreateAccount = () => {
     return (
-        <AuthWrapper>
+        <Wrapper>
             <AuthForm type='createAccount' />
-        </AuthWrapper>
+        </Wrapper>
     )
 }
