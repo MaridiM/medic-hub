@@ -8,14 +8,12 @@ import { cn } from '@/packages/utils'
 
 import { SendMailFailedIcon, SendMailSuccessIcon } from '@/auth/shared/assets/icons'
 import { useAuthStore } from '@/auth/shared/libs/store'
-
-type TAuthFormType = 'login' | 'createAccount' | 'resetPassword' | 'changePassword'
-type TStatus = 'success' | 'failed' | null
+import type { TAuthFormType, TStatus } from '@/auth/shared/types'
 
 interface IProps extends ComponentProps<'div'> {
     t: TUseTranslations
     type: TAuthFormType
-    status?: TStatus
+    status: TStatus | null
 }
 
 export const FormHeader = ({ t, type, status }: IProps) => {
@@ -44,6 +42,11 @@ export const FormHeader = ({ t, type, status }: IProps) => {
             if (status === 'failed') return t('confirmation.failedTitle')
             return t('form.title')
         }
+        if (type === 'verify') {
+            if (status === 'success') return t('confirmation.successTitle')
+            if (status === 'failed') return t('confirmation.failedTitle')
+            return null
+        }
         return t('form.title')
     }, [type, isShowTwoFactor, status, t])
 
@@ -66,6 +69,10 @@ export const FormHeader = ({ t, type, status }: IProps) => {
                 if (status === 'success') return t('confirmation.successDescription')
                 if (status === 'failed') return t('confirmation.failedDescription')
                 return t('form.description')
+            case 'verify':
+                if (status === 'success') return t('confirmation.successDescription')
+                if (status === 'failed') return t('confirmation.failedDescription')
+                return null
             default:
                 return null
         }
@@ -79,7 +86,7 @@ export const FormHeader = ({ t, type, status }: IProps) => {
             {Icon && <Icon />}
 
             <CardTitle className='text-h4 text-center leading-6'>
-                {title.split('\n').map((line, i) => (
+                {title?.split('\n').map((line, i) => (
                     <span key={i} style={{ display: 'block' }}>
                         {line}
                     </span>

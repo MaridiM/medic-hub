@@ -56,7 +56,7 @@ export const ResetPasswordForm = ({ setStatusPage }: IProps) => {
                 form.reset()
             }, 500)
         },
-        [form]
+        [form, setStatusPage]
     )
 
     return (
