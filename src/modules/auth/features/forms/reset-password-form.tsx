@@ -56,11 +56,11 @@ export const ResetPasswordForm = ({ setStatusPage }: IProps) => {
                 form.reset()
             }, 500)
         },
-        [form, setStatusPage]
+        [form]
     )
 
     return (
-        <CardContent key='reset-password-form' className='flex flex-col gap-6'>
+        <CardContent className='flex flex-col gap-6'>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
                     <FormField

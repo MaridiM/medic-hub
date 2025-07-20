@@ -34,8 +34,15 @@ export const FormHeader = ({ t, type, status }: IProps) => {
         if (type === 'login' && isShowTwoFactor) {
             return t('2fa.title')
         }
-        if (type === 'resetPassword' && status === 'success') {
-            return `${t('confirmation.successTitle.0')}\n${t('confirmation.successTitle.1')}`
+        if (type === 'resetPassword') {
+            if (status === 'success') return `${t('confirmation.successTitle.0')}\n${t('confirmation.successTitle.1')}`
+            if (status === 'failed') return `${t('confirmation.failedTitle')}`
+            return t('form.title')
+        }
+        if (type === 'changePassword') {
+            if (status === 'success') return t('confirmation.successTitle')
+            if (status === 'failed') return t('confirmation.failedTitle')
+            return t('form.title')
         }
         return t('form.title')
     }, [type, isShowTwoFactor, status, t])
@@ -56,6 +63,8 @@ export const FormHeader = ({ t, type, status }: IProps) => {
                 if (status === 'failed') return t('confirmation.failedDescription')
                 return t('form.description')
             case 'changePassword':
+                if (status === 'success') return t('confirmation.successDescription')
+                if (status === 'failed') return t('confirmation.failedDescription')
                 return t('form.description')
             default:
                 return null

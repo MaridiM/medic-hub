@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo } from 'react'
+import { type ComponentProps, useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Button, CardContent } from '@/packages/components'
@@ -11,10 +11,14 @@ import { PATHS } from '@/packages/config'
 import { useAutoValidateForm } from '@/packages/hooks'
 
 import { TPasswordFormSchema, makePasswordFormSchema } from '@/auth/shared/schemas'
+import { type TStatus } from '@/auth/shared/types'
 
 import { PasswordForm } from './password-form'
 
-export const ChangePasswordForm = () => {
+interface IProps extends ComponentProps<typeof CardContent> {
+    setStatusPage: (statusPage: TStatus | null) => void
+}
+export const ChangePasswordForm = ({ setStatusPage }: IProps) => {
     const router = useRouter()
     const t = useTranslations('auth.changePassword')
 
@@ -36,12 +40,12 @@ export const ChangePasswordForm = () => {
             console.log('SUBMIT:', data)
 
             // TODO: add login action
-
+            setStatusPage('failed')
             setTimeout(() => {
                 form.reset()
             }, 500)
         },
-        [form]
+        [form, setStatusPage]
     )
 
     return (

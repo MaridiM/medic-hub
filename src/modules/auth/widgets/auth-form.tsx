@@ -24,19 +24,22 @@ export const AuthForm = ({ className, type = 'login', ...props }: IProps) => {
     const { isShowTwoFactor, statusPage, setStatusPage } = useAuthStore()
 
     useEffect(() => {
-        if (statusPage === 'success' && pathname === PATHS.auth()) {
+        if (statusPage && pathname === PATHS.auth()) {
             console.log('PATHNAME', pathname, statusPage)
             setStatusPage(null)
         }
     }, [statusPage, pathname, setStatusPage])
 
     // Reset password layout
-    const resetPasswordLayout = useMemo(
+    const statusLayout = useMemo(
         () =>
             !!statusPage ? (
                 <StatusMessage status={statusPage} setStatusPage={setStatusPage} />
             ) : (
-                <ResetPasswordForm setStatusPage={setStatusPage} />
+                <>
+                    {type === 'resetPassword' && <ResetPasswordForm setStatusPage={setStatusPage} />}
+                    {type === 'changePassword' && <ChangePasswordForm setStatusPage={setStatusPage} />}
+                </>
             ),
         [statusPage, setStatusPage]
     )
@@ -48,8 +51,7 @@ export const AuthForm = ({ className, type = 'login', ...props }: IProps) => {
 
                 {type === 'login' && <LoginForm />}
                 {type === 'createAccount' && <CreateAccountForm />}
-                {type === 'resetPassword' ? resetPasswordLayout : null}
-                {type === 'changePassword' && <ChangePasswordForm />}
+                {statusLayout}
             </Card>
 
             {((type === 'login' && !isShowTwoFactor) || type === 'createAccount') && <FormFooter t={t} />}
