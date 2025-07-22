@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    env_file:
+      - .env # общие переменные
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - medic_hub
+
+  redis:
+    image: redis:8-alpine
+    container_name: medic_hub_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - medic_hub
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile # production‑Dockerfile
+    container_name: medic_hub_backend
+    restart: unless-stopped
+    env_file:
+      - .env # общие
+      - backend/.env # сервис‑специфичные
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8000:8000"
+    networks:
+      - medic_hub
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile # production‑Dockerfile
+    container_name: medic_hub_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    networks:
+      - medic_hub
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  medic_hub:
+    driver: bridge

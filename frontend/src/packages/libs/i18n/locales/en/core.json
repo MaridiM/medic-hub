@@ -1,0 +1,63 @@
+{
+    "organizationMenu": {
+        "title": "Organizations",
+        "button": "Create organization"
+    },
+    "sidebar": {
+        "button": {
+            "open": "Open menu",
+            "close": "Close menu"
+        },
+        "dashboard": "Dashboard",
+        "patients": "Patients",
+        "appointments": "Appointments",
+        "tasks": "Tasks",
+        "staff": "Staff",
+        "messenger": "Messenger",
+        "news": "News",
+        "organizations": "Organizations",
+        "settings": "Settings",
+        "support": "Support",
+        "feedback": "Feedback"
+    },
+    "userMenu": {
+        "upgrade": "Upgrade to Pro",
+        "account": "Account",
+        "billing": "Billing",
+        "notifications": "Notifications",
+        "logout": "Log out"
+    },
+    "notifications": "Notifications",
+    "addNewAppointment": "Add new appointment",
+    "addNewPatient": "Add new patient",
+    "time": {
+        "seconds": {
+            "short": "s",
+            "long": "seconds"
+        },
+        "minutes": {
+            "short": "m",
+            "long": "minutes"
+        },
+        "hours": {
+            "short": "h",
+            "long": "hours"
+        },
+        "days": {
+            "short": "d",
+            "long": "days"
+        },
+        "weeks": {
+            "short": "w",
+            "long": "weeks"
+        },
+        "months": {
+            "short": "m",
+            "long": "months"
+        },
+        "years": {
+            "short": "y",
+            "long": "years"
+        }
+    }
+}

@@ -1,0 +1,13 @@
+FROM oven/bun:latest
+
+WORKDIR /app
+
+COPY package*.json bun.lock ./
+RUN bun install
+
+COPY . .
+
+EXPOSE ${FRONTEND_PORT}
+
+# Next.js dev-сервер
+CMD ["bun", "run", "dev"]
