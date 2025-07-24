@@ -1,0 +1,16 @@
+{
+  "name": "medic-hub",
+  "version": "0.0.1",
+  "description": "Medic Hub",
+  "author": "MaridiM",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dev": "cd backend && bun run start:dev && cd ../frontend && bun run dev",
+    "prod": "cd backend && bun run start:prod && cd ../frontend && bun run start:prod",
+    "install": "cd backend && bun install && cd ../frontend && bun install",
+    "docker:dev": "docker compose up -d --build",
+    "docker:prod": "docker compose -f docker-compose.yml up -d --build",
+    "docker:down": "docker compose down -v"
+  }
+}

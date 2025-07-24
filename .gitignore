@@ -1,5 +1,4 @@
 # Docker
-docker-compose.override.yml
 **/.dockerignore
 **/.env
 

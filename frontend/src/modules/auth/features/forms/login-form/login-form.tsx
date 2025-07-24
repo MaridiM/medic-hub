@@ -91,7 +91,7 @@ export const LoginForm = () => {
     // 6. cancel reset when user starts typing
     const codeValue = otpForm.watch('code')
     useEffect(() => {
-        if (OTPStatus === 'failed' && codeValue.length > 0) {
+        if (OTPStatus === 'failed' && !!codeValue?.length) {
             clearTimeout(failResetTimer.current ?? undefined)
             setOTPStatus(null)
         }
@@ -99,7 +99,7 @@ export const LoginForm = () => {
 
     // 7. redirect once when countdown ends on success
     useEffect(() => {
-        if (OTPStatus === 'success' && remaining === 0 && !hasRedirected) {
+        if (OTPStatus === 'success' && !!remaining && !hasRedirected) {
             console.log('Redirect to dashboard')
             setRedirected(true)
             setIsShowTwoFactor(false)

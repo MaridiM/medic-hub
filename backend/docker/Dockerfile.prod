@@ -1,0 +1,53 @@
+# ---------- 1. deps ----------
+FROM oven/bun:latest AS deps
+WORKDIR /backend
+ENV PRISMA_SKIP_POSTINSTALL_GENERATE=1
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile
+
+# ---------- 2. build (prisma generate + ts → dist) ----------
+FROM oven/bun:latest AS build
+WORKDIR /backend
+
+# копируем зависимости
+COPY --from=deps /backend/node_modules ./node_modules
+
+# копируем схему, генерим Prisma внутри bun
+COPY prisma ./prisma
+RUN bunx prisma generate --schema prisma/schema.prisma
+
+# копируем код и билдим
+COPY . .
+RUN bun run build      # → dist
+
+# RUN cp -r /backend/prisma/__generated__  dist/prisma/__generated__
+
+# ---------- 3. runner на Node.js ----------
+FROM node:latest AS runner
+WORKDIR /backend
+
+# install openssl…
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# copy your built app…
+COPY --from=build /backend/node_modules ./node_modules
+COPY --from=build /backend/dist        ./dist
+COPY --from=build /backend/prisma      ./prisma
+COPY package.json ./
+
+# copy the real wait-for-it script
+COPY docker/wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
+
+# copy your entrypoint
+COPY docker/entrypoint.prod.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENV NODE_ENV=production PORT=8000
+EXPOSE 8000
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["node","dist/main.js"]
+    

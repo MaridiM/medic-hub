@@ -6,6 +6,10 @@ import { name, version } from './package.json'
 const withNextIntl = createNextIntlPlugin('./src/packages/libs/i18n/request.ts')
 
 const nextConfig: NextConfig = {
+    output: "standalone",
+    experimental: {
+        serverSourceMaps: false,
+    },
     reactStrictMode: true,
     productionBrowserSourceMaps: false,
     env: {
@@ -20,6 +24,10 @@ const nextConfig: NextConfig = {
     // или же просто не используйте `--experimental-turbopack`.
 
     webpack(config) {
+        config.watchOptions = {
+            poll: 1000, // Check for changes every 1000ms
+            aggregateTimeout: 300, // Delay before rebuilding
+        };
         // Grab the existing rule that handles SVG imports
         const fileLoaderRule = config.module.rules.find((rule: any) => rule.test?.test?.('.svg'))
 

@@ -1,65 +1,119 @@
+# ===========================================
+# PROD
+# ===========================================
 services:
+  # ===========================================
+  # POSTGRES
+  # ===========================================
   postgres:
     image: postgres:17-alpine
     restart: unless-stopped
+    container_name: medic-hub-postgres
     env_file:
-      - .env # общие переменные
+      - .env
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_DATABASE}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     ports:
       - "5432:5432"
     networks:
-      - medic_hub
+      - medic-hub
 
+  # ===========================================
+  # REDIS
+  # ===========================================
   redis:
     image: redis:8-alpine
-    container_name: medic_hub_redis
+    container_name: medic-hub-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
-    networks:
-      - medic_hub
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile # production‑Dockerfile
-    container_name: medic_hub_backend
-    restart: unless-stopped
-    env_file:
-      - .env # общие
-      - backend/.env # сервис‑специфичные
-    depends_on:
-      - postgres
-      - redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     ports:
-      - "8000:8000"
+      - "6379:6379"
     networks:
-      - medic_hub
+      - medic-hub
 
+  # ===========================================
+  # FRONTEND
+  # ===========================================
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile # production‑Dockerfile
-    container_name: medic_hub_frontend
+      dockerfile: docker/Dockerfile.prod
+    container_name: medic-hub-frontend
     restart: unless-stopped
-    depends_on:
-      - backend
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
+    env_file:
+      - frontend/.env
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${FRONTEND_PORT:-3000}/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     networks:
-      - medic_hub
+      - medic-hub
+    # profiles: ["prod"]
+
+  # ===========================================
+  # BACKEND
+  # ===========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile.prod
+    container_name: medic-hub-backend
+    restart: unless-stopped
+
+    env_file:
+      - backend/.env
+      - .env
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+    networks:
+      - medic-hub
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://localhost:${BACKEND_PORT:-8000}/ || exit 1",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    # depends_on:
+    #     postgres:
+    #       condition: service_healthy
+    #     redis:
+    #       condition: service_healthy
+    # profiles: ["prod"]
 
 volumes:
   postgres_data:
   redis_data:
 
 networks:
-  medic_hub:
+  medic-hub:
     driver: bridge
+    name: medic-hub

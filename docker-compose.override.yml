@@ -1,0 +1,67 @@
+# ===========================================
+# DEV
+# ===========================================
+services:
+  # ===========================================
+  # FRONTEND
+  # ===========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: docker/Dockerfile
+    container_name: medic-hub-frontend
+    restart: unless-stopped
+    command: ["bun", "run", "dev"]
+    env_file:
+      - frontend/.env
+      - .env
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - PORT=3000
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules
+      - /frontend/.next
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    networks:
+      - medic-hub
+  #   profiles: ["dev"]
+
+  # ===========================================
+  # BACKEND
+  # ===========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile
+    container_name: medic-hub-backend
+    restart: unless-stopped
+    command: ["bun", "run", "start:dev"]
+    env_file:
+      - backend/.env
+      - .env
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./backend/src:/backend/src
+      - ./backend/prisma:/backend/prisma
+      - ./backend/tsconfig.json:/backend/tsconfig.json
+      # отдельный анонимный том, чтобы сохранить node_modules из образа
+      - /backend/node_modules
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    networks:
+      - medic-hub
+  #   profiles: ["dev"]
+
+networks:
+  medic-hub:
+    driver: bridge
+    name: medic-hub
