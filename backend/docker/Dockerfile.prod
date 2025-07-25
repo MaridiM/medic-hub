@@ -26,16 +26,19 @@ RUN bun run build      # → dist
 FROM node:latest AS runner
 WORKDIR /backend
 
-# install openssl…
+# install openssl and iputils-ping
 RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends openssl ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+ && apt-get install -y --no-install-recommends openssl ca-certificates iputils-ping \
+ && rm -rf /var/lib/apt/lists/*
 
 # copy your built app…
 COPY --from=build /backend/node_modules ./node_modules
 COPY --from=build /backend/dist        ./dist
 COPY --from=build /backend/prisma      ./prisma
 COPY package.json ./
+
+# near the top of Dockerfile.prod
+COPY .env /backend/.env
 
 # copy the real wait-for-it script
 COPY docker/wait-for-it.sh /wait-for-it.sh

@@ -51,6 +51,7 @@ services:
   # FRONTEND
   # ===========================================
   frontend:
+    image: maridim/medic-hub-frontend:latest
     build:
       context: ./frontend
       dockerfile: docker/Dockerfile.prod
@@ -77,6 +78,7 @@ services:
   # BACKEND
   # ===========================================
   backend:
+    image: maridim/medic-hub-backend:latest
     build:
       context: ./backend
       dockerfile: docker/Dockerfile.prod

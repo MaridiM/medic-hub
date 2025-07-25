@@ -6,11 +6,19 @@
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
-    "dev": "cd backend && bun run start:dev && cd ../frontend && bun run dev",
-    "prod": "cd backend && bun run start:prod && cd ../frontend && bun run start:prod",
+    "backend:dev": "cd backend && bun run start:dev",
+    "frontend:dev": "cd frontend && bun run dev",
+    "backend:prod": "cd backend && bun run start:prod",
+    "frontend:prod": "cd frontend && bun run start:prod",
+    "dev": "bun run backend:dev & bun run frontend:dev",
+    "prod": "bun run backend:prod & bun run frontend:prod",
     "install": "cd backend && bun install && cd ../frontend && bun install",
     "docker:dev": "docker compose up -d --build",
     "docker:prod": "docker compose -f docker-compose.yml up -d --build",
-    "docker:down": "docker compose down -v"
+    "docker:down": "docker compose down -v",
+    "docker:up": "docker compose up -d",
+    "docker:build": "docker compose build",
+    "docker:logs": "docker compose logs -f",
+    "docker:push": "docker compose push"
   }
 }
