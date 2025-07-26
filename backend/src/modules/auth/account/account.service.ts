@@ -1,26 +1,22 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAccountInput } from './dto/create-account.input';
-import { UpdateAccountInput } from './dto/update-account.input';
+import { PrismaService } from '@/core'
+import { Injectable } from '@nestjs/common'
+
+import { CreateAccountInput } from './dtos'
+import { User } from './models'
 
 @Injectable()
 export class AccountService {
-  create(createAccountInput: CreateAccountInput) {
-    return 'This action adds a new account';
-  }
+	constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return `This action returns all account`;
-  }
+	async createAccount(data: CreateAccountInput): Promise<User> {
+		return this.prisma.user.create({ data })
+	}
 
-  findOne(id: number) {
-    return `This action returns a #${id} account`;
-  }
+	async findOne(id: string): Promise<User> {
+		return this.prisma.user.findUnique({ where: { id } })
+	}
 
-  update(id: number, updateAccountInput: UpdateAccountInput) {
-    return `This action updates a #${id} account`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} account`;
-  }
+	async findAll(): Promise<User[]> {
+		return this.prisma.user.findMany()
+	}
 }

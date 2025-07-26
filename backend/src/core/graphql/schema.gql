@@ -2,28 +2,37 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Account {
-  """Example field (placeholder)"""
-  exampleField: Int!
+input CreateAccountInput {
+  email: String!
+  fullName: String!
+  password: String!
+  phone: String!
 }
 
-input CreateAccountInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Mutation {
-  createAccount(createAccountInput: CreateAccountInput!): Account!
-  removeAccount(id: Int!): Account!
-  updateAccount(updateAccountInput: UpdateAccountInput!): Account!
+  """Create a new user"""
+  createAccount(data: CreateAccountInput!): User!
 }
 
 type Query {
-  account(id: Int!): Account!
+  """Find all users"""
+  findAll: [User!]!
+
+  """Find a user by id"""
+  findOne(id: String!): User!
 }
 
-input UpdateAccountInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+type User {
+  createdAt: DateTime!
+  email: String!
+  fullName: String!
+  id: ID!
+  password: String!
+  phone: String!
+  updatedAt: DateTime!
 }

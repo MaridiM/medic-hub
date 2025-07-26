@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "./__generated__"
+  provider      = "prisma-client-js"
+  output        = "./__generated__"
   binaryTargets = ["native", "debian-openssl-3.0.x", "windows"]
 }
 
@@ -16,9 +16,16 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  password String
+  id String @id @default(uuid())
+
+  fullName  String  @map("full_name")
+  firstName String? @map("first_name")
+  lastName  String? @map("last_name")
+
+  phone String? @unique
+  email String  @unique
+  
+  password  String
 
   tokens Token[]
 

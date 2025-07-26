@@ -1,35 +1,35 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { AccountService } from './account.service';
-import { Account } from './entities/account.entity';
-import { CreateAccountInput } from './dto/create-account.input';
-import { UpdateAccountInput } from './dto/update-account.input';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 
-@Resolver(() => Account)
+import { AccountService } from './account.service'
+import { CreateAccountInput } from './dtos'
+import { User } from './models'
+
+@Resolver()
 export class AccountResolver {
-  constructor(private readonly accountService: AccountService) {}
+	constructor(private readonly accountService: AccountService) {}
 
-  @Mutation(() => Account)
-  createAccount(@Args('createAccountInput') createAccountInput: CreateAccountInput) {
-    return this.accountService.create(createAccountInput);
-  }
+	@Mutation(() => User, { name: 'createAccount', description: 'Create a new user' })
+	createAccount(@Args('data') data: CreateAccountInput): Promise<User> {
+		return this.accountService.createAccount(data)
+	}
 
-  @Query(() => [Account], { name: 'account' })
-  findAll() {
-    return this.accountService.findAll();
-  }
+	@Query(() => [User], { name: 'findAll', description: 'Find all users' })
+	findAll() {
+		return this.accountService.findAll()
+	}
 
-  @Query(() => Account, { name: 'account' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.accountService.findOne(id);
-  }
+	@Query(() => User, { name: 'findOne', description: 'Find a user by id' })
+	findOne(@Args('id') id: string): Promise<User> {
+		return this.accountService.findOne(id)
+	}
 
-  @Mutation(() => Account)
-  updateAccount(@Args('updateAccountInput') updateAccountInput: UpdateAccountInput) {
-    return this.accountService.update(updateAccountInput.id, updateAccountInput);
-  }
+	// @Mutation(() => Account)
+	// updateAccount(@Args('updateAccountInput') updateAccountInput: UpdateAccountInput) {
+	// 	return this.accountService.update(updateAccountInput.id, updateAccountInput)
+	// }
 
-  @Mutation(() => Account)
-  removeAccount(@Args('id', { type: () => Int }) id: number) {
-    return this.accountService.remove(id);
-  }
+	// @Mutation(() => Account)
+	// removeAccount(@Args('id', { type: () => Int }) id: number) {
+	// 	return this.accountService.remove(id)
+	// }
 }

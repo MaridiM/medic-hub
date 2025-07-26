@@ -12,9 +12,6 @@
 		"baseUrl": "./",
 		"paths": {
 			"@/*": ["src/*"],
-			"@/modules/*": ["src/modules/*"],
-			"@/shared/*": ["src/shared/*"],
-			"@/core/*": ["src/core/*"],
 			"@prisma/__generated__": ["prisma/__generated__"],
 			"@prisma/__generated__/*": ["prisma/__generated__/*"]
 		},
@@ -35,5 +32,6 @@
 		"watchDirectory": "dynamicprioritypolling",
 		"excludeDirectories": ["**/node_modules", "dist"]
 	},
-	"include": ["src", "prisma"]
+	"include": ["src", "prisma", "graphql.schema.ts"],
+	"exclude": ["node_modules", "prisma/__generated__"]
 }

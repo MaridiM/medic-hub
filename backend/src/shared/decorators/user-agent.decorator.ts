@@ -5,7 +5,7 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 
 export const UserAgent = createParamDecorator((data: unknown, context: ExecutionContext) => {
 	if (context.getType() === 'http') {
-		const request = context.switchToHttp().getRequest() as Request
+		const request = context.switchToHttp().getRequest()
 
 		return request.headers['user-agent']
 	} else {
