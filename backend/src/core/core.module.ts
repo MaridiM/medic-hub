@@ -10,6 +10,7 @@ import { GraphQLModule } from '@nestjs/graphql'
 import { getGraphQLConfig } from './config'
 import { PrismaModule } from './prisma'
 import { RedisModule } from './redis'
+import { I18nModule } from './i18n/i18n.module';
 
 @Module({
 	imports: [
@@ -23,13 +24,15 @@ import { RedisModule } from './redis'
 			imports: [ConfigModule],
 			useFactory: getGraphQLConfig,
 			inject: [ConfigService],
-		}),
+		  }),
 		// Core
 		PrismaModule,
 		RedisModule,
 
 		// Modules
 		AccountModule,
+
+		I18nModule,
 	],
 })
 export class CoreModule {}

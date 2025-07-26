@@ -25,6 +25,9 @@ type Query {
 
   """Find a user by id"""
   findOne(id: String!): User!
+
+  """Get auth message (i18n demo)"""
+  getAuthMessage: String!
 }
 
 type User {

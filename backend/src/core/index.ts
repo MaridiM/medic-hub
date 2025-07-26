@@ -1,4 +1,5 @@
 export * from './config'
+export * from './i18n'
 export * from './prisma'
 export * from './redis'
 export * from './core.module'

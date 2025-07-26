@@ -23,8 +23,11 @@
 		"strictBindCallApply": false,
 		"forceConsistentCasingInFileNames": false,
 		"noFallthroughCasesInSwitch": false,
+		"resolveJsonModule": true,
 
-		"jsx": "react-jsx"
+		"jsx": "react-jsx",
+		"types": ["node", "jest"],
+		"typeRoots": ["./types", "./node_modules/@types"]
 	},
 	"watchOptions": {
 		// Use a dynamic polling instead of system's native for file changes.image.png
@@ -32,6 +35,6 @@
 		"watchDirectory": "dynamicprioritypolling",
 		"excludeDirectories": ["**/node_modules", "dist"]
 	},
-	"include": ["src", "prisma", "graphql.schema.ts"],
+	"include": ["src", "prisma", "graphql.schema.ts", "types"],
 	"exclude": ["node_modules", "prisma/__generated__"]
 }

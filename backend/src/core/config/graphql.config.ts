@@ -1,16 +1,19 @@
 import { join } from 'path'
 
-import { isDev } from '@/shared/utils'
+import { DEFAULT_LANGUAGE } from '@/core/i18n'
 import { ApolloDriverConfig } from '@nestjs/apollo'
 import { ConfigService } from '@nestjs/config'
 
 export function getGraphQLConfig(configService: ConfigService): ApolloDriverConfig {
+  const path = configService.getOrThrow<string>('GRAPHQL_PREFIX')
+  const autoSchemaFile = join(process.cwd(), 'src/core/graphql/schema.gql')
+
+
 	return {
-		playground: isDev(configService),
-		path: configService.getOrThrow<string>('GRAPHQL_PREFIX'),
-		autoSchemaFile: join(process.cwd(), 'src/core/graphql/schema.gql'),
+		path,
+		autoSchemaFile,
 		sortSchema: true,
-		context: ({ req, res }) => ({ req, res }),
+		context: ({ req, res }) => ({ req, res, language: req.language || DEFAULT_LANGUAGE }),
 		installSubscriptionHandlers: true,
 	}
 }
