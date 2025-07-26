@@ -120,7 +120,7 @@ export function ms(str: StringValue): number {
 			return n
 		default:
 			throw new Error(
-				`Ошибка: единица времени ${type} была распознана, но не существует соответствующего случая. Пожалуйста, проверьте введенные данные.`,
+				`Error: time unit ${type} was recognized, but there is no corresponding case. Please check the input data.`,
 			)
 	}
 }
