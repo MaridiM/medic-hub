@@ -18,10 +18,10 @@ datasource db {
 model User {
   id String @id @default(uuid())
 
+  // TODO: add fields for profile
   fullName  String  @map("full_name")
   firstName String? @map("first_name")
   lastName  String? @map("last_name")
-
   phone String? @unique
   email String  @unique
   

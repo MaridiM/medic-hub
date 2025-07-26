@@ -9,8 +9,8 @@ export class AccountResolver {
 	constructor(private readonly accountService: AccountService) {}
 
 	@Mutation(() => User, { name: 'createAccount', description: 'Create a new user' })
-	createAccount(@Args('data') data: CreateAccountInput): Promise<User> {
-		return this.accountService.createAccount(data)
+	create(@Args('data') data: CreateAccountInput): Promise<User> {
+		return this.accountService.create(data)
 	}
 
 	@Query(() => [User], { name: 'findAll', description: 'Find all users' })

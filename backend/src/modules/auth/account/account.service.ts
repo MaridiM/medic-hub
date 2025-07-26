@@ -8,7 +8,7 @@ import { User } from './models'
 export class AccountService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	async createAccount(data: CreateAccountInput): Promise<User> {
+	async create(data: CreateAccountInput): Promise<User> {
 		return this.prisma.user.create({ data })
 	}
 
