@@ -1,11 +1,18 @@
-import Redis from 'ioredis'
+import { createClient, RedisClientType } from 'redis'
 
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
 @Injectable()
-export class RedisService extends Redis {
-	constructor(private readonly configService: ConfigService) {
-		super(configService.getOrThrow<string>('REDIS_URL'))
+export class RedisService {
+	private client: RedisClientType
+
+	constructor(private readonly config: ConfigService) {
+		this.client = createClient({ url: this.config.getOrThrow<string>('REDIS_URL') })
+		this.client.connect()
+	}
+
+	getClient(): RedisClientType {
+		return this.client
 	}
 }

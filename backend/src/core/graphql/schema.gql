@@ -14,27 +14,39 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type LoginResponse {
+  accessToken: String
+  user: User
+}
+
 type Mutation {
   """Create a new user"""
   createAccount(data: CreateAccountInput!): User!
+
+  """Login to the system"""
+  login(data: LoginInput!): LoginResponse!
+
+  """Logout from the system"""
+  logout: Boolean!
 }
 
 type Query {
-  """Find all users"""
-  findAll: [User!]!
-
-  """Find a user by id"""
-  findOne(id: String!): User!
-
-  """Get auth message (i18n demo)"""
-  getAuthMessage: String!
+  """Find profile"""
+  findProfile: User!
 }
 
 type User {
   createdAt: DateTime!
   email: String!
+  firstName: String
   fullName: String!
   id: ID!
+  lastName: String
   password: String!
   phone: String!
   updatedAt: DateTime!

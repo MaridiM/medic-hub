@@ -5,6 +5,8 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'json'],
   testMatch: ['**/*.spec.ts'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1', // <-- вот это важно
-  },
-};
+    '^@/(.*)$': '<rootDir>/src/$1', // для @/*
+    '^@prisma/__generated__$': '<rootDir>/prisma/__generated__', // строгое сопоставление
+    '^@prisma/__generated__/(.*)$': '<rootDir>/prisma/__generated__/$1', // путь до файла
+  }
+}

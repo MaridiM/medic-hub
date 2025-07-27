@@ -1,5 +1,6 @@
 import type { Request } from 'express'
 
+import { DEFAULT_LANGUAGE, i18n } from '@/core'
 import { InternalServerErrorException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import type { User } from '@prisma/__generated__'
@@ -14,6 +15,7 @@ import type { ISessionMetadata } from '../types'
  * @returns - user
  */
 export function saveSession(req: Request, user: User, metadata: ISessionMetadata) {
+	const lang = req.language || DEFAULT_LANGUAGE
 	return new Promise((resolve, reject) => {
 		req.session.createdAt = new Date()
 		req.session.userId = user.id
@@ -21,7 +23,9 @@ export function saveSession(req: Request, user: User, metadata: ISessionMetadata
 
 		req.session.save(err => {
 			if (err) {
-				return reject(new InternalServerErrorException('Не удалось сохранить сессию'))
+				console.log('err', err)
+				const message = i18n.t('common.error_saving_session', { lng: lang })
+				return reject(new InternalServerErrorException(message))
 			}
 
 			resolve({ user })
@@ -36,10 +40,12 @@ export function saveSession(req: Request, user: User, metadata: ISessionMetadata
  * @returns boolean
  */
 export function destroySession(req: Request, configService: ConfigService) {
+	const lang = req.language || DEFAULT_LANGUAGE
 	return new Promise((resolve, reject) => {
 		req.session.destroy(err => {
 			if (err) {
-				return reject(new InternalServerErrorException('Не удалось завершить сессию'))
+				const message = i18n.t('common.error_saving_session', { lng: lang })
+				return reject(new InternalServerErrorException(message))
 			}
 
 			req.res.clearCookie(configService.getOrThrow<string>('SESSION_NAME'))

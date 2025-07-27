@@ -1,16 +1,16 @@
 import 'module-alias/register'
 
-import { AccountModule } from '@/modules/auth'
+import { AccountModule, SessionModule } from '@/modules/auth'
 import { IS_DEV_ENV } from '@/shared/utils'
 import { ApolloDriver } from '@nestjs/apollo'
-import {Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
 
 import { getGraphQLConfig } from './config'
+import { I18nModule } from './i18n/i18n.module'
 import { PrismaModule } from './prisma'
 import { RedisModule } from './redis'
-import { I18nModule } from './i18n/i18n.module';
 
 @Module({
 	imports: [
@@ -24,13 +24,14 @@ import { I18nModule } from './i18n/i18n.module';
 			imports: [ConfigModule],
 			useFactory: getGraphQLConfig,
 			inject: [ConfigService],
-		  }),
+		}),
 		// Core
 		PrismaModule,
 		RedisModule,
 
 		// Modules
 		AccountModule,
+		SessionModule,
 
 		I18nModule,
 	],

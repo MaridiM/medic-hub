@@ -1,17 +1,25 @@
-import { PrismaService } from '@/core'
+import { DEFAULT_LANGUAGE, I18nService, PrismaService } from '@/core'
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
 
 @Injectable()
 export class GqlAuthGuard implements CanActivate {
-	constructor(private readonly prismaService: PrismaService) {}
+	constructor(
+		private readonly prismaService: PrismaService,
+		private readonly i18n: I18nService,
+	) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const ctx = GqlExecutionContext.create(context)
 		const request = ctx.getContext().req
+		const lang = request.language || DEFAULT_LANGUAGE
+
+		console.log('request.session', request.session)
+
+		const user_not_authorized = this.i18n.t('common.user_not_authorized', { lng: lang }) as string
 
 		if (typeof request.session.userId === 'undefined') {
-			throw new UnauthorizedException('Пользователь не авторизован')
+			throw new UnauthorizedException(user_not_authorized)
 		}
 
 		const user = await this.prismaService.user.findUnique({
@@ -19,7 +27,7 @@ export class GqlAuthGuard implements CanActivate {
 		})
 
 		if (!user) {
-			throw new UnauthorizedException('Пользователь не авторизован')
+			throw new UnauthorizedException(user_not_authorized)
 		}
 
 		request.user = user

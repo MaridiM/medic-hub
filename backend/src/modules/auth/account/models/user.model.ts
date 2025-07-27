@@ -17,11 +17,11 @@ export class User {
 	@Field(() => String)
 	password: string | null
 
-	// @Field(() => String, { nullable: true })
-	// firstName: string
+	@Field(() => String, { nullable: true })
+	firstName: string
 
-	// @Field(() => String, { nullable: true })
-	// lastName: string
+	@Field(() => String, { nullable: true })
+	lastName: string
 
 	@Field(() => Date)
 	createdAt: Date

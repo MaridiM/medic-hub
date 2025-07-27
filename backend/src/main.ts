@@ -1,9 +1,7 @@
-import { RedisStore } from 'connect-redis'
 import cookieParser from 'cookie-parser'
 import * as dotenv from 'dotenv'
 import * as dotenvExpand from 'dotenv-expand'
 import { json } from 'express'
-import session from 'express-session'
 import { graphqlUploadExpress } from 'graphql-upload-minimal'
 import i18nextMiddleware from 'i18next-http-middleware'
 
@@ -30,7 +28,7 @@ async function bootstrap() {
 
 	// ✅ JSON и язык через Accept-Language, если вдруг не найден
 	app.use(json({ limit: '1mb', type: 'application/json' }))
-	app.use((req, _res, next) => {
+	app.use((req, res, next) => {
 		req.language =
 			req.language || req.i18n?.language || req.headers['accept-language']?.split(',')[0] || DEFAULT_LANGUAGE
 		next()
@@ -42,7 +40,7 @@ async function bootstrap() {
 	app.useGlobalPipes(new ValidationPipe({ transform: true }))
 
 	// ✅ Сессии через Redis
-	app.use(session(sessionConfig(config, redis)))
+	app.use(sessionConfig(config, redis))
 
 	// ✅ CORS
 	const allowedOrigins = [config.getOrThrow<string>('CLIENT_URL'), 'http://localhost:3000']

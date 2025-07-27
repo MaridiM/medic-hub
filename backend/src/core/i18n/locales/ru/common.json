@@ -1,0 +1,11 @@
+{
+    "password_not_matching": "Пароли не совпадают",
+    "user_not_authorized": "Пользователь не авторизован",
+    "invalid_data": "Не валидные данные из запроса",
+    "error_getting_raw_body": "Ошибка при получении данных из запроса",
+    "file_not_loaded": "Файл не загружен или неверная структура",
+    "unsupported_file_format": "Неподдерживаемый формат файла",
+    "file_size_exceeded": "Размер файла превышает 10 МБ",
+    "error_saving_session": "Не удалось сохранить сессию",
+    "error_destroying_session": "Не удалось завершить сессию"
+}

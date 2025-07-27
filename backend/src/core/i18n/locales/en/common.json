@@ -1,0 +1,11 @@
+{
+	"password_not_matching": "Passwords do not match",
+	"user_not_authorized": "User not authorized",
+	"invalid_data": "Invalid data from request",
+	"error_getting_raw_body": "Error getting raw body",
+	"file_not_loaded": "File not loaded or invalid structure",
+	"unsupported_file_format": "Unsupported file format",
+	"file_size_exceeded": "File size exceeds 10 MB",
+	"error_saving_session": "Error saving session",
+	"error_destroying_session": "Error destroying session"
+}

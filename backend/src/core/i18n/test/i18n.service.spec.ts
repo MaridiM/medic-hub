@@ -5,8 +5,8 @@ import { I18nService } from '@/core/i18n'
 // 🧪 Мокаем модуль i18n.config — подменяем реальный i18n объект на фиктивный с функцией t
 jest.mock('@/core/config/i18n.config', () => ({
 	i18n: {
-		t: jest.fn(),         // мок функции перевода
-		language: 'en',       // дефолтный язык
+		t: jest.fn(), // мок функции перевода
+		language: 'en', // дефолтный язык
 	},
 }))
 

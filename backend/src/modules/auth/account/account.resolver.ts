@@ -1,44 +1,35 @@
-import { I18nService, Lang } from '@/core'
+import { Lang } from '@/core'
+import { Authorization, Authorized } from '@/shared/decorators'
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 
 import { AccountService } from './account.service'
-import { CreateAccountInput } from './dtos'
+import { CreateAccountInput } from './inputs'
 import { User } from './models'
 
 @Resolver()
 export class AccountResolver {
-	constructor(
-		private readonly accountService: AccountService,
-		private readonly i18n: I18nService,
-	) {}
+	constructor(private readonly accountService: AccountService) {}
 
+	/**
+	 * Create a new user
+	 * @param data - The data for the new user
+	 * @param language - The language of the user
+	 * @returns The new user
+	 */
 	@Mutation(() => User, { name: 'createAccount', description: 'Create a new user' })
-	create(@Args('data') data: CreateAccountInput): Promise<User> {
-		return this.accountService.create(data)
+	create(@Args('data') data: CreateAccountInput, @Lang() language: string): Promise<User> {
+		return this.accountService.create(data, language)
 	}
 
-	@Query(() => [User], { name: 'findAll', description: 'Find all users' })
-	findAll() {
-		return this.accountService.findAll()
+	/**
+	 * Get current user
+	 * @param language - The language of the user
+	 * @param id - The id of the user
+	 * @returns The current user
+	 */
+	@Authorization()
+	@Query(() => User, { name: 'findProfile', description: 'Find profile' })
+	findProfile(@Authorized('id') id: string, @Lang() language: string) {
+		return this.accountService.findProfile(language, id)
 	}
-
-	@Query(() => User, { name: 'findOne', description: 'Find a user by id' })
-	findOne(@Args('id') id: string): Promise<User> {
-		return this.accountService.findOne(id)
-	}
-
-	@Query(() => String, { name: 'getAuthMessage', description: 'Get auth message (i18n demo)' })
-	getAuthMessage(@Lang() language: string): string {
-		return this.i18n.t('auth.test', { lng: language }) as string
-	}
-
-	// @Mutation(() => Account)
-	// updateAccount(@Args('updateAccountInput') updateAccountInput: UpdateAccountInput) {
-	// 	return this.accountService.update(updateAccountInput.id, updateAccountInput)
-	// }
-
-	// @Mutation(() => Account)
-	// removeAccount(@Args('id', { type: () => Int }) id: number) {
-	// 	return this.accountService.remove(id)
-	// }
 }
