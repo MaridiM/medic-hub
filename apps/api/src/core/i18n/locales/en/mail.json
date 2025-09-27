@@ -1,0 +1,18 @@
+{
+	"verification_email": {
+		"subject": "Email Verification",
+		"preview": "Confirm your email to complete your registration.",
+		"title": "Confirm your email",
+		"intro": "Hello! To finish signing up, please confirm your email address. The button below will remain active for {hours} hours.",
+		"cta": "Confirm email",
+		"copyLinkHint": "If the button doesn’t work, copy and paste this link into your browser’s address bar:",
+		"legalNote": "If you didn’t sign up, you can safely ignore this email — your address will remain unchanged.",
+		"signoff": ["Sincerely, the", "team"],
+		"supportNote": "This is an automated message; please don’t reply. Contact support at: ",
+		"whyReceived": "You’re receiving this email because someone entered this address during registration. If it wasn’t you, no action is required."
+	},
+	"errors": {
+		"api_key_missing": "API key is missing.",
+		"message_send_failed": "Failed to send the message."
+	}
+}

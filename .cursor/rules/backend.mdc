@@ -1,0 +1,24 @@
+# Backend Development Rules (NestJS + GraphQL)
+
+## 1. Architecture & Framework
+- **Framework**: The backend is built exclusively with **NestJS**.
+- **API Style**: The project uses **GraphQL (Code-First approach)**. The GraphQL schema is automatically generated from TypeScript classes and decorators. Do not write `.graphql` schema files by hand.
+- **Modularity**: Each primary domain concept (e.g., Patient, Schedule, Invoice, Tenant) MUST be encapsulated within its own NestJS module.
+
+## 2. Logic and Data Access
+- **Controllers/Resolvers**: API interaction points are defined in **Resolvers** (`*.resolver.ts`). Resolvers should be "thin". Their primary responsibility is to receive requests (Queries/Mutations), validate inputs (using DTOs and pipes), and delegate business logic to services.
+- **Services**: All business logic MUST reside in **Services** (`*.service.ts`). Services are responsible for orchestrating data access and business rules.
+- **Data Access (ORM)**: All database interactions MUST go through the **Prisma Client**. To keep logic organized, use the Repository Pattern: create repository classes (`*.repository.ts`) that are injected into services and contain all Prisma queries for a specific model.
+
+## 3. Schema and Data Transfer Objects (DTOs)
+- **GraphQL Schema**: Define GraphQL types using `@ObjectType`, `@Query`, `@Mutation`, and `@Field` decorators on TypeScript classes.
+- **Input DTOs**: All inputs for Queries and Mutations MUST be defined as DTO classes using `@InputType` and `@Args`.
+- **Validation**: Use the built-in `ValidationPipe` with `class-validator` decorators in DTOs to validate all incoming data.
+
+## 4. Security
+- **Authentication**: Use NestJS Guards to manage authentication.
+- **Authorization (RBAC)**: All Queries and Mutations MUST be protected by a role-based access control (RBAC) Guard by default. Publicly accessible operations must be explicitly marked with a `@Public()` decorator. Role checks should be declarative (e.g., `@Roles(Role.Admin)`).
+
+## 5. Testing
+- **Unit Tests**: All services and resolvers MUST have unit tests written with Jest. Use mocking for dependencies (repositories, other services).
+- **E2E Tests**: Write end-to-end tests for critical user flows (e.g., creating a schedule, processing a payment). Use the NestJS testing utilities with a test database.

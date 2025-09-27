@@ -1,0 +1,15 @@
+---
+description: "Security & Compliance"
+globs:
+  - "src/**"
+  - "prisma/**"
+  - ".env*"
+alwaysApply: true
+---
+
+# Security Rules
+
+- Never log PII or secrets. Mask phone/email in logs and analytics.
+- **No secrets in code or VCS**. Use environment variables and secret manager.
+- Add `helmet`, strict CORS, rate limiting. Consider IP allowlist/MFA for admin areas (PRO).
+- Sanitize uploads; validate MIME and size; store files in object storage with presigned URLs.

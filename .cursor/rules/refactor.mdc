@@ -1,0 +1,13 @@
+---
+description: "Safe refactoring & migrations"
+globs:
+  - "src/**"
+alwaysApply: false
+---
+
+# Refactoring Rules
+
+- Small, isolated PRs. One responsibility per PR.
+- Keep **public APIs** stable; if changed, update `docs/ADR-*.md` and `docs/api-contracts.md`.
+- Write migration notes & scripts when touching models/schemas.
+- Provide before/after examples in PR description.

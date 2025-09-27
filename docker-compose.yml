@@ -37,7 +37,7 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
-    healthcheck:
+      healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
@@ -47,70 +47,70 @@ services:
     networks:
       - medic-hub
 
-  # ===========================================
-  # FRONTEND
-  # ===========================================
-  frontend:
-    image: maridim/medic-hub-frontend:latest
-    build:
-      context: ./frontend
-      dockerfile: docker/Dockerfile.prod
-    container_name: medic-hub-frontend
-    restart: unless-stopped
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
-    env_file:
-      - frontend/.env
-      - .env
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${FRONTEND_PORT:-3000}/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    networks:
-      - medic-hub
-    # profiles: ["prod"]
+  # # ===========================================
+  # # FRONTEND
+  # # ===========================================
+  # web:
+  #   image: maridim/medic-hub-frontend:latest
+  #   build:
+  #     context: ./apps/web
+  #     dockerfile: docker/Dockerfile.prod
+  #   container_name: medic-hub-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${FRONTEND_PORT:-3000}:3000"
+  #   env_file:
+  #     - frontend/.env
+  #     - .env
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=3000
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:${FRONTEND_PORT:-3000}/"]
+  #     interval: 30s
+  #     timeout: 5s
+  #     retries: 3
+  #   networks:
+  #     - medic-hub
+  #   # profiles: ["prod"]
 
-  # ===========================================
-  # BACKEND
-  # ===========================================
-  backend:
-    image: maridim/medic-hub-backend:latest
-    build:
-      context: ./backend
-      dockerfile: docker/Dockerfile.prod
-    container_name: medic-hub-backend
-    restart: unless-stopped
+  # # ===========================================
+  # # BACKEND
+  # # ===========================================
+  # api:
+  #   image: maridim/medic-hub-backend:latest
+  #   build:
+  #     context: ./apps/api
+  #     dockerfile: docker/Dockerfile.prod
+  #   container_name: medic-hub-backend
+  #   restart: unless-stopped
 
     
-    env_file:
-      - backend/.env
-      - .env
-    ports:
-      - "${BACKEND_PORT:-8000}:8000"
-    environment:
-      - NODE_ENV=production
-      - PORT=8000
-    networks:
-      - medic-hub
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget -qO- http://localhost:${BACKEND_PORT:-8000}/ || exit 1",
-        ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    # depends_on:
-    #     postgres:
-    #       condition: service_healthy
-    #     redis:
-    #       condition: service_healthy
-    # profiles: ["prod"]
+  #   env_file:
+  #     - backend/.env
+  #     - .env
+  #   ports:
+  #     - "${BACKEND_PORT:-8000}:8000"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=8000
+  #   networks:
+  #     - medic-hub
+  #   healthcheck:
+  #     test:
+  #       [
+  #         "CMD-SHELL",
+  #         "wget -qO- http://localhost:${BACKEND_PORT:-8000}/ || exit 1",
+  #       ]
+  #     interval: 30s
+  #     timeout: 5s
+  #     retries: 3
+  #   # depends_on:
+  #   #     postgres:
+  #   #       condition: service_healthy
+  #   #     redis:
+  #   #       condition: service_healthy
+  #   # profiles: ["prod"]
 
 volumes:
   postgres_data:

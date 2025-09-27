@@ -1,0 +1,17 @@
+---
+description: "Accessibility & Performance"
+globs:
+  - "src/app/**"
+  - "src/packages/components/**"
+alwaysApply: false
+---
+
+# A11y & Performance
+
+## A11y
+- Keyboard navigation, focus outlines, aria labels. Use Radix primitives correctly.
+- Color contrast ≥ WCAG AA. Provide `aria-live` for form errors/toasts.
+
+## Performance
+- Prefer RSC for heavy, static blocks. Dynamic import for low-priority client widgets.
+- Optimize images (next/image) and preload fonts. Avoid blocking synchronous scripts.

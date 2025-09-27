@@ -1,0 +1,33 @@
+# Frontend Development Rules (Next.js + GraphQL)
+
+## 1. Architecture & Framework
+- **Framework**: The frontend is built exclusively with **Next.js** using the **App Router**.
+- **Language**: Use **TypeScript** for all new code.
+- **Styling**: Use **Tailwind CSS** for styling. Do not write plain CSS files.
+
+## 2. Component Library
+- **Base Components**: The UI is built upon **shadcn/ui**. Always check if a suitable component exists there before creating a new one.
+- **Custom Components**: New, reusable, application-specific components should be placed in `src/packages/components/custom`.
+- **Feature Components**: Components that are specific to a single feature or page should be co-located with that feature's code.
+
+## 3. State Management
+- **Server State**: All interactions with the GraphQL API (fetching, caching, mutating data) MUST be handled by **TanStack Query v5**.
+- **Local/UI State**: For simple component-level state, use standard React hooks (`useState`, `useReducer`). Avoid complex global state managers unless absolutely necessary.
+
+## 4. API Interaction (GraphQL)
+- **GraphQL Client**: Use a lightweight client like **`graphql-request`** as the fetcher for TanStack Query.
+- **Code Generation**: **GraphQL Code Generator** MUST be used. This tool will connect to the backend's GraphQL endpoint and automatically generate:
+    - TypeScript types for all GraphQL operations and schema objects.
+    - Typed TanStack Query hooks (e.g., `useGetUserQuery`, `useCreateUserMutation`).
+- This ensures end-to-end type safety and is a mandatory part of the development workflow. Do not write query hooks by hand.
+
+## 5. Forms
+- **Form Management**: All forms MUST be built using **React Hook Form**.
+- **Validation**: Schema-based validation using **Zod** is required. The Zod schema should be the single source of truth for a form's shape and validation rules.
+
+## 6. Internationalization (i18n)
+- All user-facing strings MUST be managed through **`next-intl`**. Do not hardcode text in components.
+
+## 7. Testing
+- **Unit/Integration Tests**: Components and hooks should be tested with **Jest** and **React Testing Library**.
+- **E2E Tests**: Critical user flows (e.g., login, creating an appointment) should be covered by end-to-end tests using a framework like **Playwright** or **Cypress**.

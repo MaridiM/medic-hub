@@ -1,0 +1,13 @@
+---
+description: "RBAC & Multitenancy rules for Doctor Lab"
+globs:
+  - "src/**"
+alwaysApply: false
+---
+
+# RBAC & Multitenancy
+
+- Implement role checks at resolver/service level (Owner/Admin/Doctor/Reception/Solo).
+- Pass `tenantId` in context/session; **all** queries/mutations must be scoped by tenant.
+- For lists: default to **current tenant**, forbid cross-tenant access.
+- Add audit records for sensitive operations (file view, status change).

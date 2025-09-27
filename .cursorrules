@@ -1,0 +1,17 @@
+---
+description: "Root aggregator for project rules (optional). Prefer .cursor/rules/* files; this file helps Cursor find global guidance quickly."
+alwaysApply: true
+---
+# Doctor Lab — Global Guidance (Aggregator)
+- This file summarizes the rules and points Cursor to detailed rules in `.cursor/rules/*`.
+- When asking the agent, reference: **@Cursor Rules** → pick specific rule files as needed.
+
+## Pointers
+- Frontend rules: `.cursor/rules/frontend.mdc`
+- Backend rules: `.cursor/rules/backend.mdc`
+- Testing rules: `.cursor/rules/testing.mdc`
+- Security & Compliance: `.cursor/rules/security.mdc`
+- A11y & Performance: `.cursor/rules/a11y-perf.mdc`
+- Refactoring: `.cursor/rules/refactor.mdc`
+- RBAC & Tenants: `.cursor/rules/rbac.mdc`
+- Project overview: `.cursor/rules/project-overview.mdc`

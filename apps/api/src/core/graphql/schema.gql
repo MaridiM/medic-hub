@@ -1,0 +1,87 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateAccountInput {
+  email: String!
+  fullName: String!
+  password: String!
+  phone: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Device {
+  browser: String!
+  os: String!
+  type: String!
+}
+
+type Location {
+  city: String!
+  country: String!
+  latidute: Float!
+  longitude: Float!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type LoginResponse {
+  accessToken: String
+  user: User
+}
+
+type Mutation {
+  """Clear session cookie"""
+  clearSessionCookie: Boolean!
+
+  """Create a new user"""
+  createAccount(data: CreateAccountInput!): User!
+
+  """Delete a user"""
+  deleteAccount: Boolean!
+
+  """Login to the system"""
+  login(data: LoginInput!): LoginResponse!
+
+  """Logout from the system"""
+  logout: Boolean!
+
+  """Remove a session by ID"""
+  removeSession(id: String!): Boolean!
+}
+
+type Query {
+  """Find current session"""
+  findCurrentSession: Session!
+}
+
+type Session {
+  createdAt: String!
+  id: ID!
+  metadata: SessionMetadata!
+  userId: String!
+}
+
+type SessionMetadata {
+  device: Device!
+  ip: String!
+  location: Location!
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  firstName: String
+  fullName: String!
+  id: ID!
+  lastName: String
+  phone: String!
+  updatedAt: DateTime!
+}

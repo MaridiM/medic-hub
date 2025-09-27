@@ -1,0 +1,30 @@
+---
+description: "Doctor Lab — Project Overview & Canon"
+globs:
+  - "src/**"
+  - "apps/**"
+  - "packages/**"
+alwaysApply: true
+---
+
+# Doctor Lab — Project Overview & Canon
+
+**Date:** 2025-09-19
+
+## Stack (FE/BE)
+- **FE**: Next.js 15 (App Router, RSC), TypeScript (strict), Tailwind v4, shadcn/ui + Radix, next-intl, Zustand, Zod + RHF.
+- **BE**: NestJS 11, GraphQL (Apollo), Prisma (PostgreSQL), Redis (sessions), i18n.
+- **Transport**: GraphQL (schema-first via decorators).
+
+## Domain (MVP focus)
+- Tenants (Solo / Org), Patients (global) + PatientProfile (per tenant), EMR-light, Schedules (calendar & statuses), Services, Invoices/Payments, Staff/Roles, Audit.
+- Channels: email/SMS/Telegram (progressive rollout).
+
+## Golden Rules for AI
+- Follow **strict typing**; avoid `any`. Add or extend Zod/Class-Validator schemas when touching inputs/outputs.
+- Respect **RSC vs Client** boundary. Prefer server components; isolate interactivity in `use client` components.
+- Keep **feature boundaries** (FSD): `modules/<domain>/{{entities,features,pages,shared,widgets}}` + shared libs in `packages/*`.
+- UI: shadcn wrappers only; **no inline styles**; Tailwind utility-first.
+- I18n: all visible strings go through `next-intl` (FE) or i18n service (BE).
+- Security: never leak secrets, PII masking in logs, do not return sensitive fields (e.g., password) via GraphQL.
+

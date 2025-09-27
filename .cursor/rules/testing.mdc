@@ -1,0 +1,21 @@
+---
+description: "Testing & Quality gates"
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+alwaysApply: false
+---
+
+# Testing & Quality
+
+## Unit/Integration
+- FE: **Vitest + RTL**. Cover forms, hooks, UI state (Zustand).
+- BE: **Jest**. Cover resolvers/services; use **Testcontainers** for Postgres/Redis integration where feasible.
+
+## E2E
+- **Playwright** for core flows (auth, create patient, schedule schedule, issue invoice).
+
+## CI Gates
+- Lint + typecheck must pass.
+- Coverage thresholds: 60% lines (MVP), 75% (PRO).
+
