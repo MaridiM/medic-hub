@@ -1,4 +1,4 @@
-import { COMPANY_NAME, DEFAULT_LANGUAGE, I18nService, type Language, SUPPORT_EMAIL, tObj } from '@/core'
+import { COMPANY_NAME, DEFAULT_LANGUAGE, I18nService, type Language, tObj } from '@/core'
 import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -30,7 +30,32 @@ export class MailService {
 		})
 		const html = await render(VerificationEmailTemplate({ token, content }))
 
-		// return this.sendMail(email, 'Верификация аккаунта', html)
-		return Promise.resolve(1)
+		return this.sendMail(email, content.subject, html)
+	}
+
+	/**
+	 * Base send mail method
+	 * @param email - email address to
+	 * @param subject - subject for email
+	 * @param html - React, html email template
+	 * @returns - send mail
+	 */
+	private async sendMail(email: string, subject: string, html: string) {
+		if (this.config.getOrThrow<string>('MAIL_USE_SERVICE') === 'brevo') {
+			return this.brevo.sendMail(email, subject, html)
+		}
+
+		if (this.config.getOrThrow<string>('MAIL_USE_SERVICE') === 'sendgrid') {
+			return this.sendgrid.sendMail(email, subject, html)
+		}
+
+		const sentResponse: unknown = await this.mailer.sendMail({
+			from: `"${COMPANY_NAME}" <${this.config.getOrThrow<string>('MAIL_LOGIN')}>`,
+			to: email,
+			subject,
+			html,
+		})
+
+		return sentResponse
 	}
 }

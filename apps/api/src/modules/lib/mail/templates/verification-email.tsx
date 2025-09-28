@@ -24,7 +24,7 @@ export function VerificationEmailTemplate({ token, content }: IProps) {
             </Text>
 
             {/* CTA */}
-            <Button
+            <Button 
                 href={verifyUrl}
                 className="flex items-center m-auto justify-center max-w-fit rounded-lg bg-[#2B7AFF] px-6 py-3"
             >
