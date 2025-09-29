@@ -63,10 +63,11 @@ export class SessionService {
 	/**
 	 * Get current session
 	 * @param req - request
+	 * @param language - language
 	 * @returns current session
 	 */
-	async findCurrent(req: Request) {
-		await this.mailService.sendVerificationEmailToken()
+	async findCurrent(req: Request, language: string) {
+		// await this.mailService.sendVerificationEmailToken('maridim92@gmail.com', '123314', language)
 		const sessionId = req.session.id
 		const session: Session = await this.redis.getJSON(this.key(sessionId))
 		return {
@@ -76,12 +77,60 @@ export class SessionService {
 	}
 
 	/**
+	 * Get all sessions for current user
+	 * @param req - request
+	 * @returns user session
+	 */
+	async findByUser(req: Request) {
+		const userId = req.session.userId
+
+		if (!userId) {
+			throw new NotFoundException(this.i18n.t('auth.user_not_found') || 'User not found')
+		}
+
+		// 1) Собираем ключи через SCAN (без блокировки Redis)
+		const keys: string[] = await this.redis.keys('*')
+
+		if (keys.length === 0) return []
+
+		// 2) Читаем все значения разом (MGET) — существенно быстрее, чем get в цикле
+		const rawList: (string | Record<string, unknown>)[] = await this.redis.getClient().mGet(keys)
+		// Либо типобезопасно по одному: await this.redis.getJSON<SessionRecord>(key)
+
+		// 3) Парсим и фильтруем по userId
+		const userSessions = keys.flatMap((key, i) => {
+			const raw = rawList[i] as string | null
+			if (typeof raw !== 'string') return []
+
+			let session: Session | null = null
+			try {
+				session = JSON.parse(raw) as Session
+			} catch {
+				return [] // пропускаем битые записи
+			}
+
+			if (session?.userId !== userId) return []
+
+			const id = key.startsWith(this.prefix) ? key.slice(this.prefix.length) : key
+			return [{ ...session, id }]
+		})
+
+		// 4) Сортировка по времени создания (новые сверху)
+		userSessions.sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
+
+		// 5) Исключаем текущую сессию пользователя
+		type RequestWithSessionId = Request & { sessionID?: string }
+		const currentId = (req.session as Session | undefined)?.id ?? (req as RequestWithSessionId).sessionID
+		return userSessions.filter(s => s.id !== currentId)
+	}
+
+	/**
 	 * Clear current session from cookie
 	 * @param req - request
 	 * @returns boolean
 	 */
 	clear(req: Request) {
-		req.res.clearCookie(this.config.getOrThrow<string>('SESSION_NAME'))
+		req.res.clearCookie(this.prefix)
 		return true
 	}
 

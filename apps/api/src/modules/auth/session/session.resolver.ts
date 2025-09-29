@@ -29,8 +29,14 @@ export class SessionResolver {
 
 	@Authorization()
 	@Query(() => Session, { name: 'findCurrentSession', description: 'Find current session' })
-	findCurrent(@Context() { req }: GqlContext): Promise<Session | null> {
-		return this.sessionService.findCurrent(req)
+	findCurrent(@Context() { req }: GqlContext, @Lang() language: string): Promise<Session | null> {
+		return this.sessionService.findCurrent(req, language)
+	}
+
+	@Authorization()
+	@Query(() => [Session], { name: 'findSessionsByUser' })
+	async findByUser(@Context() { req }: GqlContext): Promise<Session[] | null> {
+		return this.sessionService.findByUser(req)
 	}
 
 	@Authorization()

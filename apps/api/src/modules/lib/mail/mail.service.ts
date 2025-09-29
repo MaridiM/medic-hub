@@ -1,4 +1,4 @@
-import { COMPANY_NAME, DEFAULT_LANGUAGE, I18nService, type Language, tObj } from '@/core'
+import { COMPANY_NAME, DEFAULT_LANGUAGE, tObj } from '@/core'
 import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -12,7 +12,6 @@ export class MailService {
 	constructor(
 		private readonly brevo: BrevoService,
 		private readonly config: ConfigService,
-		private readonly i18n: I18nService,
 		private readonly mailer: MailerService,
 		private readonly sendgrid: SendgridService,
 	) {}
@@ -23,7 +22,7 @@ export class MailService {
 	 * @param token - generated token
 	 * @returns - sended info object
 	 */
-	async sendVerificationEmailToken(email?: string, token?: string, language?: Language) {
+	async sendVerificationEmailToken(email: string, token: string, language: string) {
 		const content = tObj('mail.verification_email', {
 			lng: language ?? DEFAULT_LANGUAGE,
 			hours: 24, // ← подставится в {hours}

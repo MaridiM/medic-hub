@@ -1,16 +1,18 @@
 import { createClient, type RedisClientType } from 'redis'
 
-import { Injectable } from '@nestjs/common'
+import { logUnknownError } from '@/shared/utils'
+import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class RedisService {
 	private client: RedisClientType
+	private readonly logger = new Logger(RedisService.name)
 
 	constructor(private readonly config: ConfigService) {
 		this.client = createClient({ url: this.config.getOrThrow<string>('REDIS_URL') })
-		this.client.connect().catch(err => {
-			console.error('Redis client connect error', err)
+		this.client.connect().catch((err: unknown) => {
+			logUnknownError(this.logger, 'Redis connect error', err, RedisService.name)
 		})
 	}
 
@@ -64,5 +66,13 @@ export class RedisService {
 		} catch {
 			return null
 		}
+	}
+
+	// ===== ПЕРЕЧИСЛЕНИЕ КЛЮЧЕЙ =====
+
+	/** Быстро получить ключи по шаблону (в проде лучше scan/scanIterator) */
+	async keys(pattern: string): Promise<string[]> {
+		const list: string[] = await this.client.keys(pattern)
+		return list
 	}
 }

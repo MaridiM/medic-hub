@@ -60,6 +60,7 @@ type Mutation {
 type Query {
   """Find current session"""
   findCurrentSession: Session!
+  findSessionsByUser: [Session!]!
 }
 
 type Session {

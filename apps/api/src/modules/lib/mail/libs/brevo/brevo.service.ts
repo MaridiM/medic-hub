@@ -1,3 +1,4 @@
+import { COMPANY_NAME } from '@/core'
 import * as brevo from '@getbrevo/brevo'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -28,7 +29,7 @@ export class BrevoService {
 		sendSmtpEmail.subject = subject
 		sendSmtpEmail.htmlContent = html
 		sendSmtpEmail.sender = {
-			name: 'Twitch Clone',
+			name: COMPANY_NAME,
 			email: this.configService.getOrThrow<string>('MAIL_BREVO_SENDER'),
 		}
 		sendSmtpEmail.to = [{ email }]

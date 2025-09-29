@@ -22,10 +22,10 @@ model User {
   fullName  String  @map("full_name")
   firstName String? @map("first_name")
   lastName  String? @map("last_name")
-  phone String? @unique
-  email String  @unique
-  
-  password  String
+  phone     String? @unique
+  email     String  @unique
+
+  password String
 
   tokens Token[]
 
@@ -44,6 +44,16 @@ model Token {
 
   user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String? @map("user_id")
+
+  isEmailVerified Boolean @default(false) @map("is_email_verified")
+
+  isTotpEnabled Boolean @default(false) @map("is_totp_enabled")
+  totpSecret    String? @map("totp_secret")
+
+  isOtpEnabled Boolean @default(false) @map("is_otp_enabled")
+  otpSecret    String? @map("otp_secret")
+
+  tokens Token[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
