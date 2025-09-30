@@ -128,6 +128,11 @@ exports.Prisma.UserScalarFieldEnum = {
   phone: 'phone',
   email: 'email',
   password: 'password',
+  isEmailVerified: 'isEmailVerified',
+  isTotpEnabled: 'isTotpEnabled',
+  totpSecret: 'totpSecret',
+  isOtpEnabled: 'isOtpEnabled',
+  otpSecret: 'otpSecret',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

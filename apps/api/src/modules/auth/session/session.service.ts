@@ -67,7 +67,7 @@ export class SessionService {
 	 * @returns current session
 	 */
 	async findCurrent(req: Request, language: string) {
-		// await this.mailService.sendVerificationEmailToken('maridim92@gmail.com', '123314', language)
+		await this.mailService.sendVerificationEmailToken('maridim92@gmail.com', '123314', language)
 		const sessionId = req.session.id
 		const session: Session = await this.redis.getJSON(this.key(sessionId))
 		return {

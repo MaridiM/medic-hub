@@ -1,4 +1,4 @@
-import { I18nService } from '@/core'
+import { COMPANY_NAME, I18nService } from '@/core'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import sgMail from '@sendgrid/mail'
@@ -30,7 +30,7 @@ export class SendgridService {
 		try {
 			await this.sgMail.send({
 				to: email,
-				from: `"Medic Hub" <${this.config.getOrThrow<string>('MAIL_SENDGRID_SENDER')}>`,
+				from: `"${COMPANY_NAME}" <${this.config.getOrThrow<string>('MAIL_SENDGRID_SENDER')}>`,
 				subject,
 				html,
 			})

@@ -1025,6 +1025,11 @@ export namespace Prisma {
     phone: string | null
     email: string | null
     password: string | null
+    isEmailVerified: boolean | null
+    isTotpEnabled: boolean | null
+    totpSecret: string | null
+    isOtpEnabled: boolean | null
+    otpSecret: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1037,6 +1042,11 @@ export namespace Prisma {
     phone: string | null
     email: string | null
     password: string | null
+    isEmailVerified: boolean | null
+    isTotpEnabled: boolean | null
+    totpSecret: string | null
+    isOtpEnabled: boolean | null
+    otpSecret: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1049,6 +1059,11 @@ export namespace Prisma {
     phone: number
     email: number
     password: number
+    isEmailVerified: number
+    isTotpEnabled: number
+    totpSecret: number
+    isOtpEnabled: number
+    otpSecret: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1063,6 +1078,11 @@ export namespace Prisma {
     phone?: true
     email?: true
     password?: true
+    isEmailVerified?: true
+    isTotpEnabled?: true
+    totpSecret?: true
+    isOtpEnabled?: true
+    otpSecret?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1075,6 +1095,11 @@ export namespace Prisma {
     phone?: true
     email?: true
     password?: true
+    isEmailVerified?: true
+    isTotpEnabled?: true
+    totpSecret?: true
+    isOtpEnabled?: true
+    otpSecret?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1087,6 +1112,11 @@ export namespace Prisma {
     phone?: true
     email?: true
     password?: true
+    isEmailVerified?: true
+    isTotpEnabled?: true
+    totpSecret?: true
+    isOtpEnabled?: true
+    otpSecret?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1172,6 +1202,11 @@ export namespace Prisma {
     phone: string | null
     email: string
     password: string
+    isEmailVerified: boolean
+    isTotpEnabled: boolean
+    totpSecret: string | null
+    isOtpEnabled: boolean
+    otpSecret: string | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -1201,6 +1236,11 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     password?: boolean
+    isEmailVerified?: boolean
+    isTotpEnabled?: boolean
+    totpSecret?: boolean
+    isOtpEnabled?: boolean
+    otpSecret?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     tokens?: boolean | User$tokensArgs<ExtArgs>
@@ -1215,6 +1255,11 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     password?: boolean
+    isEmailVerified?: boolean
+    isTotpEnabled?: boolean
+    totpSecret?: boolean
+    isOtpEnabled?: boolean
+    otpSecret?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1227,6 +1272,11 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     password?: boolean
+    isEmailVerified?: boolean
+    isTotpEnabled?: boolean
+    totpSecret?: boolean
+    isOtpEnabled?: boolean
+    otpSecret?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1239,11 +1289,16 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     password?: boolean
+    isEmailVerified?: boolean
+    isTotpEnabled?: boolean
+    totpSecret?: boolean
+    isOtpEnabled?: boolean
+    otpSecret?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "firstName" | "lastName" | "phone" | "email" | "password" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "firstName" | "lastName" | "phone" | "email" | "password" | "isEmailVerified" | "isTotpEnabled" | "totpSecret" | "isOtpEnabled" | "otpSecret" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tokens?: boolean | User$tokensArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1264,6 +1319,11 @@ export namespace Prisma {
       phone: string | null
       email: string
       password: string
+      isEmailVerified: boolean
+      isTotpEnabled: boolean
+      totpSecret: string | null
+      isOtpEnabled: boolean
+      otpSecret: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -1697,6 +1757,11 @@ export namespace Prisma {
     readonly phone: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
+    readonly isEmailVerified: FieldRef<"User", 'Boolean'>
+    readonly isTotpEnabled: FieldRef<"User", 'Boolean'>
+    readonly totpSecret: FieldRef<"User", 'String'>
+    readonly isOtpEnabled: FieldRef<"User", 'Boolean'>
+    readonly otpSecret: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -3254,6 +3319,11 @@ export namespace Prisma {
     phone: 'phone',
     email: 'email',
     password: 'password',
+    isEmailVerified: 'isEmailVerified',
+    isTotpEnabled: 'isTotpEnabled',
+    totpSecret: 'totpSecret',
+    isOtpEnabled: 'isOtpEnabled',
+    otpSecret: 'otpSecret',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -3318,6 +3388,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -3373,6 +3450,11 @@ export namespace Prisma {
     phone?: StringNullableFilter<"User"> | string | null
     email?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
+    isEmailVerified?: BoolFilter<"User"> | boolean
+    isTotpEnabled?: BoolFilter<"User"> | boolean
+    totpSecret?: StringNullableFilter<"User"> | string | null
+    isOtpEnabled?: BoolFilter<"User"> | boolean
+    otpSecret?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     tokens?: TokenListRelationFilter
@@ -3386,6 +3468,11 @@ export namespace Prisma {
     phone?: SortOrderInput | SortOrder
     email?: SortOrder
     password?: SortOrder
+    isEmailVerified?: SortOrder
+    isTotpEnabled?: SortOrder
+    totpSecret?: SortOrderInput | SortOrder
+    isOtpEnabled?: SortOrder
+    otpSecret?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     tokens?: TokenOrderByRelationAggregateInput
@@ -3402,6 +3489,11 @@ export namespace Prisma {
     firstName?: StringNullableFilter<"User"> | string | null
     lastName?: StringNullableFilter<"User"> | string | null
     password?: StringFilter<"User"> | string
+    isEmailVerified?: BoolFilter<"User"> | boolean
+    isTotpEnabled?: BoolFilter<"User"> | boolean
+    totpSecret?: StringNullableFilter<"User"> | string | null
+    isOtpEnabled?: BoolFilter<"User"> | boolean
+    otpSecret?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     tokens?: TokenListRelationFilter
@@ -3415,6 +3507,11 @@ export namespace Prisma {
     phone?: SortOrderInput | SortOrder
     email?: SortOrder
     password?: SortOrder
+    isEmailVerified?: SortOrder
+    isTotpEnabled?: SortOrder
+    totpSecret?: SortOrderInput | SortOrder
+    isOtpEnabled?: SortOrder
+    otpSecret?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -3433,6 +3530,11 @@ export namespace Prisma {
     phone?: StringNullableWithAggregatesFilter<"User"> | string | null
     email?: StringWithAggregatesFilter<"User"> | string
     password?: StringWithAggregatesFilter<"User"> | string
+    isEmailVerified?: BoolWithAggregatesFilter<"User"> | boolean
+    isTotpEnabled?: BoolWithAggregatesFilter<"User"> | boolean
+    totpSecret?: StringNullableWithAggregatesFilter<"User"> | string | null
+    isOtpEnabled?: BoolWithAggregatesFilter<"User"> | boolean
+    otpSecret?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -3510,6 +3612,11 @@ export namespace Prisma {
     phone?: string | null
     email: string
     password: string
+    isEmailVerified?: boolean
+    isTotpEnabled?: boolean
+    totpSecret?: string | null
+    isOtpEnabled?: boolean
+    otpSecret?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tokens?: TokenCreateNestedManyWithoutUserInput
@@ -3523,6 +3630,11 @@ export namespace Prisma {
     phone?: string | null
     email: string
     password: string
+    isEmailVerified?: boolean
+    isTotpEnabled?: boolean
+    totpSecret?: string | null
+    isOtpEnabled?: boolean
+    otpSecret?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
@@ -3536,6 +3648,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tokens?: TokenUpdateManyWithoutUserNestedInput
@@ -3549,6 +3666,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3562,6 +3684,11 @@ export namespace Prisma {
     phone?: string | null
     email: string
     password: string
+    isEmailVerified?: boolean
+    isTotpEnabled?: boolean
+    totpSecret?: string | null
+    isOtpEnabled?: boolean
+    otpSecret?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -3574,6 +3701,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -3586,6 +3718,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -3689,6 +3826,11 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -3723,6 +3865,11 @@ export namespace Prisma {
     phone?: SortOrder
     email?: SortOrder
     password?: SortOrder
+    isEmailVerified?: SortOrder
+    isTotpEnabled?: SortOrder
+    totpSecret?: SortOrder
+    isOtpEnabled?: SortOrder
+    otpSecret?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -3735,6 +3882,11 @@ export namespace Prisma {
     phone?: SortOrder
     email?: SortOrder
     password?: SortOrder
+    isEmailVerified?: SortOrder
+    isTotpEnabled?: SortOrder
+    totpSecret?: SortOrder
+    isOtpEnabled?: SortOrder
+    otpSecret?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -3747,6 +3899,11 @@ export namespace Prisma {
     phone?: SortOrder
     email?: SortOrder
     password?: SortOrder
+    isEmailVerified?: SortOrder
+    isTotpEnabled?: SortOrder
+    totpSecret?: SortOrder
+    isOtpEnabled?: SortOrder
+    otpSecret?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -3785,6 +3942,14 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -3875,6 +4040,10 @@ export namespace Prisma {
     set?: string | null
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -3955,6 +4124,11 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -4020,6 +4194,14 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -4118,6 +4300,11 @@ export namespace Prisma {
     phone?: string | null
     email: string
     password: string
+    isEmailVerified?: boolean
+    isTotpEnabled?: boolean
+    totpSecret?: string | null
+    isOtpEnabled?: boolean
+    otpSecret?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -4130,6 +4317,11 @@ export namespace Prisma {
     phone?: string | null
     email: string
     password: string
+    isEmailVerified?: boolean
+    isTotpEnabled?: boolean
+    totpSecret?: string | null
+    isOtpEnabled?: boolean
+    otpSecret?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -4158,6 +4350,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4170,6 +4367,11 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
+    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
