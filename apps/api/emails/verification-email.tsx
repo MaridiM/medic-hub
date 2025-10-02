@@ -12,7 +12,7 @@ import {
   Text
 } from "@react-email/components";
 
-export interface VerifyEmailProps {
+export interface verificationEmailProps {
   verifyUrl: string;
   companyName?: string;
   supportEmail?: string;
@@ -27,11 +27,11 @@ const brand = {
   logoBlue: "#143394",
 };
 
-export default function VerifyEmail({
+export default function verificationEmail({
   verifyUrl = "http://localhost:3000/auth/verify?token=exampletoken",
   companyName = "MedicHub Inc.",
   supportEmail = "support@example.com",
-}: VerifyEmailProps) {
+}: verificationEmailProps) {
 
 
 

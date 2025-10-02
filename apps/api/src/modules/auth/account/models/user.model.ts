@@ -23,6 +23,27 @@ export class User {
 	@Field(() => String, { nullable: true })
 	lastName: string
 
+	@Field(() => String, { nullable: true })
+	avatar: string
+
+	@Field(() => String, { nullable: true })
+	bio: string
+
+	@Field(() => Boolean)
+	isEmailVerified: boolean
+
+	@Field(() => Boolean)
+	isTotpEnabled: boolean
+
+	@Field(() => String, { nullable: true })
+	totpSecret: string
+
+	@Field(() => Boolean)
+	isOtpEnabled: boolean
+
+	@Field(() => String, { nullable: true })
+	otpSecret: string
+
 	@Field(() => Date)
 	createdAt: Date
 

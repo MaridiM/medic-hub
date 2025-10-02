@@ -6,7 +6,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { Prisma } from '@prisma/__generated__'
 
 import { AccountService } from '../account.service'
-import { CreateAccountInput } from '../inputs'
+import { CreateAccountInput } from '../dtos'
 import { User } from '../models'
 
 jest.mock('argon2', () => ({

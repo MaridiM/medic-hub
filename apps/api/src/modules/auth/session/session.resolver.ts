@@ -3,7 +3,7 @@ import { Authorization, UserAgent } from '@/shared/decorators'
 import { GqlContext } from '@/shared/types'
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
 
-import { LoginInput, LoginResponse } from './inputs'
+import { LoginInput, LoginResponse } from './dtos'
 import { Session } from './models'
 import { SessionService } from './session.service'
 
@@ -29,8 +29,8 @@ export class SessionResolver {
 
 	@Authorization()
 	@Query(() => Session, { name: 'findCurrentSession', description: 'Find current session' })
-	findCurrent(@Context() { req }: GqlContext, @Lang() language: string): Promise<Session | null> {
-		return this.sessionService.findCurrent(req, language)
+	findCurrent(@Context() { req }: GqlContext): Promise<Session | null> {
+		return this.sessionService.findCurrent(req)
 	}
 
 	@Authorization()

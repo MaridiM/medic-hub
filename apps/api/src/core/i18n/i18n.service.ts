@@ -3,28 +3,52 @@ import type { i18n as I18nInstance, TOptions } from 'i18next'
 import { i18n as core } from '@/core/config/i18n.config'
 import { Inject, Injectable, Scope } from '@nestjs/common'
 
-import { isObjectRecord, LeafKeys, NodeKeys, ObjOptions, Res, ScopedT, StrOptions, ValueAtPath } from './i18n'
 import { I18N_CORE } from './i18n.tokens'
+import {
+	ArrayLeafKeys,
+	isObjectRecord,
+	LeafKeys,
+	NodeKeys,
+	ObjOptions,
+	Res,
+	ScopedT,
+	StrOptions,
+	ValueAtPath,
+} from './types'
 
 @Injectable({ scope: Scope.DEFAULT })
 export class I18nService {
 	constructor(@Inject(I18N_CORE) private readonly coreI18n: I18nInstance) {}
 
-	// --- перегрузки t(...) ---
-	t<K extends LeafKeys<Res>>(key: K, opts?: StrOptions): string
-	t<K extends NodeKeys<Res>>(key: K, opts: ObjOptions): ValueAtPath<Res, K>
-	t<K extends NodeKeys<Res>>(key: K): ScopedT<K>
-	t(key: string, opts?: TOptions): unknown {
-		// единая «безопасная» сигнатура локальной обёртки
-		const coreT = this.coreI18n.t as unknown as (key: string, options?: TOptions) => unknown
+	/* ======================
+	   Перегрузки t(...)
+	   ====================== */
 
-		// 1) явно запросили объект
+	// Лист-строка → string
+	t<K extends LeafKeys<Res>>(key: K, opts?: StrOptions): string
+	// Лист-массив строк → string[]
+	t<K extends ArrayLeafKeys<Res>>(key: K, opts?: StrOptions): string[]
+	// Узел → объект
+	t<K extends NodeKeys<Res>>(key: K, opts: ObjOptions): ValueAtPath<Res, K>
+	// Узел → ScopedT
+	t<K extends NodeKeys<Res>>(key: K): ScopedT<K>
+
+	// Реализация
+	t(key: string, opts?: TOptions): unknown {
+		const coreT = this.coreI18n.t as unknown as (k: string, o?: TOptions) => unknown
+
 		if (opts && (opts as { returnObjects?: boolean }).returnObjects) {
 			return coreT(key, { ...opts, returnObjects: true })
 		}
 
-		// 2) ключ — узел → отдаём scope-функцию
+		// пробуем объектом
 		const probe = coreT(key, { returnObjects: true })
+
+		// ⬇️ ГЛАВНОЕ ИЗМЕНЕНИЕ: если массив — пересчитываем с opts
+		if (Array.isArray(probe)) {
+			return coreT(key, { ...(opts ?? {}), returnObjects: true }) as string[]
+		}
+
 		if (isObjectRecord(probe)) {
 			const makeScope = <B extends string>(base: B): ScopedT<B> => {
 				const scoped = (<C extends string>(child: C, childOpts?: TOptions) => {
@@ -35,9 +59,12 @@ export class I18nService {
 					}
 
 					const nextProbe = coreT(full, { returnObjects: true })
-					if (isObjectRecord(nextProbe)) {
-						return makeScope(full as `${B}.${C}`)
+
+					// ⬇️ тут тоже пересчитываем с childOpts
+					if (Array.isArray(nextProbe)) {
+						return coreT(full, { ...(childOpts ?? {}), returnObjects: true }) as string[]
 					}
+					if (isObjectRecord(nextProbe)) return makeScope(full as `${B}.${C}`)
 
 					return coreT(full, childOpts) as string
 				}) as ScopedT<B>
@@ -46,14 +73,15 @@ export class I18nService {
 			return makeScope(key)
 		}
 
-		// 3) лист — обычная строка
 		return coreT(key, opts) as string
 	}
 
-	// --- getFixedT(...) с теми же перегрузками ---
+	/* ======================
+	   getFixedT(...) — те же правила
+	   ====================== */
 	getFixedT(...args: Parameters<I18nInstance['getFixedT']>) {
 		const fixed = this.coreI18n.getFixedT(...args)
-		const coreT = fixed as unknown as (key: string, options?: TOptions) => unknown
+		const coreT = fixed as unknown as (k: string, o?: TOptions) => unknown
 
 		const makeScope = <B extends string>(base: B): ScopedT<B> => {
 			const scoped = (<C extends string>(child: C, childOpts?: TOptions) => {
@@ -64,6 +92,9 @@ export class I18nService {
 				}
 
 				const probe = coreT(full, { returnObjects: true })
+				if (Array.isArray(probe)) {
+					return coreT(full, { ...(childOpts ?? {}), returnObjects: true }) as string[]
+				}
 				if (isObjectRecord(probe)) return makeScope(full as `${B}.${C}`)
 
 				return coreT(full, childOpts) as string
@@ -71,15 +102,19 @@ export class I18nService {
 			return scoped
 		}
 
-		const typed = (<K extends string>(key: K, opts?: TOptions) => {
+		const typed = ((key: string, opts?: TOptions) => {
 			if (opts && (opts as { returnObjects?: boolean }).returnObjects) {
 				return coreT(key, { ...opts, returnObjects: true })
 			}
 			const probe = coreT(key, { returnObjects: true })
+			if (Array.isArray(probe)) {
+				return coreT(key, { ...(opts ?? {}), returnObjects: true }) as string[]
+			}
 			if (isObjectRecord(probe)) return makeScope(key)
 			return coreT(key, opts) as string
 		}) as {
 			<K extends LeafKeys<Res>>(key: K, opts?: StrOptions): string
+			<K extends ArrayLeafKeys<Res>>(key: K, opts?: StrOptions): string[]
 			<K extends NodeKeys<Res>>(key: K, opts: ObjOptions): ValueAtPath<Res, K>
 			<K extends NodeKeys<Res>>(key: K): ScopedT<K>
 		}
@@ -87,7 +122,89 @@ export class I18nService {
 		return typed
 	}
 
-	// --- прочее
+	/* ======= RAW ======= */
+	/** Сырой доступ (объект/массив/строка) как есть (аналог next-intl t.raw) */
+	raw<K extends string>(key: K): ValueAtPath<Res, K> {
+		const coreT = this.coreI18n.t as unknown as (k: string, o?: TOptions) => unknown
+		return coreT(key, { returnObjects: true }) as ValueAtPath<Res, K>
+	}
+
+	/* ======= RICH ======= */
+	/** Простой rich-рендер: теги вида <tag>…</tag> заменяются через handlers */
+	rich<K extends string>(key: K, handlers: Record<string, (chunks: string) => unknown>, opts?: StrOptions): unknown {
+		// строго типизируем t и НЕ делаем лишних утверждений типов
+		const coreT = this.coreI18n.t as unknown as (k: string, o?: TOptions) => unknown
+
+		// берём значение и сохраняем как unknown без cast: 'as unknown' не нужен
+		const val: unknown = coreT(key, opts)
+
+		let text = ''
+
+		switch (typeof val) {
+			case 'string':
+				text = val
+				break
+
+			case 'number':
+			case 'boolean':
+			case 'bigint':
+			case 'symbol':
+				text = String(val)
+				break
+
+			case 'undefined':
+				text = ''
+				break
+
+			case 'function':
+				text = val.toString()
+				break
+
+			case 'object': {
+				if (val === null) {
+					text = ''
+					break
+				}
+				if (Array.isArray(val)) {
+					// ожидаем string[], но на всякий случай сериализуем не-строки
+					const parts = (val as unknown[]).map(x => (typeof x === 'string' ? x : JSON.stringify(x)))
+					text = parts.join('')
+					break
+				}
+				// объект: избегаем implicit "[object Object]"
+				text = JSON.stringify(val)
+				break
+			}
+		}
+
+		// парсинг простых тегов <tag>…</tag>
+		const out: unknown[] = []
+		const re = /<([a-zA-Z][\w-]*)>(.*?)<\/\1>/g
+		let last = 0
+		let m: RegExpExecArray | null
+
+		while ((m = re.exec(text))) {
+			if (m.index > last) out.push(text.slice(last, m.index))
+			const tag = m[1]
+			const inner = m[2]
+			const h = handlers[tag]
+			out.push(h ? h(inner) : inner)
+			last = m.index + m[0].length
+		}
+		if (last < text.length) out.push(text.slice(last))
+
+		return out.length === 1 ? out[0] : out
+	}
+
+	/* ===== helpers: exists, dir ===== */
+	exists(key: string, opts?: TOptions) {
+		return this.coreI18n.exists(key, opts)
+	}
+	dir(lng?: string) {
+		return this.coreI18n.dir(lng)
+	}
+
+	/* ===== прочее ===== */
 	get language() {
 		return this.coreI18n.language
 	}
@@ -98,19 +215,25 @@ export class I18nService {
 		return options?.req?.language ?? this.coreI18n.language ?? 'en'
 	}
 
-	// --- статический доступ (утилиты)
+	/* ===== Статический доступ с теми же перегрузками ===== */
 	static t<K extends LeafKeys<Res>>(key: K, opts?: StrOptions): string
+	static t<K extends ArrayLeafKeys<Res>>(key: K, opts?: StrOptions): string[]
 	static t<K extends NodeKeys<Res>>(key: K, opts: ObjOptions): ValueAtPath<Res, K>
 	static t<K extends NodeKeys<Res>>(key: K): ScopedT<K>
 	static t(key: string, opts?: TOptions): unknown {
 		const inst = core as unknown as I18nInstance
-		const coreT = inst.t as unknown as (key: string, options?: TOptions) => unknown
+		const coreT = inst.t as unknown as (k: string, o?: TOptions) => unknown
 
 		if (opts && (opts as { returnObjects?: boolean }).returnObjects) {
 			return coreT(key, { ...opts, returnObjects: true })
 		}
 
 		const probe = coreT(key, { returnObjects: true })
+
+		if (Array.isArray(probe)) {
+			return coreT(key, { ...(opts ?? {}), returnObjects: true }) as string[]
+		}
+
 		if (isObjectRecord(probe)) {
 			const makeScope = <B extends string>(base: B): ScopedT<B> => {
 				const scoped = (<C extends string>(child: C, childOpts?: TOptions) => {
@@ -119,6 +242,9 @@ export class I18nService {
 						return coreT(full, { ...childOpts, returnObjects: true }) as ValueAtPath<Res, `${B}.${C}`>
 					}
 					const next = coreT(full, { returnObjects: true })
+					if (Array.isArray(next)) {
+						return coreT(full, { ...(childOpts ?? {}), returnObjects: true }) as string[]
+					}
 					if (isObjectRecord(next)) return makeScope(full as `${B}.${C}`)
 					return coreT(full, childOpts) as string
 				}) as ScopedT<B>
@@ -128,5 +254,30 @@ export class I18nService {
 		}
 
 		return coreT(key, opts) as string
+	}
+
+	static raw<K extends string>(key: K): ValueAtPath<Res, K> {
+		const inst = core as unknown as I18nInstance
+		const coreT = inst.t as unknown as (k: string, o?: TOptions) => unknown
+		return coreT(key, { returnObjects: true }) as ValueAtPath<Res, K>
+	}
+
+	static rich<K extends string>(
+		key: K,
+		handlers: Record<string, (chunks: string) => unknown>,
+		opts?: StrOptions,
+	): unknown {
+		const inst = core as unknown as I18nInstance
+		const service = new I18nService(inst)
+		return service.rich(key, handlers, opts)
+	}
+
+	static exists(key: string, opts?: TOptions) {
+		const inst = core as unknown as I18nInstance
+		return inst.exists(key, opts)
+	}
+	static dir(lng?: string) {
+		const inst = core as unknown as I18nInstance
+		return inst.dir(lng)
 	}
 }

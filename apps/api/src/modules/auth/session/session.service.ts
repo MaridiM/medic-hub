@@ -2,12 +2,13 @@ import { verify } from 'argon2'
 import { Request } from 'express'
 
 import { I18nService, PrismaService, RedisService } from '@/core'
-import { MailService } from '@/modules/lib'
 import { destroySession, getSessionMetadata, saveSession } from '@/shared/utils'
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { LoginInput, LoginResponse } from './inputs'
+import { VerificationService } from '../verification'
+
+import { LoginInput, LoginResponse } from './dtos'
 import { Session } from './models'
 
 @Injectable()
@@ -19,7 +20,7 @@ export class SessionService {
 		private readonly redis: RedisService,
 		private readonly i18n: I18nService,
 		private readonly config: ConfigService,
-		private readonly mailService: MailService,
+		private readonly verification: VerificationService,
 	) {
 		this.prefix = this.config.getOrThrow<string>('SESSION_FOLDER') ?? 'session:'
 	}
@@ -47,6 +48,15 @@ export class SessionService {
 			throw new NotFoundException(this.i18n.t('auth.invalid_password', { lng: language }))
 		}
 
+		if (!user.isEmailVerified) {
+			await this.verification.sendVerificationEmailToken(user, language)
+
+			throw new BadRequestException(
+				this.i18n.t('auth.account_not_verified') ||
+					'Account not verified. Please check your email for verification',
+			)
+		}
+
 		const metadata = getSessionMetadata(req, userAgent)
 		return saveSession(req, user, metadata)
 	}
@@ -66,8 +76,7 @@ export class SessionService {
 	 * @param language - language
 	 * @returns current session
 	 */
-	async findCurrent(req: Request, language: string) {
-		await this.mailService.sendVerificationEmailToken('maridim92@gmail.com', '123314', language)
+	async findCurrent(req: Request) {
 		const sessionId = req.session.id
 		const session: Session = await this.redis.getJSON(this.key(sessionId))
 		return {

@@ -1,6 +1,6 @@
 import 'module-alias/register'
 
-import { AccountModule, SessionModule } from '@/modules/auth'
+import { AccountModule, SessionModule, VerificationModule } from '@/modules/auth'
 import { MailModule } from '@/modules/lib'
 import { IS_DEV_ENV } from '@/shared/utils'
 import { ApolloDriver } from '@nestjs/apollo'
@@ -29,15 +29,15 @@ import { RedisModule } from './redis'
 		// Core
 		PrismaModule,
 		RedisModule,
+		I18nModule,
 
 		// Libs
 		MailModule,
 
 		// Modules
+		VerificationModule,
 		AccountModule,
 		SessionModule,
-
-		I18nModule,
 	],
 })
 export class CoreModule {}

@@ -1,9 +1,11 @@
-import { hash } from 'argon2'
+import { hash, verify } from 'argon2'
 
 import { I18nService, PrismaService } from '@/core'
-import { ConflictException, Injectable } from '@nestjs/common'
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 
-import { CreateAccountInput } from './inputs'
+import { VerificationService } from '../verification'
+
+import { ChangeEmailInput, ChangePasswordInput, CreateAccountInput } from './dtos'
 import { User } from './models'
 
 @Injectable()
@@ -11,7 +13,20 @@ export class AccountService {
 	constructor(
 		private readonly i18n: I18nService,
 		private readonly prisma: PrismaService,
+		private readonly verification: VerificationService,
 	) {}
+
+	/**
+	 * Get current user profile
+	 * @param id - user id
+	 * @returns - user
+	 */
+	async me(id: string) {
+		const user = await this.prisma.user.findUnique({
+			where: { id },
+		})
+		return user
+	}
 
 	/**
 	 * Create a new user
@@ -19,36 +34,57 @@ export class AccountService {
 	 * @param language - The language of the user
 	 * @returns The new user
 	 */
-	async create(data: CreateAccountInput, language: string): Promise<User> {
-		const user = await this.prisma.user.findUnique({ where: { email: data.email } })
-		if (user) {
+	async create(input: CreateAccountInput, language: string): Promise<User> {
+		const isEmailExists = await this.prisma.user.findUnique({ where: { email: input.email } })
+		if (isEmailExists) {
 			throw new ConflictException(this.i18n.t('auth.user_already_exists', { lng: language }))
 		}
 
-		const hashedPassword = await hash(data.password)
+		const hashedPassword = await hash(input.password)
 
-		return this.prisma.user.create({ data: { ...data, password: hashedPassword } })
+		const user = await this.prisma.user.create({ data: { ...input, password: hashedPassword } })
+		await this.verification.sendVerificationEmailToken(user, language)
+		return user
 	}
 
 	/**
-	 * Delete a user
-	 * @param language - The language of the user
-	 * @param id - The id of the user
-	 * @returns Boolean
+	 * Method for change email
+	 * @param user - current user
+	 * @param input - user input
+	 * @returns - boolean
 	 */
-	async delete(language: string, id: string): Promise<boolean> {
-		const user = await this.prisma.user.findUnique({ where: { id } })
-		if (user) {
-			throw new ConflictException(this.i18n.t('auth.user_already_exists', { lng: language }))
+	async changeEmail(user: User, input: ChangeEmailInput) {
+		const { email } = input
+
+		const isEmailExists = await this.prisma.user.findUnique({ where: { email } })
+		if (isEmailExists) {
+			throw new ConflictException(this.i18n.t('auth.user_already_exists') || 'This email is already in use')
 		}
 
-		console.log(
-			'DELETE USER',
-			id,
-			this.prisma.user.delete({ where: { id } }),
-			Boolean(this.prisma.user.delete({ where: { id } })),
-		)
+		await this.prisma.user.update({
+			where: { id: user.id },
+			data: { email },
+		})
+		return true
+	}
+	/**
+	 * Method for change password
+	 * @param user - current user
+	 * @param input - user input
+	 * @returns - boolean
+	 */
+	async changePassword(user: User, input: ChangePasswordInput) {
+		const { oldPassword, newPassword } = input
 
-		return Boolean(this.prisma.user.delete({ where: { id } }))
+		const isValidPassword = await verify(user.password, oldPassword)
+		if (!isValidPassword) {
+			throw new NotFoundException(this.i18n.t('auth.invalid_password') || 'Invalid password')
+		}
+
+		await this.prisma.user.update({
+			where: { id: user.id },
+			data: { password: await hash(newPassword) },
+		})
+		return true
 	}
 }

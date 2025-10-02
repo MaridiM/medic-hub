@@ -32,22 +32,31 @@ export type NodeKeys<T> = {
 	[K in DotPaths<T>]: ValueAtPath<T, K> extends object ? K : never
 }[DotPaths<T>]
 
-/** Только ключи-листья (строки) */
+/** Только ключи-листья-СТРОКИ */
 export type LeafKeys<T> = {
 	[K in DotPaths<T>]: ValueAtPath<T, K> extends string ? K : never
+}[DotPaths<T>]
+
+/** Только ключи-листья-МАССИВЫ СТРОК */
+export type ArrayLeafKeys<T> = {
+	[K in DotPaths<T>]: ValueAtPath<T, K> extends readonly string[] ? K : never
 }[DotPaths<T>]
 
 /** Значение узла */
 export type NodeValue<K extends string> = ValueAtPath<Res, K> extends object ? ValueAtPath<Res, K> : never
 
-/** Дочерние ключи-листья узла */
+/** Дочерние ключи-листья (строка ИЛИ массив строк) */
 export type ChildLeafKeys<K extends string> = {
-	[C in keyof NodeValue<K> & string]: NodeValue<K>[C] extends string ? C : never
+	[C in keyof NodeValue<K> & string]: NodeValue<K>[C] extends string | readonly string[] ? C : never
 }[keyof NodeValue<K> & string]
 
-/** Дочерние ключи-узлы узла */
+/** Дочерние ключи-узлы (массивы НЕ считаем узлами) */
 export type ChildNodeKeys<K extends string> = {
-	[C in keyof NodeValue<K> & string]: NodeValue<K>[C] extends object ? C : never
+	[C in keyof NodeValue<K> & string]: NodeValue<K>[C] extends readonly string[]
+		? never
+		: NodeValue<K>[C] extends object
+			? C
+			: never
 }[keyof NodeValue<K> & string]
 
 /** Опции */
@@ -60,9 +69,14 @@ export type ObjOptions = Omit<TOptions, 'returnObjects'> & {
 	returnObjects: true
 }
 
-/** Скоуп-t: подсказывает только детей узла */
+/** Скоуп-t: подсказывает только детей узла.
+ * Для листа-массива вернёт string[], для листа-строки — string.
+ */
 export type ScopedT<K extends string> = {
-	<C extends ChildLeafKeys<K>>(child: C, opts?: StrOptions): string
+	<C extends ChildLeafKeys<K>>(
+		child: C,
+		opts?: StrOptions,
+	): NodeValue<K>[C] extends readonly string[] ? string[] : string
 } & {
 	<C extends ChildNodeKeys<K>>(child: C, opts: ObjOptions): ValueAtPath<Res, `${K}.${C}`>
 } & {
@@ -75,13 +89,3 @@ export const isObjectRecord = (x: unknown): x is Record<string, unknown> =>
 
 /** Упрощённый тип функции t */
 export type CoreT = (key: string, opts?: TOptions) => unknown
-
-declare module 'i18next' {
-	interface CustomTypeOptions {
-		defaultNS: 'auth'
-		resources: (typeof languages)['en']
-		nsSeparator: '.' // <— хотим "ns.key"
-		keySeparator: '.' // <— точки внутри ключа не режем
-		returnNull: true // чтобы t() не возвращал null
-	}
-}

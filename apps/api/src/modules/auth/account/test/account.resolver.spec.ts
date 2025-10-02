@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 
 import { AccountResolver } from '../account.resolver'
 import { AccountService } from '../account.service'
-import { CreateAccountInput } from '../inputs'
+import { CreateAccountInput } from '../dtos'
 import { User } from '../models'
 
 describe('AccountResolver', () => {

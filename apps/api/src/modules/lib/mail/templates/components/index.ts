@@ -1,1 +1,1 @@
-// export * from './template-wrapper'
+export * from './template-wrapper'

@@ -2,6 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input ChangeEmailInput {
+  email: String!
+}
+
+input ChangePasswordInput {
+  newPassword: String!
+  oldPassword: String!
+}
+
 input CreateAccountInput {
   email: String!
   fullName: String!
@@ -38,14 +47,14 @@ type LoginResponse {
 }
 
 type Mutation {
+  changeEmail(data: ChangeEmailInput!): Boolean!
+  changePassword(data: ChangePasswordInput!): Boolean!
+
   """Clear session cookie"""
   clearSessionCookie: Boolean!
 
   """Create a new user"""
   createAccount(data: CreateAccountInput!): User!
-
-  """Delete a user"""
-  deleteAccount: Boolean!
 
   """Login to the system"""
   login(data: LoginInput!): LoginResponse!
@@ -55,12 +64,14 @@ type Mutation {
 
   """Remove a session by ID"""
   removeSession(id: String!): Boolean!
+  verificationEmail(data: VerificationInput!): VerificationResponse!
 }
 
 type Query {
   """Find current session"""
   findCurrentSession: Session!
   findSessionsByUser: [Session!]!
+  profile: User!
 }
 
 type Session {
@@ -77,12 +88,27 @@ type SessionMetadata {
 }
 
 type User {
+  avatar: String
+  bio: String
   createdAt: DateTime!
   email: String!
   firstName: String
   fullName: String!
   id: ID!
+  isEmailVerified: Boolean!
+  isOtpEnabled: Boolean!
+  isTotpEnabled: Boolean!
   lastName: String
+  otpSecret: String
   phone: String!
+  totpSecret: String
   updatedAt: DateTime!
+}
+
+input VerificationInput {
+  token: String!
+}
+
+type VerificationResponse {
+  user: User
 }
