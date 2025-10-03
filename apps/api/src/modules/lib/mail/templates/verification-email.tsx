@@ -11,19 +11,20 @@ import {
 import { TemplateWrapper } from "./components";
 
 export interface IProps {
-  token: string;
+  url: string;
   i18n?: I18nService;
-  language?: string;
+  lng?: string;
 }
 
 export function VerificationEmailTemplate({
-  token, i18n, language='en'
+  url, i18n, lng='en'
 }: IProps) {
-    const verifyUrl: string = PATHS.VERIFY_EMAIL(CLIENT_URL, token)
-    const t = i18n.t('mail.verification_email')
+    
+    const t = i18n.t('mail.verification_email', { lng })
+    const tTemp = i18n.t('mail.template', { lng })
 
     return (
-        <TemplateWrapper template='verification_email' language={language} i18n={i18n} >
+        <TemplateWrapper template='verification_email' lng={lng} i18n={i18n} >
             <Tailwind>
                 <Section className="font-sans tracking-wide font-normal text-[#222222] mb-2 px-2">
                     <Heading as="h2" className="text-center">{t('title') || "Verify your email address"}</Heading>
@@ -33,14 +34,14 @@ export function VerificationEmailTemplate({
 
                 <Button
                     className="box-border w-fit rounded-lg m-auto bg-[#2B7AFF] px-6 py-3 text-center font-normal font-sans traking-wider text-white"
-                    href={verifyUrl}
+                    href={url}
                 >
                     {t('cta') || "Verify email"}
                 </Button>
                 
                 <Section className="text-center px-2 mt-4">
-                    <Text className="text-center font-sans tracking-wide font-normal text-[#222222] m-0">{t('copyLinkHint') || "Or paste this link into your browser:"}</Text>
-                    <Link href={verifyUrl} className="font-sans tracking-[0px] text-center text-sm w-full" >{verifyUrl}</Link>
+                    <Text className="text-center font-sans tracking-wide font-normal text-[#222222] m-0">{tTemp('copyLinkHint') || "Or paste this link into your browser:"}</Text>
+                    <Link href={url} className="font-sans tracking-[0px] text-center text-sm w-full" >{url}</Link>
                 </Section>
             </Tailwind>
         </TemplateWrapper>

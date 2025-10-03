@@ -21,9 +21,15 @@ export class VerificationService {
 	 * @param req -request
 	 * @param input - input data
 	 * @param userAgent - user agent
+	 * @param lng - The language of the user
 	 * @returns - user
 	 */
-	async verificationEmail(req: Request, input: VerificationInput, userAgent: string): Promise<VerificationResponse> {
+	async verificationEmail(
+		req: Request,
+		input: VerificationInput,
+		userAgent: string,
+		lng: string,
+	): Promise<VerificationResponse> {
 		const { token } = input
 
 		const existingToken = await this.prisma.token.findUnique({
@@ -34,13 +40,13 @@ export class VerificationService {
 		})
 
 		if (!existingToken) {
-			throw new NotFoundException(this.i18n.t('verification.token_not_found') || 'Token not found')
+			throw new NotFoundException(this.i18n.t('auth.errors.token.not_found', { lng }) || 'Token not found')
 		}
 
 		const hasExpired = new Date(existingToken.expiresIn) < new Date()
 
 		if (hasExpired) {
-			throw new BadRequestException(this.i18n.t('verification.token_expired') || 'Token expired')
+			throw new BadRequestException(this.i18n.t('auth.errors.token.expired', { lng }) || 'Token expired')
 		}
 
 		const user = await this.prisma.user.update({

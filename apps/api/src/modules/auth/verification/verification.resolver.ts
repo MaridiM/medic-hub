@@ -1,3 +1,4 @@
+import { Lang } from '@/core'
 import { UserAgent } from '@/shared/decorators'
 import { GqlContext } from '@/shared/types'
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql'
@@ -14,7 +15,8 @@ export class VerificationResolver {
 		@Context() { req }: GqlContext,
 		@Args('data') input: VerificationInput,
 		@UserAgent() userAgent: string,
+		@Lang() language: string,
 	) {
-		return this.verificationService.verificationEmail(req, input, userAgent)
+		return this.verificationService.verificationEmail(req, input, userAgent, language)
 	}
 }

@@ -1,4 +1,5 @@
-import { COMPANY_NAME, I18nService } from '@/core'
+import { CLIENT_URL, COMPANY_NAME, I18nService, PATHS } from '@/core'
+import { ISessionMetadata } from '@/shared/types'
 import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -6,6 +7,7 @@ import { render } from '@react-email/components'
 
 import { BrevoService, SendgridService } from './libs'
 import { VerificationEmailTemplate } from './templates'
+import { ResetPasswordTemplate } from './templates/reset-password'
 
 @Injectable()
 export class MailService {
@@ -23,10 +25,23 @@ export class MailService {
 	 * @param token - generated token
 	 * @returns - sended info object
 	 */
-	async sendVerificationEmailToken(email: string, token: string, language: string) {
-		const html = await render(VerificationEmailTemplate({ token, i18n: this.i18n, language }))
-
+	async sendVerificationEmailToken(email: string, token: string, lng: string) {
+		const url: string = PATHS.VERIFY_EMAIL(CLIENT_URL, token)
+		const html = await render(VerificationEmailTemplate({ url, i18n: this.i18n, lng }))
 		return this.sendMail(email, this.i18n.t('mail.verification_email.subject'), html)
+	}
+
+	/**
+	 * Send Verification email
+	 * @param email - user email to
+	 * @param token - generated token
+	 * @param metadata - user browser info, ip, location, device
+	 * @returns - sended info object
+	 */
+	async sendPasswordResetToken(email: string, token: string, metadata: ISessionMetadata, lng: string) {
+		const url: string = PATHS.RESET_PASSWORD(CLIENT_URL, token)
+		const html = await render(ResetPasswordTemplate({ url, i18n: this.i18n, metadata, lng }))
+		return this.sendMail(email, this.i18n.t('mail.reset_password.subject'), html)
 	}
 
 	/**
@@ -51,6 +66,8 @@ export class MailService {
 			subject,
 			html,
 		})
+
+		console.log('sentResponse', sentResponse)
 
 		return sentResponse
 	}

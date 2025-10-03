@@ -1,34 +1,37 @@
-import { APP_NAME, COMPANY_NAME, type I18nService, SUPPORT_EMAIL } from "@/core";
-
 import {
   Body,
+  Button,
+  Column,
+  Container,
   Head,
+  Heading,
+  Hr,
   Html,
   Img,
   Link,
   Preview,
+  Row,
   Section,
   Tailwind,
   Text
 } from "@react-email/components";
-import { PropsWithChildren } from "react";
 
-type TTemplateName = 'verification_email' | 'reset_password'
-
-export interface IProps {
-  template: TTemplateName;
-  i18n?: I18nService;
-  lng?: string;
+export interface verificationEmailProps {
+  url: string;
+  companyName?: string;
+  supportEmail?: string;
 }
 
-export function TemplateWrapper({ template, children, i18n, lng='en' }: PropsWithChildren<IProps>) {
-    const currentYear: number = new Date().getFullYear()
-    const t = i18n.t(`mail.${template}`, { lng })
-    const tTemp = i18n.t(`mail.template`, { lng })
+const APP_NAME = 'DoctorLab'
+const COMPANY_NAME = 'MedicHub Inc.'
+const SUPPORT_EMAIL = "support@example.com"
 
+export default function verificationEmail({
+  url = "http://localhost:3000/auth/verify?token=exampletoken",
+}: verificationEmailProps) {
     return (
-        <Html lang={lng}>
-            <Preview>{t('preview') || "Confirm your email to finish signing up."}</Preview>
+       <Html lang='en'>
+            <Preview>{"Confirm your email to finish signing up."}</Preview>
             <Tailwind>
                 <Head />
                 <Body className="bg-[#efefef] max-w-[600px] m-auto py-3 px-3">
@@ -47,26 +50,42 @@ export function TemplateWrapper({ template, children, i18n, lng='en' }: PropsWit
                             </div>
                         </Section>
 
-                        {children}
+                        <Section className="font-sans tracking-wide font-normal text-[#222222]">
+                            <Heading as="h2" className="text-center">{"Verify your email address"}</Heading>
+
+                             <Text className="text-center">{`We received a request to reset the password for your ${APP_NAME} account. If it was you, click the button below to choose a new password.`}</Text>
+                        </Section>
+
+                        <Button
+                            className="box-border w-fit rounded-lg m-auto bg-[#2B7AFF] px-6 py-3 text-center font-normal font-sans traking-wider text-white"
+                            href={url}
+                        >
+                            {"Create new password"}
+                        </Button>
+                
+                        <Section className="text-center px-2 mt-4">
+                            <Text className="text-center font-sans tracking-wide font-normal text-[#222222] m-0">{"Or paste this link into your browser:"}</Text>
+                            <Link href={url} className="font-sans tracking-[0px] text-center text-sm w-full" >{url}</Link>
+                        </Section>
                     </div>
 
                     <Section className="px-1 pt-4">
                         <Text className="m-0 text-xs text-[#656565]">
-                         {tTemp('signature')[0] || "Regards, the"} <span className="font-semibold text-[#143394]">{tTemp('signature', {company: COMPANY_NAME})[1] || `${COMPANY_NAME} team`}</span>
+                         {"Regards, the"} <span className="font-semibold text-[#143394]">{`${COMPANY_NAME} team`}</span>
                         </Text>
                         <Text className="mt-2 text-xs text-[#656565]">
-                            {tTemp('supportNote') || "This is an automated message; please do not reply. Contact support: "}
+                            {"This is an automated message; please do not reply. Contact support: "}
                         <Link href={`mailto:${SUPPORT_EMAIL}`} className="text-[#656565] underline">
                             {SUPPORT_EMAIL}
                         </Link>
                         </Text>
                         <Text className="font-sans leading-[14px] font-normal text-[#656565] text-xs mb-2">
-                            {t('legalNote', { app: APP_NAME}) || `You're receiving this email because you created a ${APP_NAME} account. If you didn’t request this, you can safely ignore this email.`}
+                            {`You're receiving this email because you created a ${APP_NAME} account. If you didn’t request this, you can safely ignore this email.`}
                         </Text>
                     </Section>
 
                     <Section className="text-center px-2">
-                        <Text className="font-sans tracking-wide font-normal text-[#656565] text-xs mb-4">{tTemp('copyright', {year: currentYear, company: APP_NAME }) || `© ${currentYear} ${APP_NAME}. All rights reserved.`}</Text>
+                        <Text className="font-sans tracking-wide font-normal text-[#656565] text-xs mb-4">{`© ${2025} ${APP_NAME}. All rights reserved.`}</Text>
                         {/*[if mso]><div style="font-family:Segoe UI, Arial, sans-serif; font-size:20px; font-weight:700; color:#143394">{companyName}</div><![endif]*/}
                         <div className="size-12 flex justify-center items-center  m-auto" role="img" aria-label={COMPANY_NAME}>
                             <Img

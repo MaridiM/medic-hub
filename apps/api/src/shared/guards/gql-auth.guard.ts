@@ -15,7 +15,8 @@ export class GqlAuthGuard implements CanActivate {
 		const request = gqlContext.req
 		const lang = request.language || DEFAULT_LANGUAGE
 
-		const user_not_authorized = this.i18n.t('common.user_not_authorized', { lng: lang }) as string
+		const user_not_authorized: string =
+			this.i18n.t('common.errors.auth.user_not_authorized', { lng: lang }) || 'User not authorized'
 
 		if (typeof request.session.userId === 'undefined') {
 			throw new UnauthorizedException(user_not_authorized)

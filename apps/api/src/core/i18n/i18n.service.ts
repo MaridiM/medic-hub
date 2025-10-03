@@ -31,7 +31,7 @@ export class I18nService {
 	// Узел → объект
 	t<K extends NodeKeys<Res>>(key: K, opts: ObjOptions): ValueAtPath<Res, K>
 	// Узел → ScopedT
-	t<K extends NodeKeys<Res>>(key: K): ScopedT<K>
+	t<K extends NodeKeys<Res>>(key: K, opts?: StrOptions): ScopedT<K>
 
 	// Реализация
 	t(key: string, opts?: TOptions): unknown {
@@ -41,10 +41,8 @@ export class I18nService {
 			return coreT(key, { ...opts, returnObjects: true })
 		}
 
-		// пробуем объектом
 		const probe = coreT(key, { returnObjects: true })
 
-		// ⬇️ ГЛАВНОЕ ИЗМЕНЕНИЕ: если массив — пересчитываем с opts
 		if (Array.isArray(probe)) {
 			return coreT(key, { ...(opts ?? {}), returnObjects: true }) as string[]
 		}
@@ -59,8 +57,6 @@ export class I18nService {
 					}
 
 					const nextProbe = coreT(full, { returnObjects: true })
-
-					// ⬇️ тут тоже пересчитываем с childOpts
 					if (Array.isArray(nextProbe)) {
 						return coreT(full, { ...(childOpts ?? {}), returnObjects: true }) as string[]
 					}
@@ -86,17 +82,14 @@ export class I18nService {
 		const makeScope = <B extends string>(base: B): ScopedT<B> => {
 			const scoped = (<C extends string>(child: C, childOpts?: TOptions) => {
 				const full = `${base}.${child}`
-
 				if (childOpts && (childOpts as { returnObjects?: boolean }).returnObjects) {
 					return coreT(full, { ...childOpts, returnObjects: true }) as ValueAtPath<Res, `${B}.${C}`>
 				}
-
 				const probe = coreT(full, { returnObjects: true })
 				if (Array.isArray(probe)) {
 					return coreT(full, { ...(childOpts ?? {}), returnObjects: true }) as string[]
 				}
 				if (isObjectRecord(probe)) return makeScope(full as `${B}.${C}`)
-
 				return coreT(full, childOpts) as string
 			}) as ScopedT<B>
 			return scoped
@@ -116,7 +109,7 @@ export class I18nService {
 			<K extends LeafKeys<Res>>(key: K, opts?: StrOptions): string
 			<K extends ArrayLeafKeys<Res>>(key: K, opts?: StrOptions): string[]
 			<K extends NodeKeys<Res>>(key: K, opts: ObjOptions): ValueAtPath<Res, K>
-			<K extends NodeKeys<Res>>(key: K): ScopedT<K>
+			<K extends NodeKeys<Res>>(key: K, opts?: StrOptions): ScopedT<K> // <-- добавили
 		}
 
 		return typed

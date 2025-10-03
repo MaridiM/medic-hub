@@ -24,9 +24,10 @@ export class SendgridService {
 	 * @param email - email address to
 	 * @param subject - subject for email
 	 * @param html - React, html email template
+	 * @param lng - current language of user
 	 * @returns - send mail
 	 */
-	async sendMail(email: string, subject: string, html: string, language?: string): Promise<boolean> {
+	async sendMail(email: string, subject: string, html: string, lng?: string): Promise<boolean> {
 		try {
 			await this.sgMail.send({
 				to: email,
@@ -38,8 +39,7 @@ export class SendgridService {
 		} catch (error) {
 			console.log('[SENDGRID_ERROR] - ', error)
 			throw new BadRequestException(
-				this.i18n.t('mail.errors.message_send_failed', { lng: language ?? 'en' }) ||
-					'Failed to send the message.',
+				this.i18n.t('mail.errors.message_send_failed', { lng }) || 'Failed to send the message.',
 			)
 		}
 	}

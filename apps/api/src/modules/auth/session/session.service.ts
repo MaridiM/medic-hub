@@ -40,19 +40,23 @@ export class SessionService {
 	async login(req: Request, userAgent: string, data: LoginInput, language: string): Promise<LoginResponse> {
 		const user = await this.prisma.user.findUnique({ where: { email: data.email } })
 		if (!user) {
-			throw new NotFoundException(this.i18n.t('auth.user_not_found', { lng: language }))
+			throw new NotFoundException(
+				this.i18n.t('auth.errors.user.not_found', { lng: language }) || 'User not found',
+			)
 		}
 
 		const isPasswordValid = await verify(user.password, data.password)
 		if (!isPasswordValid) {
-			throw new NotFoundException(this.i18n.t('auth.invalid_password', { lng: language }))
+			throw new NotFoundException(
+				this.i18n.t('auth.errors.password.invalid', { lng: language }) || 'Invalid password',
+			)
 		}
 
 		if (!user.isEmailVerified) {
 			await this.verification.sendVerificationEmailToken(user, language)
 
 			throw new BadRequestException(
-				this.i18n.t('auth.account_not_verified') ||
+				this.i18n.t('auth.errors.account.not_verified') ||
 					'Account not verified. Please check your email for verification',
 			)
 		}
@@ -94,7 +98,7 @@ export class SessionService {
 		const userId = req.session.userId
 
 		if (!userId) {
-			throw new NotFoundException(this.i18n.t('auth.user_not_found') || 'User not found')
+			throw new NotFoundException(this.i18n.t('auth.errors.user.not_found') || 'User not found')
 		}
 
 		// 1) Собираем ключи через SCAN (без блокировки Redis)
@@ -150,7 +154,10 @@ export class SessionService {
 	 */
 	async remove(req: Request, id: string, language: string) {
 		if (req.session.id === id) {
-			throw new ConflictException(this.i18n.t('auth.cannot_delete_session', { lng: language }))
+			throw new ConflictException(
+				this.i18n.t('auth.errors.session.cannot_delete_current', { lng: language }) ||
+					'You can’t delete the current session',
+			)
 		}
 		await this.redis.del(this.key(id))
 		return true

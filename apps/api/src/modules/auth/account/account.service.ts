@@ -31,19 +31,19 @@ export class AccountService {
 	/**
 	 * Create a new user
 	 * @param data - The data for the new user
-	 * @param language - The language of the user
+	 * @param lng - The language of the user
 	 * @returns The new user
 	 */
-	async create(input: CreateAccountInput, language: string): Promise<User> {
+	async create(input: CreateAccountInput, lng: string): Promise<User> {
 		const isEmailExists = await this.prisma.user.findUnique({ where: { email: input.email } })
 		if (isEmailExists) {
-			throw new ConflictException(this.i18n.t('auth.user_already_exists', { lng: language }))
+			throw new ConflictException(this.i18n.t('auth.errors.user.already_exists', { lng }))
 		}
 
 		const hashedPassword = await hash(input.password)
 
 		const user = await this.prisma.user.create({ data: { ...input, password: hashedPassword } })
-		await this.verification.sendVerificationEmailToken(user, language)
+		await this.verification.sendVerificationEmailToken(user, lng)
 		return user
 	}
 
@@ -51,14 +51,17 @@ export class AccountService {
 	 * Method for change email
 	 * @param user - current user
 	 * @param input - user input
+	 * @param lng - The language of the user
 	 * @returns - boolean
 	 */
-	async changeEmail(user: User, input: ChangeEmailInput) {
+	async changeEmail(user: User, input: ChangeEmailInput, lng: string) {
 		const { email } = input
 
 		const isEmailExists = await this.prisma.user.findUnique({ where: { email } })
 		if (isEmailExists) {
-			throw new ConflictException(this.i18n.t('auth.user_already_exists') || 'This email is already in use')
+			throw new ConflictException(
+				this.i18n.t('auth.errors.user.already_exists', { lng }) || 'This email is already in use',
+			)
 		}
 
 		await this.prisma.user.update({
@@ -69,16 +72,16 @@ export class AccountService {
 	}
 	/**
 	 * Method for change password
-	 * @param user - current user
 	 * @param input - user input
+	 * @param lng - The language of the user
 	 * @returns - boolean
 	 */
-	async changePassword(user: User, input: ChangePasswordInput) {
+	async changePassword(user: User, input: ChangePasswordInput, lng: string) {
 		const { oldPassword, newPassword } = input
 
 		const isValidPassword = await verify(user.password, oldPassword)
 		if (!isValidPassword) {
-			throw new NotFoundException(this.i18n.t('auth.invalid_password') || 'Invalid password')
+			throw new NotFoundException(this.i18n.t('auth.errors.password.invalid', { lng }) || 'Invalid password')
 		}
 
 		await this.prisma.user.update({

@@ -10,7 +10,8 @@ export class RawBodyMiddleware implements NestMiddleware {
 	use(req: Request, res: Response, next: NextFunction) {
 		const lang = req.language || DEFAULT_LANGUAGE
 		if (!req.readable) {
-			const message = this.i18n.t('common.invalid_data', { lng: lang }) as string
+			const message =
+				this.i18n.t('common.errors.request.invalid_data', { lng: lang }) || 'Invalid data from request'
 			return next(new BadRequestException(message))
 		}
 
@@ -19,8 +20,10 @@ export class RawBodyMiddleware implements NestMiddleware {
 				req.body = rawBody
 				next()
 			})
-			.catch(error => {
-				const message = this.i18n.t('common.error_getting_raw_body', { lng: lang }) as string
+			.catch(() => {
+				const message =
+					this.i18n.t('common.errors.request.error_getting_raw_body', { lng: lang }) ||
+					'Error getting raw body'
 				return next(new InternalServerErrorException(message))
 			})
 	}

@@ -1,15 +1,42 @@
 {
+	"template": {
+		"copyLinkHint": "Or paste this link into your browser:",
+		"signature": ["Regards, the ", "{{company}} team"],
+		"supportNote": "This is an automated message; please do not reply. Contact support: ",
+		"copyright": "© {{year}} {{company}}. All rights reserved."
+	},
+
 	"verification_email": {
 		"subject": "Email Verification",
 		"preview": "Confirm your email to finish signing up.",
 		"title": "Verify your email address",
 		"intro": "Please confirm that you’d like to use this email address for your {{app}} account. Once confirmed, you’ll be able to start using {{app}}.",
 		"cta": "Verify email",
-		"copyLinkHint": "Or paste this link into your browser:",
-		"signature": ["Regards, the ", "{{company}} team"],
-		"supportNote": "This is an automated message; please do not reply. Contact support: ",
-		"legalNote": "You're receiving this email because you created a {{app}} account. If you didn’t request this, you can safely ignore this email.",
-		"copyright": "© {{year}} {{company}}. All rights reserved."
+		"legalNote": "You're receiving this email because you created a {{app}} account. If you didn’t request this, you can safely ignore this email."
+	},
+	"reset_password": {
+		"subject": "Reset your password",
+		"preview": "Set a new password to regain access.",
+		"title": "Reset your password",
+		"intro": "We received a request to reset the password for your {{app}} account. If this was you, click the button below to choose a new password.",
+		"cta": "Create new password",
+		"legalNote": "If you didn't request a password reset, you can safely ignore this email; your password will remain unchanged.",
+		"request_info": {
+			"title": "Request details: ",
+			"location": "🌍 Location: {{country}}, {{city}}",
+			"os": "📱 Operating system: {{os}}",
+			"browser": "🌐 Browser: {{browser}}",
+			"ip": "💻 IP address: {{ip}}",
+			"note": "If you didn’t initiate this request, please ignore this message."
+		}
+	},
+	"password_changed": {
+		"subject": "Your password was changed",
+		"preview": "The password for your {{app}} account has been updated.",
+		"title": "Password changed successfully",
+		"intro": "This is to let you know that the password for your {{app}} account was changed successfully.",
+		"securityNote": "If you didn’t make this change, please reset your password immediately and contact support.",
+		"cta": "Go to sign in"
 	},
 	"errors": {
 		"api_key_missing": "API key is missing.",

@@ -23,13 +23,13 @@ export class AccountResolver {
 
 	@Authorization()
 	@Mutation(() => Boolean, { name: 'changeEmail' })
-	async changeEmail(@Authorized() user: User, @Args('data') input: ChangeEmailInput) {
-		return this.accountService.changeEmail(user, input)
+	async changeEmail(@Authorized() user: User, @Args('data') input: ChangeEmailInput, @Lang() language: string) {
+		return this.accountService.changeEmail(user, input, language)
 	}
 
 	@Authorization()
 	@Mutation(() => Boolean, { name: 'changePassword' })
-	async changePassword(@Authorized() user: User, @Args('data') input: ChangePasswordInput) {
-		return this.accountService.changePassword(user, input)
+	async changePassword(@Authorized() user: User, @Args('data') input: ChangePasswordInput, @Lang() language: string) {
+		return this.accountService.changePassword(user, input, language)
 	}
 }

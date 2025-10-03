@@ -24,7 +24,7 @@ export function saveSession(req: Request, user: User, metadata: ISessionMetadata
 		req.session.save(err => {
 			if (err) {
 				console.log('err', err)
-				const message = i18n.t('common.error_saving_session', { lng: lang })
+				const message = i18n.t('common.errors.session.save_error', { lng: lang }) || 'Error saving session'
 				return reject(new InternalServerErrorException(message))
 			}
 
@@ -44,7 +44,8 @@ export function destroySession(req: Request, configService: ConfigService) {
 	return new Promise((resolve, reject) => {
 		req.session.destroy(err => {
 			if (err) {
-				const message = i18n.t('common.error_saving_session', { lng: lang })
+				const message =
+					i18n.t('common.errors.session.destroy_error', { lng: lang }) || 'Error destroying session'
 				return reject(new InternalServerErrorException(message))
 			}
 

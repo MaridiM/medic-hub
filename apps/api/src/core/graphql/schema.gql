@@ -62,9 +62,20 @@ type Mutation {
   """Logout from the system"""
   logout: Boolean!
 
+  """Recovery password - change """
+  newPassword(data: NewPasswordInput!): Boolean!
+
   """Remove a session by ID"""
   removeSession(id: String!): Boolean!
+
+  """Recovery password - reset"""
+  resetPassword(data: ResetPasswordInput!): Boolean!
   verificationEmail(data: VerificationInput!): VerificationResponse!
+}
+
+input NewPasswordInput {
+  password: String!
+  token: String!
 }
 
 type Query {
@@ -72,6 +83,10 @@ type Query {
   findCurrentSession: Session!
   findSessionsByUser: [Session!]!
   profile: User!
+}
+
+input ResetPasswordInput {
+  email: String!
 }
 
 type Session {
