@@ -199,7 +199,7 @@ apps/api
   - Резолвер использует `@UserAgent`, `@Lang`, `@Authorization`, возвращает типизированные GraphQL-ответы (`LoginResponse`, `Session`).
   - Пример — `src/modules/auth/session/session.service.ts:39-76`:
     ```ts
-    async login(req: Request, userAgent: string, data: LoginInput, language: string): Promise<LoginResponse> {
+    async login(req: Request, userAgent: string, data: LoginInput, lng: Language): Promise<LoginResponse> {
         const user = await this.prisma.user.findUnique({ where: { email: data.email } })
         if (!user) {
             throw new NotFoundException(this.i18n.t('auth.user_not_found', { lng: language }))
@@ -218,7 +218,7 @@ apps/api
         return destroySession(req, this.config)
     }
 
-    async findCurrent(req: Request, language: string) {
+    async findCurrent(req: Request, lng: Language) {
         await this.mailService.sendVerificationEmailToken('maridim92@gmail.com', '123314', language)
         const sessionId = req.session.id
         const session: Session = await this.redis.getJSON(this.key(sessionId))
@@ -232,7 +232,7 @@ apps/api
   - Resolver `deleteAccount` требует авторизации и берёт `id` из `req.user`.
   - Пример — `src/modules/auth/account/account.service.ts:22-52`:
     ```ts
-    async create(data: CreateAccountInput, language: string): Promise<User> {
+    async create(data: CreateAccountInput, lng: Language): Promise<User> {
         const user = await this.prisma.user.findUnique({ where: { email: data.email } })
         if (user) {
             throw new ConflictException(this.i18n.t('auth.user_already_exists', { lng: language }))
@@ -242,7 +242,7 @@ apps/api
         return this.prisma.user.create({ data: { ...data, password: hashedPassword } })
     }
 
-    async delete(language: string, id: string): Promise<boolean> {
+    async delete(lng: Language, id: string): Promise<boolean> {
         const user = await this.prisma.user.findUnique({ where: { id } })
         if (user) {
             throw new ConflictException(this.i18n.t('auth.user_already_exists', { lng: language }))
@@ -257,7 +257,7 @@ apps/api
   - Назначение: централизованная отправка писем, выбор провайдера, генерация HTML через React Email, использование i18n.
   - Пример — `src/modules/lib/mail/mail.service.ts:25-56`:
     ```ts
-    async sendVerificationEmailToken(email: string, token: string, language: string) {
+    async sendVerificationEmailToken(email: string, token: string, lng: Language) {
         const content = tObj('mail.verification_email', {
             lng: language ?? DEFAULT_LANGUAGE,
             hours: 24,

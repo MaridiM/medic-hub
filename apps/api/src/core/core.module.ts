@@ -1,7 +1,7 @@
 import 'module-alias/register'
 
-import { AccountModule, RecoveryModule, SessionModule, VerificationModule } from '@/modules/auth'
-import { MailModule } from '@/modules/lib'
+import { AccountModule, RecoveryModule, SessionModule, TotpModule, VerificationModule } from '@/modules/auth'
+import { MailModule } from '@/modules/libs'
 import { IS_DEV_ENV } from '@/shared/utils'
 import { ApolloDriver } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
@@ -38,6 +38,7 @@ import { RedisModule } from './redis'
 		AccountModule,
 		RecoveryModule,
 		SessionModule,
+		TotpModule,
 		VerificationModule,
 	],
 })

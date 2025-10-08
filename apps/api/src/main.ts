@@ -1,7 +1,7 @@
 import cookieParser from 'cookie-parser'
 import * as dotenv from 'dotenv'
-import * as dotenvExpand from 'dotenv-expand'
-import { json } from 'express'
+import dotenvExpand from 'dotenv-expand'
+import { json, type NextFunction, type Request } from 'express'
 import { graphqlUploadExpress } from 'graphql-upload-minimal'
 import i18nextMiddleware from 'i18next-http-middleware'
 
@@ -9,8 +9,10 @@ import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 
-import { CoreModule, i18n, initI18n, RedisService, sessionConfig } from './core'
-import { DEFAULT_LANGUAGE } from './core'
+import { i18n, initI18n, sessionConfig } from './core/config'
+import { CoreModule } from './core/core.module'
+import { DEFAULT_LANGUAGE } from './core/i18n'
+import { RedisService } from './core/redis'
 
 const myEnv = dotenv.config({ path: 'backend/.env' })
 dotenvExpand.expand(myEnv)
@@ -23,34 +25,43 @@ async function bootstrap() {
 	const config = app.get(ConfigService)
 	const redis = app.get(RedisService)
 
-	// ✅ Middleware i18n (инициализирует req.i18n и req.language)
+	// ✅ i18n middleware (добавляет req.i18n, req.language)
 	app.use(i18nextMiddleware.handle(i18n))
 
-	// ✅ JSON и язык через Accept-Language, если вдруг не найден
+	// ✅ JSON + выставляем язык, если вдруг отсутствует
 	app.use(json({ limit: '1mb', type: 'application/json' }))
-	app.use((req, res, next) => {
+	app.use((req: Request, _res, next: NextFunction) => {
 		req.language =
-			req.language || req.i18n?.language || req.headers['accept-language']?.split(',')[0] || DEFAULT_LANGUAGE
+			req.language ||
+			req.i18n?.language ||
+			String(req.headers['accept-language'] || '').split(',')[0] ||
+			DEFAULT_LANGUAGE
 		next()
 	})
 
-	// ✅ Cookie, file upload и глобальные пайпы
-	app.use(cookieParser(config.getOrThrow<string>('COOKIES_SECRET')))
-	app.use(config.getOrThrow<string>('GRAPHQL_PREFIX'), graphqlUploadExpress())
+	// ✅ Cookie / file upload / global pipes
+	app.use(cookieParser(config.get<string>('COOKIES_SECRET')))
+	app.use(config.get<string>('GRAPHQL_PREFIX') || '/graphql', graphqlUploadExpress())
 	app.useGlobalPipes(new ValidationPipe({ transform: true }))
 
 	// ✅ Сессии через Redis
 	app.use(sessionConfig(config, redis))
 
 	// ✅ CORS
-	const allowedOrigins = [config.getOrThrow<string>('CLIENT_URL'), 'http://localhost:3000']
+	const clientUrl = config.get<string>('CLIENT_URL') || 'http://localhost:3000'
 	app.enableCors({
-		origin: allowedOrigins,
+		origin: [clientUrl, 'http://localhost:3000'],
 		credentials: true,
 		exposedHeaders: ['set-cookie'],
 	})
 
-	// ✅ Запуск
-	await app.listen(config.getOrThrow<number>('SERVER_PORT') ?? 8000)
+	// ✅ Старт
+	const port = Number(config.get<string>('SERVER_PORT')) || 8000
+	await app.listen(port)
 }
-bootstrap()
+
+bootstrap().catch(err => {
+	// Можно заменить на ваш логгер
+	console.error('Nest bootstrap failed:', err)
+	process.exit(1)
+})

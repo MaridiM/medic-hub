@@ -1,6 +1,6 @@
 import { randomInt, randomUUID } from 'node:crypto'
 
-import { PrismaService } from '@/core'
+import { PrismaService } from '@/core/prisma'
 import { ETokenType, Token, type User } from '@prisma/__generated__'
 
 const TOKEN_TTL_MS = 5 * 60 * 1000 // 5 минут

@@ -2,6 +2,17 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type BackupCodesStatus {
+  """Remaining unused codes"""
+  remaining: Int!
+
+  """Total backup codes"""
+  total: Int!
+
+  """Used backup codes"""
+  used: Int!
+}
+
 input ChangeEmailInput {
   email: String!
 }
@@ -29,6 +40,22 @@ type Device {
   type: String!
 }
 
+input DisableTotpInput {
+  """Current TOTP code"""
+  code: String!
+
+  """User password for verification"""
+  password: String!
+}
+
+input EnableTotpInput {
+  """6-digit TOTP code"""
+  code: String!
+
+  """TOTP secret from generation step"""
+  secret: String!
+}
+
 type Location {
   city: String!
   country: String!
@@ -47,30 +74,69 @@ type LoginResponse {
 }
 
 type Mutation {
+  """
+  Change the current user email. Normalizes email, rejects same email, resets verification and sends a new verification token.
+  """
   changeEmail(data: ChangeEmailInput!): Boolean!
+
+  """
+  Change the current user password. Verifies old password, rejects identical new password, hashes and updates on success.
+  """
   changePassword(data: ChangePasswordInput!): Boolean!
 
-  """Clear session cookie"""
+  """Clear the session cookie from the response."""
   clearSessionCookie: Boolean!
 
-  """Create a new user"""
+  """
+  Create a new user account. Normalizes email, hashes password, and sends a verification email token.
+  """
   createAccount(data: CreateAccountInput!): User!
 
-  """Login to the system"""
+  """Disable TOTP two-factor authentication"""
+  disableTotp(data: DisableTotpInput!): Boolean!
+
+  """Enable TOTP two-factor authentication"""
+  enableTotp(data: EnableTotpInput!): TotpEnabled!
+
+  """
+  Authenticate the user and create a session (cookie-based). Returns session metadata.
+  """
   login(data: LoginInput!): LoginResponse!
 
-  """Logout from the system"""
+  """Destroy the current session (logout)."""
   logout: Boolean!
 
-  """Recovery password - change """
-  newPassword(data: NewPasswordInput!): Boolean!
+  """
+  Complete password reset: validate token, set a new password, and consume the token.
+  """
+  newPassword(
+    """Payload with the reset token and the new password."""
+    data: NewPasswordInput!
+  ): Boolean!
 
-  """Remove a session by ID"""
+  """Regenerate backup codes"""
+  regenerateTotpBackupCodes(password: String!): TotpEnabled!
+
+  """
+  Remove a specific session by id (fails if the id belongs to the current session).
+  """
   removeSession(id: String!): Boolean!
 
-  """Recovery password - reset"""
-  resetPassword(data: ResetPasswordInput!): Boolean!
+  """
+  Initiate password reset: generate a one-time token and send a reset link to the user’s email.
+  """
+  resetPassword(
+    """Payload with the email address that requests a password reset."""
+    data: ResetPasswordInput!
+  ): Boolean!
+
+  """
+  Send a verification email with a one-time token and return delivery/meta info.
+  """
   verificationEmail(data: VerificationInput!): VerificationResponse!
+
+  """Verify TOTP code"""
+  verifyTotp(data: VerifyTotpInput!): Boolean!
 }
 
 input NewPasswordInput {
@@ -79,10 +145,24 @@ input NewPasswordInput {
 }
 
 type Query {
-  """Find current session"""
+  """Get the current session by the request session id."""
   findCurrentSession: Session!
+
+  """
+  List all active sessions for the current user (the current session is excluded).
+  """
   findSessionsByUser: [Session!]!
+
+  """Generate TOTP secret and QR code"""
+  generateTotpSecret: Totp!
+
+  """
+  Get the currently authenticated user profile. Requires auth. Returns a safe projection (no password).
+  """
   profile: User!
+
+  """Get backup codes status"""
+  totpBackupCodesStatus: BackupCodesStatus!
 }
 
 input ResetPasswordInput {
@@ -102,6 +182,31 @@ type SessionMetadata {
   location: Location!
 }
 
+type Totp {
+  """Account name (user email)"""
+  accountName: String!
+
+  """Issuer name (app name)"""
+  issuer: String!
+
+  """Manual entry key (same as in QR code)"""
+  manualEntryKey: String!
+
+  """QR code as data URL"""
+  qrCodeUrl: String!
+}
+
+type TotpEnabled {
+  """Backup recovery codes (store securely!)"""
+  backupCodes: [String!]!
+
+  """Warning message about backup codes"""
+  message: String!
+
+  """Success status"""
+  success: Boolean!
+}
+
 type User {
   avatar: String
   bio: String
@@ -115,7 +220,7 @@ type User {
   isTotpEnabled: Boolean!
   lastName: String
   otpSecret: String
-  phone: String!
+  phone: String
   totpSecret: String
   updatedAt: DateTime!
 }
@@ -126,4 +231,9 @@ input VerificationInput {
 
 type VerificationResponse {
   user: User
+}
+
+input VerifyTotpInput {
+  """6-digit TOTP code or backup code"""
+  code: String!
 }

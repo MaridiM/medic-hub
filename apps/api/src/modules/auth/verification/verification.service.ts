@@ -1,81 +1,108 @@
 import { Request } from 'express'
 
-import { I18nService, PrismaService } from '@/core'
-import { MailService } from '@/modules/lib/mail'
+import { CoreService } from '@/core/core.service'
+import { I18nService, Language } from '@/core/i18n'
+import { PrismaService } from '@/core/prisma'
+import { MailService } from '@/modules/libs/mail'
 import { generateToken, getSessionMetadata, saveSession } from '@/shared/utils'
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { ETokenType, type User } from '@prisma/__generated__'
 
 import { VerificationInput, VerificationResponse } from './dtos'
 
 @Injectable()
-export class VerificationService {
+export class VerificationService extends CoreService {
 	constructor(
-		private readonly prisma: PrismaService,
-		private readonly i18n: I18nService,
+		i18n: I18nService,
+		prisma: PrismaService,
 		private readonly mail: MailService,
-	) {}
+	) {
+		super(i18n, prisma)
+	}
 
 	/**
-	 * Verify account
-	 * @param req -request
-	 * @param input - input data
-	 * @param userAgent - user agent
-	 * @param lng - The language of the user
-	 * @returns - user
+	 * Verify a user's email by one-time token, consume the token, and start a session.
+	 *
+	 * Flow:
+	 * 1) Fetch token by value (unique). Reject if missing/wrong type/expired.
+	 * 2) Atomically: mark user as verified and delete the token.
+	 * 3) Build session metadata and persist session (cookie/redis).
+	 *
+	 * @param req Express request (to save session/cookies)
+	 * @param input GraphQL input containing the token
+	 * @param userAgent Raw User-Agent header (for session metadata)
+	 * @param lng Language code for i18n
+	 * @returns VerificationResponse (session info)
+	 * @throws NotFoundException if token not found or wrong type
+	 * @throws BadRequestException if token expired
+	 * @throws InternalServerErrorException for unexpected DB/mail issues
 	 */
 	async verificationEmail(
 		req: Request,
 		input: VerificationInput,
 		userAgent: string,
-		lng: string,
+		lng: Language,
 	): Promise<VerificationResponse> {
 		const { token } = input
 
-		const existingToken = await this.prisma.token.findUnique({
-			where: {
-				token,
-				type: ETokenType.EMAIL_VERIFY,
-			},
+		// 1) Load token by unique value
+		const t = await this.prisma.token.findUnique({
+			where: { token },
+			select: { id: true, type: true, expiresIn: true, userId: true },
 		})
 
-		if (!existingToken) {
-			throw new NotFoundException(this.i18n.t('auth.errors.token.not_found', { lng }) || 'Token not found')
+		if (!t || t.type !== ETokenType.EMAIL_VERIFY) {
+			throw new NotFoundException(this.msg('auth.errors.token.not_found', 'Token not found', { lng }))
 		}
 
-		const hasExpired = new Date(existingToken.expiresIn) < new Date()
-
-		if (hasExpired) {
-			throw new BadRequestException(this.i18n.t('auth.errors.token.expired', { lng }) || 'Token expired')
+		if (new Date(t.expiresIn) < new Date()) {
+			throw new BadRequestException(this.msg('auth.errors.token.expired', 'Token expired', { lng }))
 		}
 
-		const user = await this.prisma.user.update({
-			where: { id: existingToken.userId },
-			data: { isEmailVerified: true },
-		})
+		// 2) Atomically verify and consume the token
+		const [updatedUser] = await this.prisma.$transaction([
+			this.prisma.user.update({
+				where: { id: t.userId },
+				data: { isEmailVerified: true },
+				// select минимален, но достаточно для saveSession
+				select: {
+					id: true,
+					email: true,
+					fullName: true,
+					firstName: true,
+					lastName: true,
+					isEmailVerified: true,
+					createdAt: true,
+					updatedAt: true,
+				},
+			}),
+			this.prisma.token.delete({ where: { id: t.id } }),
+		])
 
-		await this.prisma.token.delete({
-			where: {
-				id: existingToken.id,
-				type: ETokenType.EMAIL_VERIFY,
-			},
-		})
-
-		const metadata = getSessionMetadata(req, userAgent)
-
-		return saveSession(req, user, metadata)
+		// 3) Create session
+		const meta = getSessionMetadata(req, userAgent)
+		return saveSession(req, updatedUser as unknown as User, meta)
 	}
 
 	/**
-	 * Function Generate new token or numeric code, and sent to email
-	 * @param user - current user
-	 * @param language - current language
-	 * @returns - boolean
+	 * Generate and send a fresh verification token to user's email.
+	 *
+	 * @param user The target user
+	 * @param lng Language code for email templates
+	 * @returns true on success
+	 * @throws InternalServerErrorException if sending email fails
 	 */
-	async sendVerificationEmailToken(user: User, language: string) {
+	async sendVerificationEmailToken(user: User, lng: Language): Promise<boolean> {
 		const verificationToken = await generateToken(this.prisma, user, ETokenType.EMAIL_VERIFY)
 
-		await this.mail.sendVerificationEmailToken(user.email, verificationToken.token, language)
-		return true
+		try {
+			await this.mail.sendVerificationEmailToken(user.email, verificationToken.token, lng)
+			return true
+		} catch {
+			// If mailer fails — surface a clear error (you may log internally as well)
+			throw new InternalServerErrorException(
+				this.msg('common.errors.mail_send_failed', 'Failed to send verification email', { lng }),
+			)
+		}
 	}
 }

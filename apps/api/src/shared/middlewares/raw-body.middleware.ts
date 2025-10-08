@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express'
 import getRawBody from 'raw-body'
 
-import { DEFAULT_LANGUAGE, I18nService } from '@/core'
+import { DEFAULT_LANGUAGE, I18nService } from '@/core/i18n'
 import { BadRequestException, Injectable, InternalServerErrorException, NestMiddleware } from '@nestjs/common'
 
 @Injectable()

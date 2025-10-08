@@ -42,10 +42,41 @@ export class RedisService {
 		return this.client.del(key)
 	}
 
-	/** Проверить наличие ключа */
+	/** Установить TTL для существующего ключа */
 	async expire(key: string, ttlSeconds: number): Promise<boolean> {
 		const n = await this.client.expire(key, ttlSeconds)
 		return n === 1
+	}
+
+	/** Проверить существование ключа */
+	async exists(key: string): Promise<boolean> {
+		const n = await this.client.exists(key)
+		return n === 1
+	}
+
+	/** Получить оставшееся время жизни ключа (TTL) в секундах */
+	async ttl(key: string): Promise<number> {
+		return this.client.ttl(key)
+	}
+
+	/** Инкремент числового значения */
+	async incr(key: string): Promise<number> {
+		return this.client.incr(key)
+	}
+
+	/** Декремент числового значения */
+	async decr(key: string): Promise<number> {
+		return this.client.decr(key)
+	}
+
+	/** Инкремент с автоматической установкой TTL при первом вызове */
+	async incrWithExpire(key: string, ttlSeconds: number): Promise<number> {
+		const value = await this.client.incr(key)
+		// Если это первый инкремент, устанавливаем TTL
+		if (value === 1) {
+			await this.client.expire(key, ttlSeconds)
+		}
+		return value
 	}
 
 	// ===== JSON-ХЕЛПЕРЫ (типобезопасные) =====
@@ -61,7 +92,6 @@ export class RedisService {
 		const raw = await this.get(key)
 		if (raw == null) return null
 		try {
-			// raw is a string here (get() returns string | null), so parse it
 			return JSON.parse(raw) as T
 		} catch {
 			return null
@@ -74,5 +104,29 @@ export class RedisService {
 	async keys(pattern: string): Promise<string[]> {
 		const list: string[] = await this.client.keys(pattern)
 		return list
+	}
+
+	/** Удалить все ключи по паттерну */
+	async delPattern(pattern: string): Promise<number> {
+		const keys = await this.keys(pattern)
+		if (keys.length === 0) return 0
+		return this.client.del(keys)
+	}
+
+	// ===== ДОПОЛНИТЕЛЬНЫЕ ОПЕРАЦИИ =====
+
+	/** Установить значение только если ключ не существует (NX) */
+	async setNX(key: string, value: string, ttlSeconds?: number): Promise<boolean> {
+		const result = ttlSeconds
+			? await this.client.set(key, value, { NX: true, EX: ttlSeconds })
+			: await this.client.set(key, value, { NX: true })
+		return result === 'OK'
+	}
+
+	/** Получить и удалить ключ атомарно */
+	async getdel(key: string): Promise<string | null> {
+		const result = await this.client.getDel(key)
+		// getDel может вернуть string или null (но TypeScript думает что это string | {})
+		return result === null || typeof result !== 'string' ? null : result
 	}
 }

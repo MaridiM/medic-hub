@@ -1,3 +1,4 @@
+import { Request, Response } from 'express'
 import { join } from 'path'
 
 import { DEFAULT_LANGUAGE } from '@/core/i18n'
@@ -12,7 +13,11 @@ export function getGraphQLConfig(configService: ConfigService): ApolloDriverConf
 		path,
 		autoSchemaFile,
 		sortSchema: true,
-		context: ({ req, res }) => ({ req, res, language: req.language || DEFAULT_LANGUAGE }),
+		context: ({ req, res }: { req: Request; res: Response }) => ({
+			req,
+			res,
+			language: req.language || DEFAULT_LANGUAGE,
+		}),
 		installSubscriptionHandlers: true,
 	}
 }

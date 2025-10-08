@@ -1,6 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 
+import { Language } from '../locales'
+
 export type I18nLogEntry = {
 	key: string
 	namespace: string
@@ -26,19 +28,19 @@ export class I18nLogger {
 		return dir
 	}
 
-	static log(type: I18nLogType, key: string, namespace: string, lang: string) {
+	static log(type: I18nLogType, key: string, namespace: string, lng: Language) {
 		const map = this.logMap[type]
 		const entry = `${namespace}.${key}`
 
 		if (!map.has(entry)) map.set(entry, new Set())
-		map.get(entry)?.add(lang)
+		map.get(entry)?.add(lng)
 
-		this.appendRawLog(type, lang, namespace, key)
+		this.appendRawLog(type, lng, namespace, key)
 		this.flush(type)
 	}
 
-	private static appendRawLog(type: I18nLogType, lang: string, ns: string, key: string) {
-		const line = `[${lang}/${ns}] ➜ "${key}"\n`
+	private static appendRawLog(type: I18nLogType, lng: Language, ns: string, key: string) {
+		const line = `[${lng}/${ns}] ➜ "${key}"\n`
 		const filePath = path.join(this.getLogDir(), `${type}.log`)
 
 		const existing = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : ''

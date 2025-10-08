@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider      = "prisma-client-js"
   output        = "./__generated__"
@@ -18,7 +15,7 @@ datasource db {
 model User {
   id String @id @default(uuid())
 
-  // TODO: add fields for profile
+  // Profile fields
   fullName  String  @map("full_name")
   firstName String? @map("first_name")
   lastName  String? @map("last_name")
@@ -32,17 +29,25 @@ model User {
 
   isEmailVerified Boolean @default(false) @map("is_email_verified")
 
+  // TOTP (Time-based One-Time Password) - Google Authenticator, etc.
   isTotpEnabled Boolean @default(false) @map("is_totp_enabled")
-  totpSecret    String? @map("totp_secret")
+  totpSecret    String? @map("totp_secret") // Encrypted TOTP secret
 
+  // OTP (One-Time Password) - SMS/Email codes
   isOtpEnabled Boolean @default(false) @map("is_otp_enabled")
   otpSecret    String? @map("otp_secret")
 
-  tokens Token[]
+  // Relations
+  backupCodes BackupCode[]
+  auditLogs   AuditLog[]
+  tokens      Token[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([email])
+  @@index([isTotpEnabled])
+  @@index([isOtpEnabled])
   @@map("users")
 }
 
@@ -60,7 +65,59 @@ model Token {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([userId, type]) // один токен каждого типа на пользователя
+  @@index([token])
+  @@index([expiresIn]) // для очистки истекших токенов
   @@map("tokens")
+}
+
+model BackupCode {
+  id String @id @default(cuid())
+
+  userId String          @map("user_id")
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type   EBackupCodeType @default(TOTP) // TOTP или OTP
+
+  code String // Хешированный backup код (Argon2)
+
+  // Статус использования
+  usedAt DateTime? @map("used_at") // null = не использован
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([userId, type])
+  @@index([userId, usedAt]) // для быстрого поиска неиспользованных кодов
+  @@index([userId, type, usedAt]) // комбинированный индекс
+  @@map("backup_codes")
+}
+
+model AuditLog {
+  id String @id @default(cuid())
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  action String // TOTP_ENABLED, TOTP_DISABLED, TOTP_VERIFIED, etc.
+
+  // Дополнительные данные
+  metadata  Json?
+  ip        String?
+  userAgent String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([action])
+  @@index([createdAt]) // для очистки старых логов
+  @@map("audit_logs")
+}
+
+enum EBackupCodeType {
+  TOTP // Time-based OTP backup codes (for Google Authenticator)
+  OTP // One-time password backup codes (for SMS/Email)
+
+  @@map("backup_code_types")
 }
 
 enum ETokenType {
@@ -69,133 +126,3 @@ enum ETokenType {
 
   @@map("token_types")
 }
-
-// /// Аутентификационные данные и настройки безопасности
-// model User {
-//   id       String @id @default(uuid())
-//   email    String @unique
-//   password String
-
-//   // Один‐ко‐одному к профилю пользователя
-//   profile Profile?
-//   // Один‐ко‐одному к настройкам MFA и верификаций
-//   auth    AuthSettings?
-
-//   // Роли — многие‐ко‐многим через join‐таблицу
-//   roles Role[] @relation("UserRoles", onDelete: Cascade)
-
-//   createdAt DateTime   @default(now()) @map("created_at")
-//   updatedAt DateTime   @updatedAt @map("updated_at")
-//   UserRole  UserRole[]
-//   Token     Token[]
-
-//   @@map("users")
-// }
-
-// /// Профиль: личные данные и ссылки
-// model Profile {
-//   id     String @id @default(uuid())
-//   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   userId String @unique
-
-//   firstName String
-//   lastName  String
-//   phone     String
-//   avatar    String?
-
-//   socialLinks SocialLink[]
-
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @updatedAt @map("updated_at")
-
-//   @@map("profiles")
-// }
-
-// /// Социальные ссылки пользователя
-// model SocialLink {
-//   id        String  @id @default(uuid())
-//   profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-//   profileId String  @map("profile_id")
-
-//   title    String
-//   url      String
-//   position Int
-
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @updatedAt @map("updated_at")
-
-//   @@map("social_links")
-// }
-
-// /// Настройки многофакторной аутентификации и верификации
-// model AuthSettings {
-//   id     String @id @default(uuid())
-//   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   userId String @unique @map("user_id")
-
-//   isEmailVerified Boolean @default(false)
-//   isPhoneVerified Boolean @default(false)
-
-//   isTotpEnabled Boolean @default(false)
-//   totpSecret    String?
-//   isOtpEnabled  Boolean @default(false)
-//   otpSecret     String?
-
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @updatedAt @map("updated_at")
-
-//   @@map("auth_settings")
-// }
-
-// /// Роль (например: ADMIN, USER, SUPPORT)
-// model Role {
-//   id          String  @id @default(uuid())
-//   name        String  @unique
-//   description String?
-
-//   users User[] @relation("UserRoles",  onDelete: Cascade)
-
-//   createdAt DateTime   @default(now()) @map("created_at")
-//   updatedAt DateTime   @updatedAt @map("updated_at")
-//   UserRole  UserRole[]
-
-//   @@map("roles")
-// }
-
-// /// Явная join‐таблица для связи User ↔ Role
-// model UserRole {
-//   id     String @id @default(uuid())
-//   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   userId String @map("user_id")
-//   role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-//   roleId String @map("role_id")
-
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @updatedAt @map("updated_at")
-
-//   @@unique([userId, roleId])
-//   @@map("user_roles")
-// }
-
-// model Token {
-//   id String @id @default(uuid())
-
-//   token     String     @unique
-//   type      ETokenType
-//   expiresIn DateTime   @map("expires_in")
-
-//   user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   userId String? @map("user_id")
-
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @updatedAt @map("updated_at")
-
-//   @@map("tokens")
-// }
-
-// enum ETokenType {
-//   EMAIL_VERIFY
-//   PASSWORD_RESET
-
-//   @@map("token_types")
-// }

@@ -1,6 +1,7 @@
 import type { Request } from 'express'
 
-import { DEFAULT_LANGUAGE, i18n } from '@/core'
+import { i18n } from '@/core/config'
+import { DEFAULT_LANGUAGE } from '@/core/i18n'
 import { InternalServerErrorException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import type { User } from '@prisma/__generated__'
@@ -39,7 +40,7 @@ export function saveSession(req: Request, user: User, metadata: ISessionMetadata
  * @param configService - config service
  * @returns boolean
  */
-export function destroySession(req: Request, configService: ConfigService) {
+export function destroySession(req: Request, configService: ConfigService): Promise<boolean> {
 	const lang = req.language || DEFAULT_LANGUAGE
 	return new Promise((resolve, reject) => {
 		req.session.destroy(err => {

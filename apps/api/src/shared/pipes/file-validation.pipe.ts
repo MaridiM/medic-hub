@@ -1,7 +1,6 @@
-// src/modules/upload/pipes/file-validation.pipe.ts
 import { Readable } from 'node:stream'
 
-import { DEFAULT_LANGUAGE, I18nService } from '@/core'
+import { DEFAULT_LANGUAGE, I18nService } from '@/core/i18n'
 import { type ArgumentMetadata, BadRequestException, Injectable, type PipeTransform } from '@nestjs/common'
 
 import { bufferToStream, streamToBuffer, validateFileFormat } from '../utils'

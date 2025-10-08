@@ -1,4 +1,5 @@
-import { DEFAULT_LANGUAGE, I18nService, PrismaService } from '@/core'
+import { DEFAULT_LANGUAGE, I18nService } from '@/core/i18n'
+import { PrismaService } from '@/core/prisma'
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
 

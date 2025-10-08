@@ -7,5 +7,7 @@ declare module 'express-session' {
 		userId?: string
 		createdAt?: Date | string
 		metadata?: ISessionMetadata
+		userAgent?: string
+		ip?: string
 	}
 }

@@ -11,7 +11,7 @@ export class User {
 	@Field(() => String)
 	email: string
 
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	phone: string
 
 	@HideField()

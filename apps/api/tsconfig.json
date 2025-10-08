@@ -19,7 +19,7 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"strictNullChecks": false,
-		"noImplicitAny": false,
+		"noImplicitAny": true,
 		"strictBindCallApply": false,
 		"forceConsistentCasingInFileNames": false,
 		"noFallthroughCasesInSwitch": false,
@@ -29,12 +29,13 @@
 		"types": ["node", "jest"],
 		"typeRoots": ["./types", "./node_modules/@types"]
 	},
+	"allowDefaultProject": true,
 	"watchOptions": {
 		// Use a dynamic polling instead of system's native for file changes.image.png
 		"watchFile": "dynamicprioritypolling",
 		"watchDirectory": "dynamicprioritypolling",
 		"excludeDirectories": ["**/node_modules", "dist"]
 	},
-	"include": ["src", "prisma", "graphql.schema.ts", "types"],
+	"include": ["src", "prisma", "graphql.schema.ts", "types", "jest.config.mjs"],
 	"exclude": ["node_modules", "prisma/__generated__"]
 }

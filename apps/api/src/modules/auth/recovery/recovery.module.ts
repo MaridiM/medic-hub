@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
-import { RecoveryService } from './recovery.service';
-import { RecoveryResolver } from './recovery.resolver';
+import { Module } from '@nestjs/common'
+
+import { RecoveryResolver } from './recovery.resolver'
+import { RecoveryService } from './recovery.service'
 
 @Module({
-  providers: [RecoveryResolver, RecoveryService],
+	providers: [RecoveryResolver, RecoveryService],
 })
 export class RecoveryModule {}
