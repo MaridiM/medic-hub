@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider      = "prisma-client-js"
   output        = "./__generated__"
@@ -121,6 +118,7 @@ enum EBackupCodeType {
 }
 
 enum ETokenType {
+  SMS_VERIFY
   EMAIL_VERIFY
   PASSWORD_RESET
 

@@ -3,8 +3,10 @@ import * as brevo from '@getbrevo/brevo'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
+import { IEmailProvider } from '../email.provider.interface'
+
 @Injectable()
-export class BrevoService {
+export class BrevoService implements IEmailProvider {
 	private apiInstance: brevo.TransactionalEmailsApi
 
 	constructor(private readonly configService: ConfigService) {

@@ -1,24 +1,22 @@
-import { CLIENT_URL, COMPANY_NAME, PATHS } from '@/core/config'
+import { CLIENT_URL, PATHS } from '@/core/config'
+import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { ISessionMetadata } from '@/shared/types'
-import { MailerService } from '@nestjs-modules/mailer'
-import { Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+import { Inject, Injectable } from '@nestjs/common'
 import { render } from '@react-email/components'
 
-import { BrevoService, SendgridService } from './libs'
+import { IEmailProvider } from './providers'
 import { VerificationEmailTemplate } from './templates'
 import { ResetPasswordTemplate } from './templates/reset-password'
 
 @Injectable()
-export class MailService {
+export class MailService extends CoreService {
 	constructor(
-		private readonly brevo: BrevoService,
-		private readonly config: ConfigService,
-		private readonly i18n: I18nService,
-		private readonly mailer: MailerService,
-		private readonly sendgrid: SendgridService,
-	) {}
+		i18n: I18nService,
+		@Inject(IEmailProvider) private readonly emailProvider: IEmailProvider,
+	) {
+		super(i18n)
+	}
 
 	/**
 	 * Send Verification email
@@ -27,9 +25,23 @@ export class MailService {
 	 * @returns - sended info object
 	 */
 	async sendVerificationEmailToken(email: string, token: string, lng: Language) {
-		const url: string = PATHS.VERIFY_EMAIL(CLIENT_URL, token)
+		const url = PATHS.VERIFY_EMAIL(CLIENT_URL, token)
 		const html = await render(VerificationEmailTemplate({ url, i18n: this.i18n, lng }))
-		return this.sendMail(email, this.i18n.t('mail.verification_email.subject'), html)
+		const subject = this.i18n.t('mail.verification_email.subject', { lng })
+		return this.sendMail(email, subject, html)
+	}
+
+	/**
+	 * Send Verification email
+	 * @param email - user email to
+	 * @param token - generated token
+	 * @returns - sended info object
+	 */
+	async sendVerificationEmailOtpToken(email: string, token: string, lng: Language) {
+		const url = PATHS.VERIFY_EMAIL(CLIENT_URL, token)
+		const html = await render(VerificationEmailTemplate({ url, i18n: this.i18n, lng }))
+		const subject = this.i18n.t('mail.verification_email.subject', { lng })
+		return this.sendMail(email, subject, html)
 	}
 
 	/**
@@ -46,28 +58,15 @@ export class MailService {
 	}
 
 	/**
-	 * Base send mail method
-	 * @param email - email address to
-	 * @param subject - subject for email
-	 * @param html - React, html email template
-	 * @returns - send mail
+	 * Проверка возможности отправки Email
 	 */
+	async canSendEmail(_email: string): Promise<boolean> {
+		// TODO: Добавить валидацию email, проверку черного списка и т.д.
+		return Promise.resolve(true)
+	}
+
 	private async sendMail(email: string, subject: string, html: string) {
-		if (this.config.getOrThrow<string>('MAIL_USE_SERVICE') === 'brevo') {
-			return this.brevo.sendMail(email, subject, html)
-		}
-
-		if (this.config.getOrThrow<string>('MAIL_USE_SERVICE') === 'sendgrid') {
-			return this.sendgrid.sendMail(email, subject, html)
-		}
-
-		const sentResponse: unknown = await this.mailer.sendMail({
-			from: `"${COMPANY_NAME}" <${this.config.getOrThrow<string>('MAIL_LOGIN')}>`,
-			to: email,
-			subject,
-			html,
-		})
-
-		return sentResponse
+		// Просто делегируем вызов выбранному провайдеру
+		return this.emailProvider.sendMail(email, subject, html)
 	}
 }

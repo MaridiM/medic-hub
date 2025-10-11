@@ -1,0 +1,9 @@
+{
+	"errors": {
+		"message_send_failed": "Failed to send the message."
+	},
+	"verification": {
+		"otp": "Ваш код верификации: {{code}}",
+		"phone": "Ваш код верификации: {{code}}"
+	}
+}

@@ -40,12 +40,28 @@ type Device {
   type: String!
 }
 
+input DisableOtpInput {
+  """Current OTP code"""
+  code: String!
+
+  """User password for verification"""
+  password: String!
+}
+
 input DisableTotpInput {
   """Current TOTP code"""
   code: String!
 
   """User password for verification"""
   password: String!
+}
+
+input EnableOtpInput {
+  """Preferred delivery channel"""
+  channel: String!
+
+  """Phone number (required for SMS)"""
+  phone: String
 }
 
 input EnableTotpInput {
@@ -92,8 +108,14 @@ type Mutation {
   """
   createAccount(data: CreateAccountInput!): User!
 
+  """Disable OTP two-factor authentication"""
+  disableOtp(data: DisableOtpInput!): Boolean!
+
   """Disable TOTP two-factor authentication"""
   disableTotp(data: DisableTotpInput!): Boolean!
+
+  """Enable OTP two-factor authentication"""
+  enableOtp(data: EnableOtpInput!): OtpEnabled!
 
   """Enable TOTP two-factor authentication"""
   enableTotp(data: EnableTotpInput!): TotpEnabled!
@@ -114,6 +136,9 @@ type Mutation {
     data: NewPasswordInput!
   ): Boolean!
 
+  """Regenerate OTP backup codes"""
+  regenerateOtpBackupCodes(password: String!): OtpEnabled!
+
   """Regenerate backup codes"""
   regenerateTotpBackupCodes(password: String!): TotpEnabled!
 
@@ -130,10 +155,19 @@ type Mutation {
     data: ResetPasswordInput!
   ): Boolean!
 
+  """Send OTP code via email or SMS"""
+  sendOtp(data: SendOtpInput!): OtpSent!
+
   """
   Send a verification email with a one-time token and return delivery/meta info.
   """
   verificationEmail(data: VerificationInput!): VerificationResponse!
+
+  """Verify OTP code"""
+  verifyOtp(data: VerifyOtpInput!): Boolean!
+
+  """Verify OTP backup code"""
+  verifyOtpBackupCode(data: VerifyBackupCodeInput!): Boolean!
 
   """Verify TOTP code"""
   verifyTotp(data: VerifyTotpInput!): Boolean!
@@ -142,6 +176,42 @@ type Mutation {
 input NewPasswordInput {
   password: String!
   token: String!
+}
+
+type OtpBackupCodesStatus {
+  """Remaining unused codes"""
+  remaining: Int!
+
+  """Total backup codes"""
+  total: Int!
+
+  """Used backup codes"""
+  used: Int!
+}
+
+type OtpEnabled {
+  """Backup recovery codes (store securely!)"""
+  backupCodes: [String!]!
+
+  """Warning message about backup codes"""
+  message: String!
+
+  """Success status"""
+  success: Boolean!
+}
+
+type OtpSent {
+  """Delivery channel used"""
+  channel: String!
+
+  """Code expires in (seconds)"""
+  expiresIn: Int!
+
+  """Success message"""
+  message: String!
+
+  """Success status"""
+  success: Boolean!
 }
 
 type Query {
@@ -156,6 +226,9 @@ type Query {
   """Generate TOTP secret and QR code"""
   generateTotpSecret: Totp!
 
+  """Get OTP backup codes status"""
+  otpBackupCodesStatus: OtpBackupCodesStatus!
+
   """
   Get the currently authenticated user profile. Requires auth. Returns a safe projection (no password).
   """
@@ -167,6 +240,11 @@ type Query {
 
 input ResetPasswordInput {
   email: String!
+}
+
+input SendOtpInput {
+  """Delivery channel for OTP code"""
+  channel: String!
 }
 
 type Session {
@@ -231,6 +309,16 @@ input VerificationInput {
 
 type VerificationResponse {
   user: User
+}
+
+input VerifyBackupCodeInput {
+  """Backup recovery code"""
+  backupCode: String!
+}
+
+input VerifyOtpInput {
+  """6-digit OTP code"""
+  code: String!
 }
 
 input VerifyTotpInput {

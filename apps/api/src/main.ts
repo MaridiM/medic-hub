@@ -1,7 +1,7 @@
 import cookieParser from 'cookie-parser'
 import * as dotenv from 'dotenv'
 import dotenvExpand from 'dotenv-expand'
-import { json, type NextFunction, type Request } from 'express'
+import { json, type NextFunction, type Request, Response } from 'express'
 import { graphqlUploadExpress } from 'graphql-upload-minimal'
 import i18nextMiddleware from 'i18next-http-middleware'
 
@@ -30,7 +30,7 @@ async function bootstrap() {
 
 	// ✅ JSON + выставляем язык, если вдруг отсутствует
 	app.use(json({ limit: '1mb', type: 'application/json' }))
-	app.use((req: Request, _res, next: NextFunction) => {
+	app.use((req: Request, res: Response, next: NextFunction) => {
 		req.language =
 			req.language ||
 			req.i18n?.language ||

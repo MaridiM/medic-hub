@@ -1,4 +1,5 @@
 export * from './account'
+export * from './otp'
 export * from './recovery'
 export * from './session'
 export * from './totp'

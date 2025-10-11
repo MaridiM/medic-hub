@@ -4,8 +4,10 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import sgMail from '@sendgrid/mail'
 
+import { IEmailProvider } from '../email.provider.interface'
+
 @Injectable()
-export class SendgridService {
+export class SendgridService implements IEmailProvider {
 	private sgMail: typeof sgMail
 
 	constructor(

@@ -100,7 +100,7 @@ export class AccountService extends CoreService {
 			})
 
 			// Optional: do not fail account creation if mailing fails
-			await this.verification.sendVerificationEmailToken(user as unknown as User, lng)
+			await this.verification.sendEmailVerificationToken(user as unknown as User, lng)
 
 			return user as unknown as User
 		} catch (e) {
@@ -146,7 +146,7 @@ export class AccountService extends CoreService {
 				select: { id: true, email: true, isEmailVerified: true },
 			})
 
-			await this.verification.sendVerificationEmailToken(updated as unknown as User, lng)
+			await this.verification.sendEmailVerificationToken(updated as unknown as User, lng)
 			return true
 		} catch (e) {
 			if (isPrismaError(e, 'P2002')) {

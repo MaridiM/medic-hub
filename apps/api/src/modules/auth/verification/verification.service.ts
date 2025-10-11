@@ -3,7 +3,7 @@ import { Request } from 'express'
 import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
-import { MailService } from '@/modules/libs/mail'
+import { MailService, SmsService } from '@/modules/libs'
 import { generateToken, getSessionMetadata, saveSession } from '@/shared/utils'
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { ETokenType, type User } from '@prisma/__generated__'
@@ -16,6 +16,7 @@ export class VerificationService extends CoreService {
 		i18n: I18nService,
 		prisma: PrismaService,
 		private readonly mail: MailService,
+		private readonly sms: SmsService,
 	) {
 		super(i18n, prisma)
 	}
@@ -92,7 +93,7 @@ export class VerificationService extends CoreService {
 	 * @returns true on success
 	 * @throws InternalServerErrorException if sending email fails
 	 */
-	async sendVerificationEmailToken(user: User, lng: Language): Promise<boolean> {
+	async sendEmailVerificationToken(user: User, lng: Language): Promise<boolean> {
 		const verificationToken = await generateToken(this.prisma, user, ETokenType.EMAIL_VERIFY)
 
 		try {
@@ -101,7 +102,51 @@ export class VerificationService extends CoreService {
 		} catch {
 			// If mailer fails — surface a clear error (you may log internally as well)
 			throw new InternalServerErrorException(
-				this.msg('common.errors.mail_send_failed', 'Failed to send verification email', { lng }),
+				this.msg('mail.errors.message_send_failed', 'Failed to send the message.', { lng }),
+			)
+		}
+	}
+
+	/**
+	 * Generate and send a fresh verification token to user's email.
+	 *
+	 * @param user The target user
+	 * @param lng Language code for email templates
+	 * @returns true on success
+	 * @throws InternalServerErrorException if sending email fails
+	 */
+	async sendEmailVerificationOtpToken(user: User, lng: Language): Promise<boolean> {
+		const verificationOtpToken = await generateToken(this.prisma, user, ETokenType.EMAIL_VERIFY, false)
+
+		try {
+			await this.mail.sendVerificationEmailOtpToken(user.email, verificationOtpToken.token, lng)
+			return true
+		} catch {
+			// If mailer fails — surface a clear error (you may log internally as well)
+			throw new InternalServerErrorException(
+				this.msg('mail.errors.message_send_failed', 'Failed to send the message.', { lng }),
+			)
+		}
+	}
+
+	/**
+	 * Generate and send a fresh verification token to user's email.
+	 *
+	 * @param user The target user
+	 * @param lng Language code for email templates
+	 * @returns true on success
+	 * @throws InternalServerErrorException if sending email fails
+	 */
+	async sendSmsVerificationOtpToken(user: User, lng: Language): Promise<boolean> {
+		const verificationOtpToken = await generateToken(this.prisma, user, ETokenType.EMAIL_VERIFY, false)
+
+		try {
+			await this.sms.sendOtpSMS(user.email, verificationOtpToken.token, lng)
+			return true
+		} catch {
+			// If mailer fails — surface a clear error (you may log internally as well)
+			throw new InternalServerErrorException(
+				this.msg('sms.errors.message_send_failed', 'Failed to send the message.', { lng }),
 			)
 		}
 	}

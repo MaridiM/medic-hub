@@ -75,7 +75,7 @@ export class SessionService extends CoreService {
 
 		if (!user.isEmailVerified) {
 			// fire-and-forget повторная верификация (не блокируем логин)
-			await this.verification.sendVerificationEmailToken(user, lng).catch(() => {})
+			await this.verification.sendEmailVerificationToken(user, lng).catch(() => {})
 			throw new BadRequestException(
 				this.msg(
 					'auth.errors.account.not_verified',
