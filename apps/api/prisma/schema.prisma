@@ -9,6 +9,10 @@ datasource db {
   url      = env("POSTGRES_URL")
 }
 
+// ============================================================================
+// USER MODEL
+// ============================================================================
+
 model User {
   id String @id @default(uuid())
 
@@ -24,29 +28,307 @@ model User {
 
   password String
 
-  isEmailVerified Boolean @default(false) @map("is_email_verified")
+  // Email verification
+  isEmailVerified Boolean   @default(false) @map("is_email_verified")
+  emailVerifiedAt DateTime? @map("email_verified_at")
 
-  // TOTP (Time-based One-Time Password) - Google Authenticator, etc.
-  isTotpEnabled Boolean @default(false) @map("is_totp_enabled")
-  totpSecret    String? @map("totp_secret") // Encrypted TOTP secret
+  // Email reputation fields
+  isUnsubscribed Boolean?  @default(false) @map("is_unsubscribed")
+  emailBouncedAt DateTime? @map("email_bounced_at")
 
-  // OTP (One-Time Password) - SMS/Email codes
-  isOtpEnabled Boolean @default(false) @map("is_otp_enabled")
-  otpSecret    String? @map("otp_secret")
+  // Phone verification
+  isPhoneVerified Boolean   @default(false) @map("is_phone_verified")
+  phoneVerifiedAt DateTime? @map("phone_verified_at")
+
+  // ✅ SMS reputation field
+  phoneBouncedAt DateTime? @map("phone_bounced_at")
+
+  // ========== NEW: Unified 2FA System ==========
+
+  /// Global 2FA status - true if user has any active 2FA method
+  is2FAEnabled Boolean @default(false) @map("is_2fa_enabled")
+
+  /// User's preferred 2FA method for login
+  preferred2FAMethod E2FAMethod? @map("preferred_2fa_method")
+
+  /// Force 2FA for this user (admin-enforced, compliance)
+  require2FA Boolean @default(false) @map("require_2fa")
+
+  // Account security
+  lastLoginAt       DateTime? @map("last_login_at")
+  lastLoginIp       String?   @map("last_login_ip")
+  passwordChangedAt DateTime? @map("password_changed_at")
+
+  // ========== NEW: Risk Assessment ==========
+
+  /// User risk score (0-100): 0=trusted, 100=high risk
+  /// Calculated based on login patterns, location changes, failed attempts
+  riskScore Float? @default(0) @map("risk_score")
+
+  /// Last time risk score was calculated
+  lastRiskAssessAt DateTime? @map("last_risk_assess_at")
+
+  // Soft delete
+  deletedAt DateTime? @map("deleted_at")
 
   // Relations
-  backupCodes BackupCode[]
-  auditLogs   AuditLog[]
-  tokens      Token[]
+  authenticationMethods AuthenticationMethod[]
+  backupCodes           BackupCode[]
+  trustedDevices        TrustedDevice[]
+  auditLogs             AuditLog[]
+  tokens                Token[]
+  sessions              Session[]
+  accountLocks          AccountLock[]
+  securityEvents        SecurityEvent[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([email])
-  @@index([isTotpEnabled])
-  @@index([isOtpEnabled])
+  @@index([phone])
+  @@index([is2FAEnabled])
+  @@index([preferred2FAMethod])
+  @@index([deletedAt])
+  @@index([lastLoginAt])
+  @@index([riskScore])
   @@map("users")
 }
+
+// ============================================================================
+// AUTHENTICATION METHOD MODEL - Unified 2FA Storage
+// ============================================================================
+
+/// Stores all 2FA methods for a user in a unified way
+/// Supports TOTP, OTP, WebAuthn, Passkeys, and future methods
+model AuthenticationMethod {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Type of 2FA method (TOTP, OTP_EMAIL, OTP_SMS, WEBAUTHN, PASSKEY)
+  method E2FAMethod
+
+  /// Method-specific encrypted data as JSON
+  data Json
+
+  /// Display name for this method (e.g., "iPhone 15 Pro", "YubiKey 5")
+  name String?
+
+  /// Whether this method is currently active
+  isActive Boolean @default(true) @map("is_active")
+
+  /// Primary method used by default for 2FA challenges
+  isPrimary Boolean @default(false) @map("is_primary")
+
+  /// Last time this method was used for authentication
+  lastUsedAt DateTime? @map("last_used_at")
+
+  /// Total number of successful authentications with this method
+  useCount Int @default(0) @map("use_count")
+
+  /// WebAuthn credential ID (base64url encoded)
+  credentialId String? @unique @map("credential_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, method, credentialId])
+  @@index([userId, method])
+  @@index([userId, isPrimary])
+  @@index([credentialId])
+  @@map("authentication_methods")
+}
+
+// ============================================================================
+// TRUSTED DEVICE MODEL
+// ============================================================================
+
+/// Manages trusted devices for reduced 2FA friction
+model TrustedDevice {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Hashed device fingerprint for identification
+  deviceId String @unique @map("device_id")
+
+  /// Full device fingerprint data (for verification)
+  fingerprint Json
+
+  /// User-provided device name (e.g., "Home Laptop", "Work iPhone")
+  name String?
+
+  userAgent String  @map("user_agent")
+  browser   String?
+  os        String?
+  device    String?
+
+  /// Trust level (0-100): higher = more trusted
+  trustScore Float @default(50) @map("trust_score")
+
+  lastIp      String? @map("last_ip")
+  lastCountry String? @map("last_country")
+  lastCity    String? @map("last_city")
+
+  /// Device is currently trusted and active
+  isActive Boolean @default(true) @map("is_active")
+
+  /// Last time device was seen/used
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+
+  /// Optional expiration (e.g., trust for 30 days)
+  expiresAt DateTime? @map("expires_at")
+
+  /// Manual revocation timestamp
+  revokedAt DateTime? @map("revoked_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([userId, isActive])
+  @@index([expiresAt])
+  @@map("trusted_devices")
+}
+
+// ============================================================================
+// SECURITY EVENT MODEL - Enhanced Audit for Security
+// ============================================================================
+
+/// Detailed security event logging with severity and risk scoring
+model SecurityEvent {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Type of security event (LOGIN_SUCCESS, TWO_FA_FAILED, etc.)
+  event ESecurityEvent
+
+  /// Event severity level
+  severity ESecuritySeverity @default(LOW)
+
+  ip        String?
+  userAgent String? @map("user_agent")
+  country   String?
+  city      String?
+
+  /// Associated device fingerprint
+  deviceId String? @map("device_id")
+
+  /// Calculated risk score for this specific event (0-100)
+  riskScore Float? @map("risk_score")
+
+  /// Risk factors that contributed to the score
+  riskFactors Json? @map("risk_factors")
+
+  /// Whether this event has been reviewed and resolved
+  resolved Boolean @default(false)
+
+  /// When the event was marked as resolved
+  resolvedAt DateTime? @map("resolved_at")
+
+  /// Admin user who resolved the event
+  resolvedBy String? @map("resolved_by")
+
+  /// Additional context data
+  metadata Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([event])
+  @@index([severity])
+  @@index([resolved])
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@map("security_events")
+}
+
+// ============================================================================
+// SESSION MODEL - Enhanced with Trust and Risk
+// ============================================================================
+
+model Session {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token        String  @unique
+  refreshToken String? @unique @map("refresh_token")
+
+  deviceId  String? @map("device_id")
+  userAgent String? @map("user_agent")
+  ip        String?
+  country   String?
+  city      String?
+  browser   String?
+  os        String?
+  device    String?
+
+  /// Whether this session is from a trusted device
+  isTrusted Boolean @default(false) @map("is_trusted")
+
+  /// Risk score for this session (0-100)
+  riskScore Float? @default(0) @map("risk_score")
+
+  /// Whether 2FA has been verified for this session
+  is2FAVerified Boolean @default(false) @map("is_2fa_verified")
+
+  /// When 2FA was successfully verified
+  verified2FAAt DateTime? @map("verified_2fa_at")
+
+  expiresAt  DateTime  @map("expires_at")
+  lastUsedAt DateTime  @default(now()) @map("last_used_at")
+  revokedAt  DateTime? @map("revoked_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([token])
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+  @@index([deviceId])
+  @@index([is2FAVerified])
+  @@map("sessions")
+}
+
+// ============================================================================
+// ACCOUNT LOCK MODEL
+// ============================================================================
+
+model AccountLock {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reason         String
+  failedAttempts Int    @default(0) @map("failed_attempts")
+
+  lockedAt   DateTime  @default(now()) @map("locked_at")
+  expiresAt  DateTime? @map("expires_at")
+  unlockedAt DateTime? @map("unlocked_at")
+
+  ip        String?
+  userAgent String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([userId, expiresAt, unlockedAt])
+  @@index([expiresAt])
+  @@map("account_locks")
+}
+
+// ============================================================================
+// TOKEN MODEL
+// ============================================================================
 
 model Token {
   id String @id @default(uuid())
@@ -55,38 +337,64 @@ model Token {
   type      ETokenType
   expiresIn DateTime   @map("expires_in")
 
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usedAt   DateTime? @map("used_at")
+  maxUses  Int       @default(1) @map("max_uses")
+  useCount Int       @default(0) @map("use_count")
+
   userId String? @map("user_id")
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdIp String? @map("created_ip")
+  usedIp    String? @map("used_ip")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([userId, type]) // один токен каждого типа на пользователя
+  @@unique([userId, type])
   @@index([token])
-  @@index([expiresIn]) // для очистки истекших токенов
+  @@index([expiresIn])
+  @@index([userId, type, expiresIn])
   @@map("tokens")
 }
+
+// ============================================================================
+// BACKUP CODE MODEL - Unified for All 2FA Methods
+// ============================================================================
 
 model BackupCode {
   id String @id @default(cuid())
 
-  userId String          @map("user_id")
-  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type   EBackupCodeType @default(TOTP) // TOTP или OTP
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  code String // Хешированный backup код (Argon2)
+  /// Link to specific authentication method (optional)
+  authMethodId String? @map("auth_method_id")
 
-  // Статус использования
-  usedAt DateTime? @map("used_at") // null = не использован
+  /// Which 2FA method this backup code is for
+  type E2FAMethod @default(TOTP)
+
+  /// Hashed backup code (Argon2id)
+  code String
+
+  usedAt DateTime? @map("used_at")
+  usedIp String?   @map("used_ip")
+
+  /// Optional expiration for compliance
+  expiresAt DateTime? @map("expires_at")
 
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([userId])
   @@index([userId, type])
-  @@index([userId, usedAt]) // для быстрого поиска неиспользованных кодов
-  @@index([userId, type, usedAt]) // комбинированный индекс
+  @@index([userId, usedAt])
+  @@index([userId, type, usedAt])
+  @@index([expiresAt])
   @@map("backup_codes")
 }
+
+// ============================================================================
+// AUDIT LOG MODEL
+// ============================================================================
 
 model AuditLog {
   id String @id @default(cuid())
@@ -94,33 +402,131 @@ model AuditLog {
   userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  action String // TOTP_ENABLED, TOTP_DISABLED, TOTP_VERIFIED, etc.
+  action   String
+  category EAuditCategory @default(SECURITY)
 
-  // Дополнительные данные
-  metadata  Json?
+  success Boolean @default(true)
+
   ip        String?
   userAgent String? @map("user_agent")
+  country   String?
+  city      String?
+
+  metadata Json?
 
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([userId])
   @@index([userId, createdAt])
   @@index([action])
-  @@index([createdAt]) // для очистки старых логов
+  @@index([category])
+  @@index([createdAt])
+  @@index([success])
   @@map("audit_logs")
 }
 
-enum EBackupCodeType {
-  TOTP // Time-based OTP backup codes (for Google Authenticator)
-  OTP // One-time password backup codes (for SMS/Email)
+// ============================================================================
+// ENUMS
+// ============================================================================
 
-  @@map("backup_code_types")
+/// Modern 2FA authentication methods
+enum E2FAMethod {
+  TOTP /// Time-based OTP (Google Authenticator, Authy, 1Password)
+  OTP_EMAIL /// One-time password sent via email
+  OTP_SMS /// One-time password sent via SMS
+  WEBAUTHN /// WebAuthn/FIDO2 hardware keys (YubiKey, Titan Key)
+  PASSKEY /// Passkeys (TouchID, FaceID, Windows Hello)
+  BACKUP_CODE /// Backup/recovery codes (last resort)
+
+  @@map("2fa_method_types")
 }
 
 enum ETokenType {
-  SMS_VERIFY
   EMAIL_VERIFY
+  PHONE_VERIFY
   PASSWORD_RESET
+  TWO_FA_SETUP
 
   @@map("token_types")
+}
+
+enum EAuditCategory {
+  SECURITY
+  PROFILE
+  ADMIN
+  SYSTEM
+  ACCOUNT
+  AUTHENTICATION
+  AUTHORIZATION
+  DATA
+
+  @@map("audit_categories")
+}
+
+/// Comprehensive security event types for audit and monitoring
+enum ESecurityEvent {
+  // ===== Authentication Events =====
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  SESSION_EXPIRED
+
+  // ===== 2FA Events =====
+  TWO_FA_ENABLED
+  TWO_FA_DISABLED
+  TWO_FA_VERIFIED
+  TWO_FA_FAILED
+  TWO_FA_BACKUP_CODE_USED
+  TWO_FA_BACKUP_CODES_REGENERATED
+  TWO_FA_METHOD_ADDED
+  TWO_FA_METHOD_REMOVED
+
+  // ===== Password Events =====
+  PASSWORD_CHANGED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
+  PASSWORD_RESET_FAILED
+
+  // ===== Account Events =====
+  ACCOUNT_CREATED
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  ACCOUNT_DELETED
+  EMAIL_VERIFIED
+  PHONE_VERIFIED
+  EMAIL_CHANGED
+  PHONE_CHANGED
+
+  // ===== Device Events =====
+  NEW_DEVICE_DETECTED
+  DEVICE_TRUSTED
+  DEVICE_UNTRUSTED
+  DEVICE_REVOKED
+
+  // ===== Suspicious Activity =====
+  SUSPICIOUS_LOGIN
+  UNUSUAL_LOCATION
+  BRUTE_FORCE_DETECTED
+  ACCOUNT_TAKEOVER_ATTEMPT
+  IMPOSSIBLE_TRAVEL
+
+  // ===== WebAuthn/Passkey Events =====
+  WEBAUTHN_REGISTERED
+  WEBAUTHN_VERIFIED
+  WEBAUTHN_REMOVED
+  PASSKEY_CREATED
+  PASSKEY_USED
+  PASSKEY_DELETED
+
+  @@map("security_event_types")
+}
+
+/// Security event severity levels for prioritization
+enum ESecuritySeverity {
+  LOW /// Normal activity, informational
+  MEDIUM /// Unusual activity, monitor
+  HIGH /// Suspicious activity, alert
+  CRITICAL /// Attack detected, immediate action required
+
+  @@map("security_severity_levels")
 }

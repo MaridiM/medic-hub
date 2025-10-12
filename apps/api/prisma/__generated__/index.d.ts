@@ -19,6 +19,32 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
+ * Model AuthenticationMethod
+ * Stores all 2FA methods for a user in a unified way
+ * Supports TOTP, OTP, WebAuthn, Passkeys, and future methods
+ */
+export type AuthenticationMethod = $Result.DefaultSelection<Prisma.$AuthenticationMethodPayload>
+/**
+ * Model TrustedDevice
+ * Manages trusted devices for reduced 2FA friction
+ */
+export type TrustedDevice = $Result.DefaultSelection<Prisma.$TrustedDevicePayload>
+/**
+ * Model SecurityEvent
+ * Detailed security event logging with severity and risk scoring
+ */
+export type SecurityEvent = $Result.DefaultSelection<Prisma.$SecurityEventPayload>
+/**
+ * Model Session
+ * 
+ */
+export type Session = $Result.DefaultSelection<Prisma.$SessionPayload>
+/**
+ * Model AccountLock
+ * 
+ */
+export type AccountLock = $Result.DefaultSelection<Prisma.$AccountLockPayload>
+/**
  * Model Token
  * 
  */
@@ -38,31 +64,117 @@ export type AuditLog = $Result.DefaultSelection<Prisma.$AuditLogPayload>
  * Enums
  */
 export namespace $Enums {
-  export const EBackupCodeType: {
+  export const E2FAMethod: {
   TOTP: 'TOTP',
-  OTP: 'OTP'
+  OTP_EMAIL: 'OTP_EMAIL',
+  OTP_SMS: 'OTP_SMS',
+  WEBAUTHN: 'WEBAUTHN',
+  PASSKEY: 'PASSKEY',
+  BACKUP_CODE: 'BACKUP_CODE'
 };
 
-export type EBackupCodeType = (typeof EBackupCodeType)[keyof typeof EBackupCodeType]
+export type E2FAMethod = (typeof E2FAMethod)[keyof typeof E2FAMethod]
 
 
 export const ETokenType: {
-  SMS_VERIFY: 'SMS_VERIFY',
   EMAIL_VERIFY: 'EMAIL_VERIFY',
-  PASSWORD_RESET: 'PASSWORD_RESET'
+  PHONE_VERIFY: 'PHONE_VERIFY',
+  PASSWORD_RESET: 'PASSWORD_RESET',
+  TWO_FA_SETUP: 'TWO_FA_SETUP'
 };
 
 export type ETokenType = (typeof ETokenType)[keyof typeof ETokenType]
 
+
+export const EAuditCategory: {
+  SECURITY: 'SECURITY',
+  PROFILE: 'PROFILE',
+  ADMIN: 'ADMIN',
+  SYSTEM: 'SYSTEM',
+  ACCOUNT: 'ACCOUNT',
+  AUTHENTICATION: 'AUTHENTICATION',
+  AUTHORIZATION: 'AUTHORIZATION',
+  DATA: 'DATA'
+};
+
+export type EAuditCategory = (typeof EAuditCategory)[keyof typeof EAuditCategory]
+
+
+export const ESecurityEvent: {
+  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
+  LOGIN_FAILED: 'LOGIN_FAILED',
+  LOGOUT: 'LOGOUT',
+  SESSION_EXPIRED: 'SESSION_EXPIRED',
+  TWO_FA_ENABLED: 'TWO_FA_ENABLED',
+  TWO_FA_DISABLED: 'TWO_FA_DISABLED',
+  TWO_FA_VERIFIED: 'TWO_FA_VERIFIED',
+  TWO_FA_FAILED: 'TWO_FA_FAILED',
+  TWO_FA_BACKUP_CODE_USED: 'TWO_FA_BACKUP_CODE_USED',
+  TWO_FA_BACKUP_CODES_REGENERATED: 'TWO_FA_BACKUP_CODES_REGENERATED',
+  TWO_FA_METHOD_ADDED: 'TWO_FA_METHOD_ADDED',
+  TWO_FA_METHOD_REMOVED: 'TWO_FA_METHOD_REMOVED',
+  PASSWORD_CHANGED: 'PASSWORD_CHANGED',
+  PASSWORD_RESET_REQUESTED: 'PASSWORD_RESET_REQUESTED',
+  PASSWORD_RESET_COMPLETED: 'PASSWORD_RESET_COMPLETED',
+  PASSWORD_RESET_FAILED: 'PASSWORD_RESET_FAILED',
+  ACCOUNT_CREATED: 'ACCOUNT_CREATED',
+  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
+  ACCOUNT_UNLOCKED: 'ACCOUNT_UNLOCKED',
+  ACCOUNT_DELETED: 'ACCOUNT_DELETED',
+  EMAIL_VERIFIED: 'EMAIL_VERIFIED',
+  PHONE_VERIFIED: 'PHONE_VERIFIED',
+  EMAIL_CHANGED: 'EMAIL_CHANGED',
+  PHONE_CHANGED: 'PHONE_CHANGED',
+  NEW_DEVICE_DETECTED: 'NEW_DEVICE_DETECTED',
+  DEVICE_TRUSTED: 'DEVICE_TRUSTED',
+  DEVICE_UNTRUSTED: 'DEVICE_UNTRUSTED',
+  DEVICE_REVOKED: 'DEVICE_REVOKED',
+  SUSPICIOUS_LOGIN: 'SUSPICIOUS_LOGIN',
+  UNUSUAL_LOCATION: 'UNUSUAL_LOCATION',
+  BRUTE_FORCE_DETECTED: 'BRUTE_FORCE_DETECTED',
+  ACCOUNT_TAKEOVER_ATTEMPT: 'ACCOUNT_TAKEOVER_ATTEMPT',
+  IMPOSSIBLE_TRAVEL: 'IMPOSSIBLE_TRAVEL',
+  WEBAUTHN_REGISTERED: 'WEBAUTHN_REGISTERED',
+  WEBAUTHN_VERIFIED: 'WEBAUTHN_VERIFIED',
+  WEBAUTHN_REMOVED: 'WEBAUTHN_REMOVED',
+  PASSKEY_CREATED: 'PASSKEY_CREATED',
+  PASSKEY_USED: 'PASSKEY_USED',
+  PASSKEY_DELETED: 'PASSKEY_DELETED'
+};
+
+export type ESecurityEvent = (typeof ESecurityEvent)[keyof typeof ESecurityEvent]
+
+
+export const ESecuritySeverity: {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
+};
+
+export type ESecuritySeverity = (typeof ESecuritySeverity)[keyof typeof ESecuritySeverity]
+
 }
 
-export type EBackupCodeType = $Enums.EBackupCodeType
+export type E2FAMethod = $Enums.E2FAMethod
 
-export const EBackupCodeType: typeof $Enums.EBackupCodeType
+export const E2FAMethod: typeof $Enums.E2FAMethod
 
 export type ETokenType = $Enums.ETokenType
 
 export const ETokenType: typeof $Enums.ETokenType
+
+export type EAuditCategory = $Enums.EAuditCategory
+
+export const EAuditCategory: typeof $Enums.EAuditCategory
+
+export type ESecurityEvent = $Enums.ESecurityEvent
+
+export const ESecurityEvent: typeof $Enums.ESecurityEvent
+
+export type ESecuritySeverity = $Enums.ESecuritySeverity
+
+export const ESecuritySeverity: typeof $Enums.ESecuritySeverity
 
 /**
  * ##  Prisma Client ʲˢ
@@ -80,7 +192,7 @@ export const ETokenType: typeof $Enums.ETokenType
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
@@ -112,13 +224,6 @@ export class PrismaClient<
    * Disconnect from the database
    */
   $disconnect(): $Utils.JsPromise<void>;
-
-  /**
-   * Add a middleware
-   * @deprecated since 4.16.0. For new code, prefer client extensions instead.
-   * @see https://pris.ly/d/extensions
-   */
-  $use(cb: Prisma.Middleware): void
 
 /**
    * Executes a prepared raw query and returns the number of affected rows.
@@ -198,6 +303,56 @@ export class PrismaClient<
     * ```
     */
   get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.authenticationMethod`: Exposes CRUD operations for the **AuthenticationMethod** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AuthenticationMethods
+    * const authenticationMethods = await prisma.authenticationMethod.findMany()
+    * ```
+    */
+  get authenticationMethod(): Prisma.AuthenticationMethodDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.trustedDevice`: Exposes CRUD operations for the **TrustedDevice** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TrustedDevices
+    * const trustedDevices = await prisma.trustedDevice.findMany()
+    * ```
+    */
+  get trustedDevice(): Prisma.TrustedDeviceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.securityEvent`: Exposes CRUD operations for the **SecurityEvent** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SecurityEvents
+    * const securityEvents = await prisma.securityEvent.findMany()
+    * ```
+    */
+  get securityEvent(): Prisma.SecurityEventDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.session`: Exposes CRUD operations for the **Session** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Sessions
+    * const sessions = await prisma.session.findMany()
+    * ```
+    */
+  get session(): Prisma.SessionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.accountLock`: Exposes CRUD operations for the **AccountLock** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AccountLocks
+    * const accountLocks = await prisma.accountLock.findMany()
+    * ```
+    */
+  get accountLock(): Prisma.AccountLockDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.token`: Exposes CRUD operations for the **Token** model.
@@ -286,8 +441,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.12.0
-   * Query Engine version: 8047c96bbd92db98a2abc7c9323ce77c02c89dbc
+   * Prisma Client JS version: 6.17.1
+   * Query Engine version: 272a37d34178c2894197e17273bf937f25acdeac
    */
   export type PrismaVersion = {
     client: string
@@ -669,6 +824,11 @@ export namespace Prisma {
 
   export const ModelName: {
     User: 'User',
+    AuthenticationMethod: 'AuthenticationMethod',
+    TrustedDevice: 'TrustedDevice',
+    SecurityEvent: 'SecurityEvent',
+    Session: 'Session',
+    AccountLock: 'AccountLock',
     Token: 'Token',
     BackupCode: 'BackupCode',
     AuditLog: 'AuditLog'
@@ -690,7 +850,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "token" | "backupCode" | "auditLog"
+      modelProps: "user" | "authenticationMethod" | "trustedDevice" | "securityEvent" | "session" | "accountLock" | "token" | "backupCode" | "auditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -765,6 +925,376 @@ export namespace Prisma {
           count: {
             args: Prisma.UserCountArgs<ExtArgs>
             result: $Utils.Optional<UserCountAggregateOutputType> | number
+          }
+        }
+      }
+      AuthenticationMethod: {
+        payload: Prisma.$AuthenticationMethodPayload<ExtArgs>
+        fields: Prisma.AuthenticationMethodFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AuthenticationMethodFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AuthenticationMethodFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload>
+          }
+          findFirst: {
+            args: Prisma.AuthenticationMethodFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AuthenticationMethodFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload>
+          }
+          findMany: {
+            args: Prisma.AuthenticationMethodFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload>[]
+          }
+          create: {
+            args: Prisma.AuthenticationMethodCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload>
+          }
+          createMany: {
+            args: Prisma.AuthenticationMethodCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AuthenticationMethodCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload>[]
+          }
+          delete: {
+            args: Prisma.AuthenticationMethodDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload>
+          }
+          update: {
+            args: Prisma.AuthenticationMethodUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload>
+          }
+          deleteMany: {
+            args: Prisma.AuthenticationMethodDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AuthenticationMethodUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AuthenticationMethodUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload>[]
+          }
+          upsert: {
+            args: Prisma.AuthenticationMethodUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AuthenticationMethodPayload>
+          }
+          aggregate: {
+            args: Prisma.AuthenticationMethodAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAuthenticationMethod>
+          }
+          groupBy: {
+            args: Prisma.AuthenticationMethodGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AuthenticationMethodGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AuthenticationMethodCountArgs<ExtArgs>
+            result: $Utils.Optional<AuthenticationMethodCountAggregateOutputType> | number
+          }
+        }
+      }
+      TrustedDevice: {
+        payload: Prisma.$TrustedDevicePayload<ExtArgs>
+        fields: Prisma.TrustedDeviceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TrustedDeviceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TrustedDeviceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload>
+          }
+          findFirst: {
+            args: Prisma.TrustedDeviceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TrustedDeviceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload>
+          }
+          findMany: {
+            args: Prisma.TrustedDeviceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload>[]
+          }
+          create: {
+            args: Prisma.TrustedDeviceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload>
+          }
+          createMany: {
+            args: Prisma.TrustedDeviceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TrustedDeviceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload>[]
+          }
+          delete: {
+            args: Prisma.TrustedDeviceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload>
+          }
+          update: {
+            args: Prisma.TrustedDeviceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload>
+          }
+          deleteMany: {
+            args: Prisma.TrustedDeviceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TrustedDeviceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TrustedDeviceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload>[]
+          }
+          upsert: {
+            args: Prisma.TrustedDeviceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TrustedDevicePayload>
+          }
+          aggregate: {
+            args: Prisma.TrustedDeviceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTrustedDevice>
+          }
+          groupBy: {
+            args: Prisma.TrustedDeviceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TrustedDeviceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TrustedDeviceCountArgs<ExtArgs>
+            result: $Utils.Optional<TrustedDeviceCountAggregateOutputType> | number
+          }
+        }
+      }
+      SecurityEvent: {
+        payload: Prisma.$SecurityEventPayload<ExtArgs>
+        fields: Prisma.SecurityEventFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SecurityEventFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SecurityEventFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload>
+          }
+          findFirst: {
+            args: Prisma.SecurityEventFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SecurityEventFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload>
+          }
+          findMany: {
+            args: Prisma.SecurityEventFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload>[]
+          }
+          create: {
+            args: Prisma.SecurityEventCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload>
+          }
+          createMany: {
+            args: Prisma.SecurityEventCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SecurityEventCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload>[]
+          }
+          delete: {
+            args: Prisma.SecurityEventDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload>
+          }
+          update: {
+            args: Prisma.SecurityEventUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload>
+          }
+          deleteMany: {
+            args: Prisma.SecurityEventDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SecurityEventUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SecurityEventUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload>[]
+          }
+          upsert: {
+            args: Prisma.SecurityEventUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SecurityEventPayload>
+          }
+          aggregate: {
+            args: Prisma.SecurityEventAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSecurityEvent>
+          }
+          groupBy: {
+            args: Prisma.SecurityEventGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SecurityEventGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SecurityEventCountArgs<ExtArgs>
+            result: $Utils.Optional<SecurityEventCountAggregateOutputType> | number
+          }
+        }
+      }
+      Session: {
+        payload: Prisma.$SessionPayload<ExtArgs>
+        fields: Prisma.SessionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SessionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SessionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          findFirst: {
+            args: Prisma.SessionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SessionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          findMany: {
+            args: Prisma.SessionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>[]
+          }
+          create: {
+            args: Prisma.SessionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          createMany: {
+            args: Prisma.SessionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SessionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>[]
+          }
+          delete: {
+            args: Prisma.SessionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          update: {
+            args: Prisma.SessionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          deleteMany: {
+            args: Prisma.SessionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SessionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SessionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>[]
+          }
+          upsert: {
+            args: Prisma.SessionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessionPayload>
+          }
+          aggregate: {
+            args: Prisma.SessionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSession>
+          }
+          groupBy: {
+            args: Prisma.SessionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SessionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SessionCountArgs<ExtArgs>
+            result: $Utils.Optional<SessionCountAggregateOutputType> | number
+          }
+        }
+      }
+      AccountLock: {
+        payload: Prisma.$AccountLockPayload<ExtArgs>
+        fields: Prisma.AccountLockFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AccountLockFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AccountLockFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload>
+          }
+          findFirst: {
+            args: Prisma.AccountLockFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AccountLockFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload>
+          }
+          findMany: {
+            args: Prisma.AccountLockFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload>[]
+          }
+          create: {
+            args: Prisma.AccountLockCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload>
+          }
+          createMany: {
+            args: Prisma.AccountLockCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AccountLockCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload>[]
+          }
+          delete: {
+            args: Prisma.AccountLockDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload>
+          }
+          update: {
+            args: Prisma.AccountLockUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload>
+          }
+          deleteMany: {
+            args: Prisma.AccountLockDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AccountLockUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AccountLockUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload>[]
+          }
+          upsert: {
+            args: Prisma.AccountLockUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AccountLockPayload>
+          }
+          aggregate: {
+            args: Prisma.AccountLockAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAccountLock>
+          }
+          groupBy: {
+            args: Prisma.AccountLockGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AccountLockGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AccountLockCountArgs<ExtArgs>
+            result: $Utils.Optional<AccountLockCountAggregateOutputType> | number
           }
         }
       }
@@ -1033,16 +1563,24 @@ export namespace Prisma {
     /**
      * @example
      * ```
-     * // Defaults to stdout
+     * // Shorthand for `emit: 'stdout'`
      * log: ['query', 'info', 'warn', 'error']
      * 
-     * // Emit as events
+     * // Emit as events only
      * log: [
-     *   { emit: 'stdout', level: 'query' },
-     *   { emit: 'stdout', level: 'info' },
-     *   { emit: 'stdout', level: 'warn' }
-     *   { emit: 'stdout', level: 'error' }
+     *   { emit: 'event', level: 'query' },
+     *   { emit: 'event', level: 'info' },
+     *   { emit: 'event', level: 'warn' }
+     *   { emit: 'event', level: 'error' }
      * ]
+     * 
+     * / Emit as events and log to stdout
+     * og: [
+     *  { emit: 'stdout', level: 'query' },
+     *  { emit: 'stdout', level: 'info' },
+     *  { emit: 'stdout', level: 'warn' }
+     *  { emit: 'stdout', level: 'error' }
+     * 
      * ```
      * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
      */
@@ -1057,6 +1595,10 @@ export namespace Prisma {
       timeout?: number
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
+    /**
+     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
+     */
+    adapter?: runtime.SqlDriverAdapterFactory | null
     /**
      * Global configuration for omitting model fields by default.
      * 
@@ -1075,6 +1617,11 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     user?: UserOmit
+    authenticationMethod?: AuthenticationMethodOmit
+    trustedDevice?: TrustedDeviceOmit
+    securityEvent?: SecurityEventOmit
+    session?: SessionOmit
+    accountLock?: AccountLockOmit
     token?: TokenOmit
     backupCode?: BackupCodeOmit
     auditLog?: AuditLogOmit
@@ -1087,10 +1634,15 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
-  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
-    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
-    : never
+  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
+
+  export type GetLogType<T> = CheckIsLogLevel<
+    T extends LogDefinition ? T['level'] : T
+  >;
+
+  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
+    ? GetLogType<T[number]>
+    : never;
 
   export type QueryEvent = {
     timestamp: Date
@@ -1131,25 +1683,6 @@ export namespace Prisma {
     | 'findRaw'
     | 'groupBy'
 
-  /**
-   * These options are being passed into the middleware as "params"
-   */
-  export type MiddlewareParams = {
-    model?: ModelName
-    action: PrismaAction
-    args: any
-    dataPath: string[]
-    runInTransaction: boolean
-  }
-
-  /**
-   * The `T` type makes sure, that the `return proceed` is not forgotten in the middleware implementation
-   */
-  export type Middleware<T = any> = (
-    params: MiddlewareParams,
-    next: (params: MiddlewareParams) => $Utils.JsPromise<T>,
-  ) => $Utils.JsPromise<T>
-
   // tested in getLogLevel.test.ts
   export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
 
@@ -1172,15 +1705,25 @@ export namespace Prisma {
    */
 
   export type UserCountOutputType = {
+    authenticationMethods: number
     backupCodes: number
+    trustedDevices: number
     auditLogs: number
     tokens: number
+    sessions: number
+    accountLocks: number
+    securityEvents: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    authenticationMethods?: boolean | UserCountOutputTypeCountAuthenticationMethodsArgs
     backupCodes?: boolean | UserCountOutputTypeCountBackupCodesArgs
+    trustedDevices?: boolean | UserCountOutputTypeCountTrustedDevicesArgs
     auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
     tokens?: boolean | UserCountOutputTypeCountTokensArgs
+    sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+    accountLocks?: boolean | UserCountOutputTypeCountAccountLocksArgs
+    securityEvents?: boolean | UserCountOutputTypeCountSecurityEventsArgs
   }
 
   // Custom InputTypes
@@ -1197,8 +1740,22 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
+  export type UserCountOutputTypeCountAuthenticationMethodsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AuthenticationMethodWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
   export type UserCountOutputTypeCountBackupCodesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BackupCodeWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountTrustedDevicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TrustedDeviceWhereInput
   }
 
   /**
@@ -1215,6 +1772,27 @@ export namespace Prisma {
     where?: TokenWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SessionWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountAccountLocksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AccountLockWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountSecurityEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SecurityEventWhereInput
+  }
+
 
   /**
    * Models
@@ -1226,8 +1804,18 @@ export namespace Prisma {
 
   export type AggregateUser = {
     _count: UserCountAggregateOutputType | null
+    _avg: UserAvgAggregateOutputType | null
+    _sum: UserSumAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
+  }
+
+  export type UserAvgAggregateOutputType = {
+    riskScore: number | null
+  }
+
+  export type UserSumAggregateOutputType = {
+    riskScore: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -1241,10 +1829,21 @@ export namespace Prisma {
     bio: string | null
     password: string | null
     isEmailVerified: boolean | null
-    isTotpEnabled: boolean | null
-    totpSecret: string | null
-    isOtpEnabled: boolean | null
-    otpSecret: string | null
+    emailVerifiedAt: Date | null
+    isUnsubscribed: boolean | null
+    emailBouncedAt: Date | null
+    isPhoneVerified: boolean | null
+    phoneVerifiedAt: Date | null
+    phoneBouncedAt: Date | null
+    is2FAEnabled: boolean | null
+    preferred2FAMethod: $Enums.E2FAMethod | null
+    require2FA: boolean | null
+    lastLoginAt: Date | null
+    lastLoginIp: string | null
+    passwordChangedAt: Date | null
+    riskScore: number | null
+    lastRiskAssessAt: Date | null
+    deletedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1260,10 +1859,21 @@ export namespace Prisma {
     bio: string | null
     password: string | null
     isEmailVerified: boolean | null
-    isTotpEnabled: boolean | null
-    totpSecret: string | null
-    isOtpEnabled: boolean | null
-    otpSecret: string | null
+    emailVerifiedAt: Date | null
+    isUnsubscribed: boolean | null
+    emailBouncedAt: Date | null
+    isPhoneVerified: boolean | null
+    phoneVerifiedAt: Date | null
+    phoneBouncedAt: Date | null
+    is2FAEnabled: boolean | null
+    preferred2FAMethod: $Enums.E2FAMethod | null
+    require2FA: boolean | null
+    lastLoginAt: Date | null
+    lastLoginIp: string | null
+    passwordChangedAt: Date | null
+    riskScore: number | null
+    lastRiskAssessAt: Date | null
+    deletedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1279,15 +1889,34 @@ export namespace Prisma {
     bio: number
     password: number
     isEmailVerified: number
-    isTotpEnabled: number
-    totpSecret: number
-    isOtpEnabled: number
-    otpSecret: number
+    emailVerifiedAt: number
+    isUnsubscribed: number
+    emailBouncedAt: number
+    isPhoneVerified: number
+    phoneVerifiedAt: number
+    phoneBouncedAt: number
+    is2FAEnabled: number
+    preferred2FAMethod: number
+    require2FA: number
+    lastLoginAt: number
+    lastLoginIp: number
+    passwordChangedAt: number
+    riskScore: number
+    lastRiskAssessAt: number
+    deletedAt: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
+
+  export type UserAvgAggregateInputType = {
+    riskScore?: true
+  }
+
+  export type UserSumAggregateInputType = {
+    riskScore?: true
+  }
 
   export type UserMinAggregateInputType = {
     id?: true
@@ -1300,10 +1929,21 @@ export namespace Prisma {
     bio?: true
     password?: true
     isEmailVerified?: true
-    isTotpEnabled?: true
-    totpSecret?: true
-    isOtpEnabled?: true
-    otpSecret?: true
+    emailVerifiedAt?: true
+    isUnsubscribed?: true
+    emailBouncedAt?: true
+    isPhoneVerified?: true
+    phoneVerifiedAt?: true
+    phoneBouncedAt?: true
+    is2FAEnabled?: true
+    preferred2FAMethod?: true
+    require2FA?: true
+    lastLoginAt?: true
+    lastLoginIp?: true
+    passwordChangedAt?: true
+    riskScore?: true
+    lastRiskAssessAt?: true
+    deletedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1319,10 +1959,21 @@ export namespace Prisma {
     bio?: true
     password?: true
     isEmailVerified?: true
-    isTotpEnabled?: true
-    totpSecret?: true
-    isOtpEnabled?: true
-    otpSecret?: true
+    emailVerifiedAt?: true
+    isUnsubscribed?: true
+    emailBouncedAt?: true
+    isPhoneVerified?: true
+    phoneVerifiedAt?: true
+    phoneBouncedAt?: true
+    is2FAEnabled?: true
+    preferred2FAMethod?: true
+    require2FA?: true
+    lastLoginAt?: true
+    lastLoginIp?: true
+    passwordChangedAt?: true
+    riskScore?: true
+    lastRiskAssessAt?: true
+    deletedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1338,10 +1989,21 @@ export namespace Prisma {
     bio?: true
     password?: true
     isEmailVerified?: true
-    isTotpEnabled?: true
-    totpSecret?: true
-    isOtpEnabled?: true
-    otpSecret?: true
+    emailVerifiedAt?: true
+    isUnsubscribed?: true
+    emailBouncedAt?: true
+    isPhoneVerified?: true
+    phoneVerifiedAt?: true
+    phoneBouncedAt?: true
+    is2FAEnabled?: true
+    preferred2FAMethod?: true
+    require2FA?: true
+    lastLoginAt?: true
+    lastLoginIp?: true
+    passwordChangedAt?: true
+    riskScore?: true
+    lastRiskAssessAt?: true
+    deletedAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1385,6 +2047,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: UserAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: UserSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: UserMinAggregateInputType
@@ -1415,6 +2089,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: UserCountAggregateInputType | true
+    _avg?: UserAvgAggregateInputType
+    _sum?: UserSumAggregateInputType
     _min?: UserMinAggregateInputType
     _max?: UserMaxAggregateInputType
   }
@@ -1430,13 +2106,26 @@ export namespace Prisma {
     bio: string | null
     password: string
     isEmailVerified: boolean
-    isTotpEnabled: boolean
-    totpSecret: string | null
-    isOtpEnabled: boolean
-    otpSecret: string | null
+    emailVerifiedAt: Date | null
+    isUnsubscribed: boolean | null
+    emailBouncedAt: Date | null
+    isPhoneVerified: boolean
+    phoneVerifiedAt: Date | null
+    phoneBouncedAt: Date | null
+    is2FAEnabled: boolean
+    preferred2FAMethod: $Enums.E2FAMethod | null
+    require2FA: boolean
+    lastLoginAt: Date | null
+    lastLoginIp: string | null
+    passwordChangedAt: Date | null
+    riskScore: number | null
+    lastRiskAssessAt: Date | null
+    deletedAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
+    _avg: UserAvgAggregateOutputType | null
+    _sum: UserSumAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
   }
@@ -1466,15 +2155,31 @@ export namespace Prisma {
     bio?: boolean
     password?: boolean
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: boolean
-    isOtpEnabled?: boolean
-    otpSecret?: boolean
+    emailVerifiedAt?: boolean
+    isUnsubscribed?: boolean
+    emailBouncedAt?: boolean
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: boolean
+    phoneBouncedAt?: boolean
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: boolean
+    require2FA?: boolean
+    lastLoginAt?: boolean
+    lastLoginIp?: boolean
+    passwordChangedAt?: boolean
+    riskScore?: boolean
+    lastRiskAssessAt?: boolean
+    deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    authenticationMethods?: boolean | User$authenticationMethodsArgs<ExtArgs>
     backupCodes?: boolean | User$backupCodesArgs<ExtArgs>
+    trustedDevices?: boolean | User$trustedDevicesArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
     tokens?: boolean | User$tokensArgs<ExtArgs>
+    sessions?: boolean | User$sessionsArgs<ExtArgs>
+    accountLocks?: boolean | User$accountLocksArgs<ExtArgs>
+    securityEvents?: boolean | User$securityEventsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1489,10 +2194,21 @@ export namespace Prisma {
     bio?: boolean
     password?: boolean
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: boolean
-    isOtpEnabled?: boolean
-    otpSecret?: boolean
+    emailVerifiedAt?: boolean
+    isUnsubscribed?: boolean
+    emailBouncedAt?: boolean
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: boolean
+    phoneBouncedAt?: boolean
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: boolean
+    require2FA?: boolean
+    lastLoginAt?: boolean
+    lastLoginIp?: boolean
+    passwordChangedAt?: boolean
+    riskScore?: boolean
+    lastRiskAssessAt?: boolean
+    deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1508,10 +2224,21 @@ export namespace Prisma {
     bio?: boolean
     password?: boolean
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: boolean
-    isOtpEnabled?: boolean
-    otpSecret?: boolean
+    emailVerifiedAt?: boolean
+    isUnsubscribed?: boolean
+    emailBouncedAt?: boolean
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: boolean
+    phoneBouncedAt?: boolean
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: boolean
+    require2FA?: boolean
+    lastLoginAt?: boolean
+    lastLoginIp?: boolean
+    passwordChangedAt?: boolean
+    riskScore?: boolean
+    lastRiskAssessAt?: boolean
+    deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1527,19 +2254,35 @@ export namespace Prisma {
     bio?: boolean
     password?: boolean
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: boolean
-    isOtpEnabled?: boolean
-    otpSecret?: boolean
+    emailVerifiedAt?: boolean
+    isUnsubscribed?: boolean
+    emailBouncedAt?: boolean
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: boolean
+    phoneBouncedAt?: boolean
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: boolean
+    require2FA?: boolean
+    lastLoginAt?: boolean
+    lastLoginIp?: boolean
+    passwordChangedAt?: boolean
+    riskScore?: boolean
+    lastRiskAssessAt?: boolean
+    deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "firstName" | "lastName" | "phone" | "email" | "avatar" | "bio" | "password" | "isEmailVerified" | "isTotpEnabled" | "totpSecret" | "isOtpEnabled" | "otpSecret" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "firstName" | "lastName" | "phone" | "email" | "avatar" | "bio" | "password" | "isEmailVerified" | "emailVerifiedAt" | "isUnsubscribed" | "emailBouncedAt" | "isPhoneVerified" | "phoneVerifiedAt" | "phoneBouncedAt" | "is2FAEnabled" | "preferred2FAMethod" | "require2FA" | "lastLoginAt" | "lastLoginIp" | "passwordChangedAt" | "riskScore" | "lastRiskAssessAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    authenticationMethods?: boolean | User$authenticationMethodsArgs<ExtArgs>
     backupCodes?: boolean | User$backupCodesArgs<ExtArgs>
+    trustedDevices?: boolean | User$trustedDevicesArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
     tokens?: boolean | User$tokensArgs<ExtArgs>
+    sessions?: boolean | User$sessionsArgs<ExtArgs>
+    accountLocks?: boolean | User$accountLocksArgs<ExtArgs>
+    securityEvents?: boolean | User$securityEventsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1548,9 +2291,14 @@ export namespace Prisma {
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
     objects: {
+      authenticationMethods: Prisma.$AuthenticationMethodPayload<ExtArgs>[]
       backupCodes: Prisma.$BackupCodePayload<ExtArgs>[]
+      trustedDevices: Prisma.$TrustedDevicePayload<ExtArgs>[]
       auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
       tokens: Prisma.$TokenPayload<ExtArgs>[]
+      sessions: Prisma.$SessionPayload<ExtArgs>[]
+      accountLocks: Prisma.$AccountLockPayload<ExtArgs>[]
+      securityEvents: Prisma.$SecurityEventPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1563,10 +2311,37 @@ export namespace Prisma {
       bio: string | null
       password: string
       isEmailVerified: boolean
-      isTotpEnabled: boolean
-      totpSecret: string | null
-      isOtpEnabled: boolean
-      otpSecret: string | null
+      emailVerifiedAt: Date | null
+      isUnsubscribed: boolean | null
+      emailBouncedAt: Date | null
+      isPhoneVerified: boolean
+      phoneVerifiedAt: Date | null
+      phoneBouncedAt: Date | null
+      /**
+       * Global 2FA status - true if user has any active 2FA method
+       */
+      is2FAEnabled: boolean
+      /**
+       * User's preferred 2FA method for login
+       */
+      preferred2FAMethod: $Enums.E2FAMethod | null
+      /**
+       * Force 2FA for this user (admin-enforced, compliance)
+       */
+      require2FA: boolean
+      lastLoginAt: Date | null
+      lastLoginIp: string | null
+      passwordChangedAt: Date | null
+      /**
+       * User risk score (0-100): 0=trusted, 100=high risk
+       * Calculated based on login patterns, location changes, failed attempts
+       */
+      riskScore: number | null
+      /**
+       * Last time risk score was calculated
+       */
+      lastRiskAssessAt: Date | null
+      deletedAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -1963,9 +2738,14 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    authenticationMethods<T extends User$authenticationMethodsArgs<ExtArgs> = {}>(args?: Subset<T, User$authenticationMethodsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     backupCodes<T extends User$backupCodesArgs<ExtArgs> = {}>(args?: Subset<T, User$backupCodesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackupCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    trustedDevices<T extends User$trustedDevicesArgs<ExtArgs> = {}>(args?: Subset<T, User$trustedDevicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     auditLogs<T extends User$auditLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tokens<T extends User$tokensArgs<ExtArgs> = {}>(args?: Subset<T, User$tokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    sessions<T extends User$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    accountLocks<T extends User$accountLocksArgs<ExtArgs> = {}>(args?: Subset<T, User$accountLocksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    securityEvents<T extends User$securityEventsArgs<ExtArgs> = {}>(args?: Subset<T, User$securityEventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2005,10 +2785,21 @@ export namespace Prisma {
     readonly bio: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly isEmailVerified: FieldRef<"User", 'Boolean'>
-    readonly isTotpEnabled: FieldRef<"User", 'Boolean'>
-    readonly totpSecret: FieldRef<"User", 'String'>
-    readonly isOtpEnabled: FieldRef<"User", 'Boolean'>
-    readonly otpSecret: FieldRef<"User", 'String'>
+    readonly emailVerifiedAt: FieldRef<"User", 'DateTime'>
+    readonly isUnsubscribed: FieldRef<"User", 'Boolean'>
+    readonly emailBouncedAt: FieldRef<"User", 'DateTime'>
+    readonly isPhoneVerified: FieldRef<"User", 'Boolean'>
+    readonly phoneVerifiedAt: FieldRef<"User", 'DateTime'>
+    readonly phoneBouncedAt: FieldRef<"User", 'DateTime'>
+    readonly is2FAEnabled: FieldRef<"User", 'Boolean'>
+    readonly preferred2FAMethod: FieldRef<"User", 'E2FAMethod'>
+    readonly require2FA: FieldRef<"User", 'Boolean'>
+    readonly lastLoginAt: FieldRef<"User", 'DateTime'>
+    readonly lastLoginIp: FieldRef<"User", 'String'>
+    readonly passwordChangedAt: FieldRef<"User", 'DateTime'>
+    readonly riskScore: FieldRef<"User", 'Float'>
+    readonly lastRiskAssessAt: FieldRef<"User", 'DateTime'>
+    readonly deletedAt: FieldRef<"User", 'DateTime'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -2399,6 +3190,30 @@ export namespace Prisma {
   }
 
   /**
+   * User.authenticationMethods
+   */
+  export type User$authenticationMethodsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+    where?: AuthenticationMethodWhereInput
+    orderBy?: AuthenticationMethodOrderByWithRelationInput | AuthenticationMethodOrderByWithRelationInput[]
+    cursor?: AuthenticationMethodWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AuthenticationMethodScalarFieldEnum | AuthenticationMethodScalarFieldEnum[]
+  }
+
+  /**
    * User.backupCodes
    */
   export type User$backupCodesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2420,6 +3235,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: BackupCodeScalarFieldEnum | BackupCodeScalarFieldEnum[]
+  }
+
+  /**
+   * User.trustedDevices
+   */
+  export type User$trustedDevicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+    where?: TrustedDeviceWhereInput
+    orderBy?: TrustedDeviceOrderByWithRelationInput | TrustedDeviceOrderByWithRelationInput[]
+    cursor?: TrustedDeviceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TrustedDeviceScalarFieldEnum | TrustedDeviceScalarFieldEnum[]
   }
 
   /**
@@ -2471,6 +3310,78 @@ export namespace Prisma {
   }
 
   /**
+   * User.sessions
+   */
+  export type User$sessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    where?: SessionWhereInput
+    orderBy?: SessionOrderByWithRelationInput | SessionOrderByWithRelationInput[]
+    cursor?: SessionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
+   * User.accountLocks
+   */
+  export type User$accountLocksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+    where?: AccountLockWhereInput
+    orderBy?: AccountLockOrderByWithRelationInput | AccountLockOrderByWithRelationInput[]
+    cursor?: AccountLockWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AccountLockScalarFieldEnum | AccountLockScalarFieldEnum[]
+  }
+
+  /**
+   * User.securityEvents
+   */
+  export type User$securityEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+    where?: SecurityEventWhereInput
+    orderBy?: SecurityEventOrderByWithRelationInput | SecurityEventOrderByWithRelationInput[]
+    cursor?: SecurityEventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SecurityEventScalarFieldEnum | SecurityEventScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2490,13 +3401,6245 @@ export namespace Prisma {
 
 
   /**
+   * Model AuthenticationMethod
+   */
+
+  export type AggregateAuthenticationMethod = {
+    _count: AuthenticationMethodCountAggregateOutputType | null
+    _avg: AuthenticationMethodAvgAggregateOutputType | null
+    _sum: AuthenticationMethodSumAggregateOutputType | null
+    _min: AuthenticationMethodMinAggregateOutputType | null
+    _max: AuthenticationMethodMaxAggregateOutputType | null
+  }
+
+  export type AuthenticationMethodAvgAggregateOutputType = {
+    useCount: number | null
+  }
+
+  export type AuthenticationMethodSumAggregateOutputType = {
+    useCount: number | null
+  }
+
+  export type AuthenticationMethodMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    method: $Enums.E2FAMethod | null
+    name: string | null
+    isActive: boolean | null
+    isPrimary: boolean | null
+    lastUsedAt: Date | null
+    useCount: number | null
+    credentialId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AuthenticationMethodMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    method: $Enums.E2FAMethod | null
+    name: string | null
+    isActive: boolean | null
+    isPrimary: boolean | null
+    lastUsedAt: Date | null
+    useCount: number | null
+    credentialId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AuthenticationMethodCountAggregateOutputType = {
+    id: number
+    userId: number
+    method: number
+    data: number
+    name: number
+    isActive: number
+    isPrimary: number
+    lastUsedAt: number
+    useCount: number
+    credentialId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AuthenticationMethodAvgAggregateInputType = {
+    useCount?: true
+  }
+
+  export type AuthenticationMethodSumAggregateInputType = {
+    useCount?: true
+  }
+
+  export type AuthenticationMethodMinAggregateInputType = {
+    id?: true
+    userId?: true
+    method?: true
+    name?: true
+    isActive?: true
+    isPrimary?: true
+    lastUsedAt?: true
+    useCount?: true
+    credentialId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AuthenticationMethodMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    method?: true
+    name?: true
+    isActive?: true
+    isPrimary?: true
+    lastUsedAt?: true
+    useCount?: true
+    credentialId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AuthenticationMethodCountAggregateInputType = {
+    id?: true
+    userId?: true
+    method?: true
+    data?: true
+    name?: true
+    isActive?: true
+    isPrimary?: true
+    lastUsedAt?: true
+    useCount?: true
+    credentialId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AuthenticationMethodAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AuthenticationMethod to aggregate.
+     */
+    where?: AuthenticationMethodWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AuthenticationMethods to fetch.
+     */
+    orderBy?: AuthenticationMethodOrderByWithRelationInput | AuthenticationMethodOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AuthenticationMethodWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AuthenticationMethods from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AuthenticationMethods.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AuthenticationMethods
+    **/
+    _count?: true | AuthenticationMethodCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AuthenticationMethodAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AuthenticationMethodSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AuthenticationMethodMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AuthenticationMethodMaxAggregateInputType
+  }
+
+  export type GetAuthenticationMethodAggregateType<T extends AuthenticationMethodAggregateArgs> = {
+        [P in keyof T & keyof AggregateAuthenticationMethod]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAuthenticationMethod[P]>
+      : GetScalarType<T[P], AggregateAuthenticationMethod[P]>
+  }
+
+
+
+
+  export type AuthenticationMethodGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AuthenticationMethodWhereInput
+    orderBy?: AuthenticationMethodOrderByWithAggregationInput | AuthenticationMethodOrderByWithAggregationInput[]
+    by: AuthenticationMethodScalarFieldEnum[] | AuthenticationMethodScalarFieldEnum
+    having?: AuthenticationMethodScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AuthenticationMethodCountAggregateInputType | true
+    _avg?: AuthenticationMethodAvgAggregateInputType
+    _sum?: AuthenticationMethodSumAggregateInputType
+    _min?: AuthenticationMethodMinAggregateInputType
+    _max?: AuthenticationMethodMaxAggregateInputType
+  }
+
+  export type AuthenticationMethodGroupByOutputType = {
+    id: string
+    userId: string
+    method: $Enums.E2FAMethod
+    data: JsonValue
+    name: string | null
+    isActive: boolean
+    isPrimary: boolean
+    lastUsedAt: Date | null
+    useCount: number
+    credentialId: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AuthenticationMethodCountAggregateOutputType | null
+    _avg: AuthenticationMethodAvgAggregateOutputType | null
+    _sum: AuthenticationMethodSumAggregateOutputType | null
+    _min: AuthenticationMethodMinAggregateOutputType | null
+    _max: AuthenticationMethodMaxAggregateOutputType | null
+  }
+
+  type GetAuthenticationMethodGroupByPayload<T extends AuthenticationMethodGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AuthenticationMethodGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AuthenticationMethodGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AuthenticationMethodGroupByOutputType[P]>
+            : GetScalarType<T[P], AuthenticationMethodGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AuthenticationMethodSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    method?: boolean
+    data?: boolean
+    name?: boolean
+    isActive?: boolean
+    isPrimary?: boolean
+    lastUsedAt?: boolean
+    useCount?: boolean
+    credentialId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["authenticationMethod"]>
+
+  export type AuthenticationMethodSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    method?: boolean
+    data?: boolean
+    name?: boolean
+    isActive?: boolean
+    isPrimary?: boolean
+    lastUsedAt?: boolean
+    useCount?: boolean
+    credentialId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["authenticationMethod"]>
+
+  export type AuthenticationMethodSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    method?: boolean
+    data?: boolean
+    name?: boolean
+    isActive?: boolean
+    isPrimary?: boolean
+    lastUsedAt?: boolean
+    useCount?: boolean
+    credentialId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["authenticationMethod"]>
+
+  export type AuthenticationMethodSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    method?: boolean
+    data?: boolean
+    name?: boolean
+    isActive?: boolean
+    isPrimary?: boolean
+    lastUsedAt?: boolean
+    useCount?: boolean
+    credentialId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AuthenticationMethodOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "method" | "data" | "name" | "isActive" | "isPrimary" | "lastUsedAt" | "useCount" | "credentialId" | "createdAt" | "updatedAt", ExtArgs["result"]["authenticationMethod"]>
+  export type AuthenticationMethodInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type AuthenticationMethodIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type AuthenticationMethodIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $AuthenticationMethodPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AuthenticationMethod"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      /**
+       * Type of 2FA method (TOTP, OTP_EMAIL, OTP_SMS, WEBAUTHN, PASSKEY)
+       */
+      method: $Enums.E2FAMethod
+      /**
+       * Method-specific encrypted data as JSON
+       */
+      data: Prisma.JsonValue
+      /**
+       * Display name for this method (e.g., "iPhone 15 Pro", "YubiKey 5")
+       */
+      name: string | null
+      /**
+       * Whether this method is currently active
+       */
+      isActive: boolean
+      /**
+       * Primary method used by default for 2FA challenges
+       */
+      isPrimary: boolean
+      /**
+       * Last time this method was used for authentication
+       */
+      lastUsedAt: Date | null
+      /**
+       * Total number of successful authentications with this method
+       */
+      useCount: number
+      /**
+       * WebAuthn credential ID (base64url encoded)
+       */
+      credentialId: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["authenticationMethod"]>
+    composites: {}
+  }
+
+  type AuthenticationMethodGetPayload<S extends boolean | null | undefined | AuthenticationMethodDefaultArgs> = $Result.GetResult<Prisma.$AuthenticationMethodPayload, S>
+
+  type AuthenticationMethodCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AuthenticationMethodFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AuthenticationMethodCountAggregateInputType | true
+    }
+
+  export interface AuthenticationMethodDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AuthenticationMethod'], meta: { name: 'AuthenticationMethod' } }
+    /**
+     * Find zero or one AuthenticationMethod that matches the filter.
+     * @param {AuthenticationMethodFindUniqueArgs} args - Arguments to find a AuthenticationMethod
+     * @example
+     * // Get one AuthenticationMethod
+     * const authenticationMethod = await prisma.authenticationMethod.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AuthenticationMethodFindUniqueArgs>(args: SelectSubset<T, AuthenticationMethodFindUniqueArgs<ExtArgs>>): Prisma__AuthenticationMethodClient<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AuthenticationMethod that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AuthenticationMethodFindUniqueOrThrowArgs} args - Arguments to find a AuthenticationMethod
+     * @example
+     * // Get one AuthenticationMethod
+     * const authenticationMethod = await prisma.authenticationMethod.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AuthenticationMethodFindUniqueOrThrowArgs>(args: SelectSubset<T, AuthenticationMethodFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AuthenticationMethodClient<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AuthenticationMethod that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuthenticationMethodFindFirstArgs} args - Arguments to find a AuthenticationMethod
+     * @example
+     * // Get one AuthenticationMethod
+     * const authenticationMethod = await prisma.authenticationMethod.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AuthenticationMethodFindFirstArgs>(args?: SelectSubset<T, AuthenticationMethodFindFirstArgs<ExtArgs>>): Prisma__AuthenticationMethodClient<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AuthenticationMethod that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuthenticationMethodFindFirstOrThrowArgs} args - Arguments to find a AuthenticationMethod
+     * @example
+     * // Get one AuthenticationMethod
+     * const authenticationMethod = await prisma.authenticationMethod.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AuthenticationMethodFindFirstOrThrowArgs>(args?: SelectSubset<T, AuthenticationMethodFindFirstOrThrowArgs<ExtArgs>>): Prisma__AuthenticationMethodClient<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AuthenticationMethods that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuthenticationMethodFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AuthenticationMethods
+     * const authenticationMethods = await prisma.authenticationMethod.findMany()
+     * 
+     * // Get first 10 AuthenticationMethods
+     * const authenticationMethods = await prisma.authenticationMethod.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const authenticationMethodWithIdOnly = await prisma.authenticationMethod.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AuthenticationMethodFindManyArgs>(args?: SelectSubset<T, AuthenticationMethodFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AuthenticationMethod.
+     * @param {AuthenticationMethodCreateArgs} args - Arguments to create a AuthenticationMethod.
+     * @example
+     * // Create one AuthenticationMethod
+     * const AuthenticationMethod = await prisma.authenticationMethod.create({
+     *   data: {
+     *     // ... data to create a AuthenticationMethod
+     *   }
+     * })
+     * 
+     */
+    create<T extends AuthenticationMethodCreateArgs>(args: SelectSubset<T, AuthenticationMethodCreateArgs<ExtArgs>>): Prisma__AuthenticationMethodClient<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AuthenticationMethods.
+     * @param {AuthenticationMethodCreateManyArgs} args - Arguments to create many AuthenticationMethods.
+     * @example
+     * // Create many AuthenticationMethods
+     * const authenticationMethod = await prisma.authenticationMethod.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AuthenticationMethodCreateManyArgs>(args?: SelectSubset<T, AuthenticationMethodCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AuthenticationMethods and returns the data saved in the database.
+     * @param {AuthenticationMethodCreateManyAndReturnArgs} args - Arguments to create many AuthenticationMethods.
+     * @example
+     * // Create many AuthenticationMethods
+     * const authenticationMethod = await prisma.authenticationMethod.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AuthenticationMethods and only return the `id`
+     * const authenticationMethodWithIdOnly = await prisma.authenticationMethod.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AuthenticationMethodCreateManyAndReturnArgs>(args?: SelectSubset<T, AuthenticationMethodCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AuthenticationMethod.
+     * @param {AuthenticationMethodDeleteArgs} args - Arguments to delete one AuthenticationMethod.
+     * @example
+     * // Delete one AuthenticationMethod
+     * const AuthenticationMethod = await prisma.authenticationMethod.delete({
+     *   where: {
+     *     // ... filter to delete one AuthenticationMethod
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AuthenticationMethodDeleteArgs>(args: SelectSubset<T, AuthenticationMethodDeleteArgs<ExtArgs>>): Prisma__AuthenticationMethodClient<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AuthenticationMethod.
+     * @param {AuthenticationMethodUpdateArgs} args - Arguments to update one AuthenticationMethod.
+     * @example
+     * // Update one AuthenticationMethod
+     * const authenticationMethod = await prisma.authenticationMethod.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AuthenticationMethodUpdateArgs>(args: SelectSubset<T, AuthenticationMethodUpdateArgs<ExtArgs>>): Prisma__AuthenticationMethodClient<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AuthenticationMethods.
+     * @param {AuthenticationMethodDeleteManyArgs} args - Arguments to filter AuthenticationMethods to delete.
+     * @example
+     * // Delete a few AuthenticationMethods
+     * const { count } = await prisma.authenticationMethod.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AuthenticationMethodDeleteManyArgs>(args?: SelectSubset<T, AuthenticationMethodDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AuthenticationMethods.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuthenticationMethodUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AuthenticationMethods
+     * const authenticationMethod = await prisma.authenticationMethod.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AuthenticationMethodUpdateManyArgs>(args: SelectSubset<T, AuthenticationMethodUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AuthenticationMethods and returns the data updated in the database.
+     * @param {AuthenticationMethodUpdateManyAndReturnArgs} args - Arguments to update many AuthenticationMethods.
+     * @example
+     * // Update many AuthenticationMethods
+     * const authenticationMethod = await prisma.authenticationMethod.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AuthenticationMethods and only return the `id`
+     * const authenticationMethodWithIdOnly = await prisma.authenticationMethod.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AuthenticationMethodUpdateManyAndReturnArgs>(args: SelectSubset<T, AuthenticationMethodUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AuthenticationMethod.
+     * @param {AuthenticationMethodUpsertArgs} args - Arguments to update or create a AuthenticationMethod.
+     * @example
+     * // Update or create a AuthenticationMethod
+     * const authenticationMethod = await prisma.authenticationMethod.upsert({
+     *   create: {
+     *     // ... data to create a AuthenticationMethod
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AuthenticationMethod we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AuthenticationMethodUpsertArgs>(args: SelectSubset<T, AuthenticationMethodUpsertArgs<ExtArgs>>): Prisma__AuthenticationMethodClient<$Result.GetResult<Prisma.$AuthenticationMethodPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AuthenticationMethods.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuthenticationMethodCountArgs} args - Arguments to filter AuthenticationMethods to count.
+     * @example
+     * // Count the number of AuthenticationMethods
+     * const count = await prisma.authenticationMethod.count({
+     *   where: {
+     *     // ... the filter for the AuthenticationMethods we want to count
+     *   }
+     * })
+    **/
+    count<T extends AuthenticationMethodCountArgs>(
+      args?: Subset<T, AuthenticationMethodCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AuthenticationMethodCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AuthenticationMethod.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuthenticationMethodAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AuthenticationMethodAggregateArgs>(args: Subset<T, AuthenticationMethodAggregateArgs>): Prisma.PrismaPromise<GetAuthenticationMethodAggregateType<T>>
+
+    /**
+     * Group by AuthenticationMethod.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AuthenticationMethodGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AuthenticationMethodGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AuthenticationMethodGroupByArgs['orderBy'] }
+        : { orderBy?: AuthenticationMethodGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AuthenticationMethodGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAuthenticationMethodGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AuthenticationMethod model
+   */
+  readonly fields: AuthenticationMethodFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AuthenticationMethod.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AuthenticationMethodClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AuthenticationMethod model
+   */
+  interface AuthenticationMethodFieldRefs {
+    readonly id: FieldRef<"AuthenticationMethod", 'String'>
+    readonly userId: FieldRef<"AuthenticationMethod", 'String'>
+    readonly method: FieldRef<"AuthenticationMethod", 'E2FAMethod'>
+    readonly data: FieldRef<"AuthenticationMethod", 'Json'>
+    readonly name: FieldRef<"AuthenticationMethod", 'String'>
+    readonly isActive: FieldRef<"AuthenticationMethod", 'Boolean'>
+    readonly isPrimary: FieldRef<"AuthenticationMethod", 'Boolean'>
+    readonly lastUsedAt: FieldRef<"AuthenticationMethod", 'DateTime'>
+    readonly useCount: FieldRef<"AuthenticationMethod", 'Int'>
+    readonly credentialId: FieldRef<"AuthenticationMethod", 'String'>
+    readonly createdAt: FieldRef<"AuthenticationMethod", 'DateTime'>
+    readonly updatedAt: FieldRef<"AuthenticationMethod", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AuthenticationMethod findUnique
+   */
+  export type AuthenticationMethodFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+    /**
+     * Filter, which AuthenticationMethod to fetch.
+     */
+    where: AuthenticationMethodWhereUniqueInput
+  }
+
+  /**
+   * AuthenticationMethod findUniqueOrThrow
+   */
+  export type AuthenticationMethodFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+    /**
+     * Filter, which AuthenticationMethod to fetch.
+     */
+    where: AuthenticationMethodWhereUniqueInput
+  }
+
+  /**
+   * AuthenticationMethod findFirst
+   */
+  export type AuthenticationMethodFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+    /**
+     * Filter, which AuthenticationMethod to fetch.
+     */
+    where?: AuthenticationMethodWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AuthenticationMethods to fetch.
+     */
+    orderBy?: AuthenticationMethodOrderByWithRelationInput | AuthenticationMethodOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AuthenticationMethods.
+     */
+    cursor?: AuthenticationMethodWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AuthenticationMethods from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AuthenticationMethods.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AuthenticationMethods.
+     */
+    distinct?: AuthenticationMethodScalarFieldEnum | AuthenticationMethodScalarFieldEnum[]
+  }
+
+  /**
+   * AuthenticationMethod findFirstOrThrow
+   */
+  export type AuthenticationMethodFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+    /**
+     * Filter, which AuthenticationMethod to fetch.
+     */
+    where?: AuthenticationMethodWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AuthenticationMethods to fetch.
+     */
+    orderBy?: AuthenticationMethodOrderByWithRelationInput | AuthenticationMethodOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AuthenticationMethods.
+     */
+    cursor?: AuthenticationMethodWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AuthenticationMethods from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AuthenticationMethods.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AuthenticationMethods.
+     */
+    distinct?: AuthenticationMethodScalarFieldEnum | AuthenticationMethodScalarFieldEnum[]
+  }
+
+  /**
+   * AuthenticationMethod findMany
+   */
+  export type AuthenticationMethodFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+    /**
+     * Filter, which AuthenticationMethods to fetch.
+     */
+    where?: AuthenticationMethodWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AuthenticationMethods to fetch.
+     */
+    orderBy?: AuthenticationMethodOrderByWithRelationInput | AuthenticationMethodOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AuthenticationMethods.
+     */
+    cursor?: AuthenticationMethodWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AuthenticationMethods from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AuthenticationMethods.
+     */
+    skip?: number
+    distinct?: AuthenticationMethodScalarFieldEnum | AuthenticationMethodScalarFieldEnum[]
+  }
+
+  /**
+   * AuthenticationMethod create
+   */
+  export type AuthenticationMethodCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AuthenticationMethod.
+     */
+    data: XOR<AuthenticationMethodCreateInput, AuthenticationMethodUncheckedCreateInput>
+  }
+
+  /**
+   * AuthenticationMethod createMany
+   */
+  export type AuthenticationMethodCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AuthenticationMethods.
+     */
+    data: AuthenticationMethodCreateManyInput | AuthenticationMethodCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AuthenticationMethod createManyAndReturn
+   */
+  export type AuthenticationMethodCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * The data used to create many AuthenticationMethods.
+     */
+    data: AuthenticationMethodCreateManyInput | AuthenticationMethodCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AuthenticationMethod update
+   */
+  export type AuthenticationMethodUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AuthenticationMethod.
+     */
+    data: XOR<AuthenticationMethodUpdateInput, AuthenticationMethodUncheckedUpdateInput>
+    /**
+     * Choose, which AuthenticationMethod to update.
+     */
+    where: AuthenticationMethodWhereUniqueInput
+  }
+
+  /**
+   * AuthenticationMethod updateMany
+   */
+  export type AuthenticationMethodUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AuthenticationMethods.
+     */
+    data: XOR<AuthenticationMethodUpdateManyMutationInput, AuthenticationMethodUncheckedUpdateManyInput>
+    /**
+     * Filter which AuthenticationMethods to update
+     */
+    where?: AuthenticationMethodWhereInput
+    /**
+     * Limit how many AuthenticationMethods to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AuthenticationMethod updateManyAndReturn
+   */
+  export type AuthenticationMethodUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * The data used to update AuthenticationMethods.
+     */
+    data: XOR<AuthenticationMethodUpdateManyMutationInput, AuthenticationMethodUncheckedUpdateManyInput>
+    /**
+     * Filter which AuthenticationMethods to update
+     */
+    where?: AuthenticationMethodWhereInput
+    /**
+     * Limit how many AuthenticationMethods to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AuthenticationMethod upsert
+   */
+  export type AuthenticationMethodUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AuthenticationMethod to update in case it exists.
+     */
+    where: AuthenticationMethodWhereUniqueInput
+    /**
+     * In case the AuthenticationMethod found by the `where` argument doesn't exist, create a new AuthenticationMethod with this data.
+     */
+    create: XOR<AuthenticationMethodCreateInput, AuthenticationMethodUncheckedCreateInput>
+    /**
+     * In case the AuthenticationMethod was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AuthenticationMethodUpdateInput, AuthenticationMethodUncheckedUpdateInput>
+  }
+
+  /**
+   * AuthenticationMethod delete
+   */
+  export type AuthenticationMethodDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+    /**
+     * Filter which AuthenticationMethod to delete.
+     */
+    where: AuthenticationMethodWhereUniqueInput
+  }
+
+  /**
+   * AuthenticationMethod deleteMany
+   */
+  export type AuthenticationMethodDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AuthenticationMethods to delete
+     */
+    where?: AuthenticationMethodWhereInput
+    /**
+     * Limit how many AuthenticationMethods to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AuthenticationMethod without action
+   */
+  export type AuthenticationMethodDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AuthenticationMethod
+     */
+    select?: AuthenticationMethodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AuthenticationMethod
+     */
+    omit?: AuthenticationMethodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AuthenticationMethodInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TrustedDevice
+   */
+
+  export type AggregateTrustedDevice = {
+    _count: TrustedDeviceCountAggregateOutputType | null
+    _avg: TrustedDeviceAvgAggregateOutputType | null
+    _sum: TrustedDeviceSumAggregateOutputType | null
+    _min: TrustedDeviceMinAggregateOutputType | null
+    _max: TrustedDeviceMaxAggregateOutputType | null
+  }
+
+  export type TrustedDeviceAvgAggregateOutputType = {
+    trustScore: number | null
+  }
+
+  export type TrustedDeviceSumAggregateOutputType = {
+    trustScore: number | null
+  }
+
+  export type TrustedDeviceMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    deviceId: string | null
+    name: string | null
+    userAgent: string | null
+    browser: string | null
+    os: string | null
+    device: string | null
+    trustScore: number | null
+    lastIp: string | null
+    lastCountry: string | null
+    lastCity: string | null
+    isActive: boolean | null
+    lastSeenAt: Date | null
+    expiresAt: Date | null
+    revokedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TrustedDeviceMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    deviceId: string | null
+    name: string | null
+    userAgent: string | null
+    browser: string | null
+    os: string | null
+    device: string | null
+    trustScore: number | null
+    lastIp: string | null
+    lastCountry: string | null
+    lastCity: string | null
+    isActive: boolean | null
+    lastSeenAt: Date | null
+    expiresAt: Date | null
+    revokedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TrustedDeviceCountAggregateOutputType = {
+    id: number
+    userId: number
+    deviceId: number
+    fingerprint: number
+    name: number
+    userAgent: number
+    browser: number
+    os: number
+    device: number
+    trustScore: number
+    lastIp: number
+    lastCountry: number
+    lastCity: number
+    isActive: number
+    lastSeenAt: number
+    expiresAt: number
+    revokedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TrustedDeviceAvgAggregateInputType = {
+    trustScore?: true
+  }
+
+  export type TrustedDeviceSumAggregateInputType = {
+    trustScore?: true
+  }
+
+  export type TrustedDeviceMinAggregateInputType = {
+    id?: true
+    userId?: true
+    deviceId?: true
+    name?: true
+    userAgent?: true
+    browser?: true
+    os?: true
+    device?: true
+    trustScore?: true
+    lastIp?: true
+    lastCountry?: true
+    lastCity?: true
+    isActive?: true
+    lastSeenAt?: true
+    expiresAt?: true
+    revokedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TrustedDeviceMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    deviceId?: true
+    name?: true
+    userAgent?: true
+    browser?: true
+    os?: true
+    device?: true
+    trustScore?: true
+    lastIp?: true
+    lastCountry?: true
+    lastCity?: true
+    isActive?: true
+    lastSeenAt?: true
+    expiresAt?: true
+    revokedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TrustedDeviceCountAggregateInputType = {
+    id?: true
+    userId?: true
+    deviceId?: true
+    fingerprint?: true
+    name?: true
+    userAgent?: true
+    browser?: true
+    os?: true
+    device?: true
+    trustScore?: true
+    lastIp?: true
+    lastCountry?: true
+    lastCity?: true
+    isActive?: true
+    lastSeenAt?: true
+    expiresAt?: true
+    revokedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TrustedDeviceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TrustedDevice to aggregate.
+     */
+    where?: TrustedDeviceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TrustedDevices to fetch.
+     */
+    orderBy?: TrustedDeviceOrderByWithRelationInput | TrustedDeviceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TrustedDeviceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TrustedDevices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TrustedDevices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TrustedDevices
+    **/
+    _count?: true | TrustedDeviceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TrustedDeviceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TrustedDeviceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TrustedDeviceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TrustedDeviceMaxAggregateInputType
+  }
+
+  export type GetTrustedDeviceAggregateType<T extends TrustedDeviceAggregateArgs> = {
+        [P in keyof T & keyof AggregateTrustedDevice]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTrustedDevice[P]>
+      : GetScalarType<T[P], AggregateTrustedDevice[P]>
+  }
+
+
+
+
+  export type TrustedDeviceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TrustedDeviceWhereInput
+    orderBy?: TrustedDeviceOrderByWithAggregationInput | TrustedDeviceOrderByWithAggregationInput[]
+    by: TrustedDeviceScalarFieldEnum[] | TrustedDeviceScalarFieldEnum
+    having?: TrustedDeviceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TrustedDeviceCountAggregateInputType | true
+    _avg?: TrustedDeviceAvgAggregateInputType
+    _sum?: TrustedDeviceSumAggregateInputType
+    _min?: TrustedDeviceMinAggregateInputType
+    _max?: TrustedDeviceMaxAggregateInputType
+  }
+
+  export type TrustedDeviceGroupByOutputType = {
+    id: string
+    userId: string
+    deviceId: string
+    fingerprint: JsonValue
+    name: string | null
+    userAgent: string
+    browser: string | null
+    os: string | null
+    device: string | null
+    trustScore: number
+    lastIp: string | null
+    lastCountry: string | null
+    lastCity: string | null
+    isActive: boolean
+    lastSeenAt: Date
+    expiresAt: Date | null
+    revokedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: TrustedDeviceCountAggregateOutputType | null
+    _avg: TrustedDeviceAvgAggregateOutputType | null
+    _sum: TrustedDeviceSumAggregateOutputType | null
+    _min: TrustedDeviceMinAggregateOutputType | null
+    _max: TrustedDeviceMaxAggregateOutputType | null
+  }
+
+  type GetTrustedDeviceGroupByPayload<T extends TrustedDeviceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TrustedDeviceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TrustedDeviceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TrustedDeviceGroupByOutputType[P]>
+            : GetScalarType<T[P], TrustedDeviceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TrustedDeviceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    deviceId?: boolean
+    fingerprint?: boolean
+    name?: boolean
+    userAgent?: boolean
+    browser?: boolean
+    os?: boolean
+    device?: boolean
+    trustScore?: boolean
+    lastIp?: boolean
+    lastCountry?: boolean
+    lastCity?: boolean
+    isActive?: boolean
+    lastSeenAt?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["trustedDevice"]>
+
+  export type TrustedDeviceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    deviceId?: boolean
+    fingerprint?: boolean
+    name?: boolean
+    userAgent?: boolean
+    browser?: boolean
+    os?: boolean
+    device?: boolean
+    trustScore?: boolean
+    lastIp?: boolean
+    lastCountry?: boolean
+    lastCity?: boolean
+    isActive?: boolean
+    lastSeenAt?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["trustedDevice"]>
+
+  export type TrustedDeviceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    deviceId?: boolean
+    fingerprint?: boolean
+    name?: boolean
+    userAgent?: boolean
+    browser?: boolean
+    os?: boolean
+    device?: boolean
+    trustScore?: boolean
+    lastIp?: boolean
+    lastCountry?: boolean
+    lastCity?: boolean
+    isActive?: boolean
+    lastSeenAt?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["trustedDevice"]>
+
+  export type TrustedDeviceSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    deviceId?: boolean
+    fingerprint?: boolean
+    name?: boolean
+    userAgent?: boolean
+    browser?: boolean
+    os?: boolean
+    device?: boolean
+    trustScore?: boolean
+    lastIp?: boolean
+    lastCountry?: boolean
+    lastCity?: boolean
+    isActive?: boolean
+    lastSeenAt?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TrustedDeviceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "deviceId" | "fingerprint" | "name" | "userAgent" | "browser" | "os" | "device" | "trustScore" | "lastIp" | "lastCountry" | "lastCity" | "isActive" | "lastSeenAt" | "expiresAt" | "revokedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["trustedDevice"]>
+  export type TrustedDeviceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type TrustedDeviceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type TrustedDeviceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $TrustedDevicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TrustedDevice"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      /**
+       * Hashed device fingerprint for identification
+       */
+      deviceId: string
+      /**
+       * Full device fingerprint data (for verification)
+       */
+      fingerprint: Prisma.JsonValue
+      /**
+       * User-provided device name (e.g., "Home Laptop", "Work iPhone")
+       */
+      name: string | null
+      userAgent: string
+      browser: string | null
+      os: string | null
+      device: string | null
+      /**
+       * Trust level (0-100): higher = more trusted
+       */
+      trustScore: number
+      lastIp: string | null
+      lastCountry: string | null
+      lastCity: string | null
+      /**
+       * Device is currently trusted and active
+       */
+      isActive: boolean
+      /**
+       * Last time device was seen/used
+       */
+      lastSeenAt: Date
+      /**
+       * Optional expiration (e.g., trust for 30 days)
+       */
+      expiresAt: Date | null
+      /**
+       * Manual revocation timestamp
+       */
+      revokedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["trustedDevice"]>
+    composites: {}
+  }
+
+  type TrustedDeviceGetPayload<S extends boolean | null | undefined | TrustedDeviceDefaultArgs> = $Result.GetResult<Prisma.$TrustedDevicePayload, S>
+
+  type TrustedDeviceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TrustedDeviceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TrustedDeviceCountAggregateInputType | true
+    }
+
+  export interface TrustedDeviceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TrustedDevice'], meta: { name: 'TrustedDevice' } }
+    /**
+     * Find zero or one TrustedDevice that matches the filter.
+     * @param {TrustedDeviceFindUniqueArgs} args - Arguments to find a TrustedDevice
+     * @example
+     * // Get one TrustedDevice
+     * const trustedDevice = await prisma.trustedDevice.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TrustedDeviceFindUniqueArgs>(args: SelectSubset<T, TrustedDeviceFindUniqueArgs<ExtArgs>>): Prisma__TrustedDeviceClient<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TrustedDevice that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TrustedDeviceFindUniqueOrThrowArgs} args - Arguments to find a TrustedDevice
+     * @example
+     * // Get one TrustedDevice
+     * const trustedDevice = await prisma.trustedDevice.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TrustedDeviceFindUniqueOrThrowArgs>(args: SelectSubset<T, TrustedDeviceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TrustedDeviceClient<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TrustedDevice that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TrustedDeviceFindFirstArgs} args - Arguments to find a TrustedDevice
+     * @example
+     * // Get one TrustedDevice
+     * const trustedDevice = await prisma.trustedDevice.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TrustedDeviceFindFirstArgs>(args?: SelectSubset<T, TrustedDeviceFindFirstArgs<ExtArgs>>): Prisma__TrustedDeviceClient<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TrustedDevice that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TrustedDeviceFindFirstOrThrowArgs} args - Arguments to find a TrustedDevice
+     * @example
+     * // Get one TrustedDevice
+     * const trustedDevice = await prisma.trustedDevice.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TrustedDeviceFindFirstOrThrowArgs>(args?: SelectSubset<T, TrustedDeviceFindFirstOrThrowArgs<ExtArgs>>): Prisma__TrustedDeviceClient<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TrustedDevices that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TrustedDeviceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TrustedDevices
+     * const trustedDevices = await prisma.trustedDevice.findMany()
+     * 
+     * // Get first 10 TrustedDevices
+     * const trustedDevices = await prisma.trustedDevice.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const trustedDeviceWithIdOnly = await prisma.trustedDevice.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TrustedDeviceFindManyArgs>(args?: SelectSubset<T, TrustedDeviceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TrustedDevice.
+     * @param {TrustedDeviceCreateArgs} args - Arguments to create a TrustedDevice.
+     * @example
+     * // Create one TrustedDevice
+     * const TrustedDevice = await prisma.trustedDevice.create({
+     *   data: {
+     *     // ... data to create a TrustedDevice
+     *   }
+     * })
+     * 
+     */
+    create<T extends TrustedDeviceCreateArgs>(args: SelectSubset<T, TrustedDeviceCreateArgs<ExtArgs>>): Prisma__TrustedDeviceClient<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TrustedDevices.
+     * @param {TrustedDeviceCreateManyArgs} args - Arguments to create many TrustedDevices.
+     * @example
+     * // Create many TrustedDevices
+     * const trustedDevice = await prisma.trustedDevice.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TrustedDeviceCreateManyArgs>(args?: SelectSubset<T, TrustedDeviceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TrustedDevices and returns the data saved in the database.
+     * @param {TrustedDeviceCreateManyAndReturnArgs} args - Arguments to create many TrustedDevices.
+     * @example
+     * // Create many TrustedDevices
+     * const trustedDevice = await prisma.trustedDevice.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TrustedDevices and only return the `id`
+     * const trustedDeviceWithIdOnly = await prisma.trustedDevice.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TrustedDeviceCreateManyAndReturnArgs>(args?: SelectSubset<T, TrustedDeviceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TrustedDevice.
+     * @param {TrustedDeviceDeleteArgs} args - Arguments to delete one TrustedDevice.
+     * @example
+     * // Delete one TrustedDevice
+     * const TrustedDevice = await prisma.trustedDevice.delete({
+     *   where: {
+     *     // ... filter to delete one TrustedDevice
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TrustedDeviceDeleteArgs>(args: SelectSubset<T, TrustedDeviceDeleteArgs<ExtArgs>>): Prisma__TrustedDeviceClient<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TrustedDevice.
+     * @param {TrustedDeviceUpdateArgs} args - Arguments to update one TrustedDevice.
+     * @example
+     * // Update one TrustedDevice
+     * const trustedDevice = await prisma.trustedDevice.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TrustedDeviceUpdateArgs>(args: SelectSubset<T, TrustedDeviceUpdateArgs<ExtArgs>>): Prisma__TrustedDeviceClient<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TrustedDevices.
+     * @param {TrustedDeviceDeleteManyArgs} args - Arguments to filter TrustedDevices to delete.
+     * @example
+     * // Delete a few TrustedDevices
+     * const { count } = await prisma.trustedDevice.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TrustedDeviceDeleteManyArgs>(args?: SelectSubset<T, TrustedDeviceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TrustedDevices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TrustedDeviceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TrustedDevices
+     * const trustedDevice = await prisma.trustedDevice.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TrustedDeviceUpdateManyArgs>(args: SelectSubset<T, TrustedDeviceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TrustedDevices and returns the data updated in the database.
+     * @param {TrustedDeviceUpdateManyAndReturnArgs} args - Arguments to update many TrustedDevices.
+     * @example
+     * // Update many TrustedDevices
+     * const trustedDevice = await prisma.trustedDevice.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TrustedDevices and only return the `id`
+     * const trustedDeviceWithIdOnly = await prisma.trustedDevice.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TrustedDeviceUpdateManyAndReturnArgs>(args: SelectSubset<T, TrustedDeviceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TrustedDevice.
+     * @param {TrustedDeviceUpsertArgs} args - Arguments to update or create a TrustedDevice.
+     * @example
+     * // Update or create a TrustedDevice
+     * const trustedDevice = await prisma.trustedDevice.upsert({
+     *   create: {
+     *     // ... data to create a TrustedDevice
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TrustedDevice we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TrustedDeviceUpsertArgs>(args: SelectSubset<T, TrustedDeviceUpsertArgs<ExtArgs>>): Prisma__TrustedDeviceClient<$Result.GetResult<Prisma.$TrustedDevicePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TrustedDevices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TrustedDeviceCountArgs} args - Arguments to filter TrustedDevices to count.
+     * @example
+     * // Count the number of TrustedDevices
+     * const count = await prisma.trustedDevice.count({
+     *   where: {
+     *     // ... the filter for the TrustedDevices we want to count
+     *   }
+     * })
+    **/
+    count<T extends TrustedDeviceCountArgs>(
+      args?: Subset<T, TrustedDeviceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TrustedDeviceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TrustedDevice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TrustedDeviceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TrustedDeviceAggregateArgs>(args: Subset<T, TrustedDeviceAggregateArgs>): Prisma.PrismaPromise<GetTrustedDeviceAggregateType<T>>
+
+    /**
+     * Group by TrustedDevice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TrustedDeviceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TrustedDeviceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TrustedDeviceGroupByArgs['orderBy'] }
+        : { orderBy?: TrustedDeviceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TrustedDeviceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTrustedDeviceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TrustedDevice model
+   */
+  readonly fields: TrustedDeviceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TrustedDevice.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TrustedDeviceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TrustedDevice model
+   */
+  interface TrustedDeviceFieldRefs {
+    readonly id: FieldRef<"TrustedDevice", 'String'>
+    readonly userId: FieldRef<"TrustedDevice", 'String'>
+    readonly deviceId: FieldRef<"TrustedDevice", 'String'>
+    readonly fingerprint: FieldRef<"TrustedDevice", 'Json'>
+    readonly name: FieldRef<"TrustedDevice", 'String'>
+    readonly userAgent: FieldRef<"TrustedDevice", 'String'>
+    readonly browser: FieldRef<"TrustedDevice", 'String'>
+    readonly os: FieldRef<"TrustedDevice", 'String'>
+    readonly device: FieldRef<"TrustedDevice", 'String'>
+    readonly trustScore: FieldRef<"TrustedDevice", 'Float'>
+    readonly lastIp: FieldRef<"TrustedDevice", 'String'>
+    readonly lastCountry: FieldRef<"TrustedDevice", 'String'>
+    readonly lastCity: FieldRef<"TrustedDevice", 'String'>
+    readonly isActive: FieldRef<"TrustedDevice", 'Boolean'>
+    readonly lastSeenAt: FieldRef<"TrustedDevice", 'DateTime'>
+    readonly expiresAt: FieldRef<"TrustedDevice", 'DateTime'>
+    readonly revokedAt: FieldRef<"TrustedDevice", 'DateTime'>
+    readonly createdAt: FieldRef<"TrustedDevice", 'DateTime'>
+    readonly updatedAt: FieldRef<"TrustedDevice", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TrustedDevice findUnique
+   */
+  export type TrustedDeviceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+    /**
+     * Filter, which TrustedDevice to fetch.
+     */
+    where: TrustedDeviceWhereUniqueInput
+  }
+
+  /**
+   * TrustedDevice findUniqueOrThrow
+   */
+  export type TrustedDeviceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+    /**
+     * Filter, which TrustedDevice to fetch.
+     */
+    where: TrustedDeviceWhereUniqueInput
+  }
+
+  /**
+   * TrustedDevice findFirst
+   */
+  export type TrustedDeviceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+    /**
+     * Filter, which TrustedDevice to fetch.
+     */
+    where?: TrustedDeviceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TrustedDevices to fetch.
+     */
+    orderBy?: TrustedDeviceOrderByWithRelationInput | TrustedDeviceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TrustedDevices.
+     */
+    cursor?: TrustedDeviceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TrustedDevices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TrustedDevices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TrustedDevices.
+     */
+    distinct?: TrustedDeviceScalarFieldEnum | TrustedDeviceScalarFieldEnum[]
+  }
+
+  /**
+   * TrustedDevice findFirstOrThrow
+   */
+  export type TrustedDeviceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+    /**
+     * Filter, which TrustedDevice to fetch.
+     */
+    where?: TrustedDeviceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TrustedDevices to fetch.
+     */
+    orderBy?: TrustedDeviceOrderByWithRelationInput | TrustedDeviceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TrustedDevices.
+     */
+    cursor?: TrustedDeviceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TrustedDevices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TrustedDevices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TrustedDevices.
+     */
+    distinct?: TrustedDeviceScalarFieldEnum | TrustedDeviceScalarFieldEnum[]
+  }
+
+  /**
+   * TrustedDevice findMany
+   */
+  export type TrustedDeviceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+    /**
+     * Filter, which TrustedDevices to fetch.
+     */
+    where?: TrustedDeviceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TrustedDevices to fetch.
+     */
+    orderBy?: TrustedDeviceOrderByWithRelationInput | TrustedDeviceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TrustedDevices.
+     */
+    cursor?: TrustedDeviceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TrustedDevices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TrustedDevices.
+     */
+    skip?: number
+    distinct?: TrustedDeviceScalarFieldEnum | TrustedDeviceScalarFieldEnum[]
+  }
+
+  /**
+   * TrustedDevice create
+   */
+  export type TrustedDeviceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TrustedDevice.
+     */
+    data: XOR<TrustedDeviceCreateInput, TrustedDeviceUncheckedCreateInput>
+  }
+
+  /**
+   * TrustedDevice createMany
+   */
+  export type TrustedDeviceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TrustedDevices.
+     */
+    data: TrustedDeviceCreateManyInput | TrustedDeviceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TrustedDevice createManyAndReturn
+   */
+  export type TrustedDeviceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * The data used to create many TrustedDevices.
+     */
+    data: TrustedDeviceCreateManyInput | TrustedDeviceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TrustedDevice update
+   */
+  export type TrustedDeviceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TrustedDevice.
+     */
+    data: XOR<TrustedDeviceUpdateInput, TrustedDeviceUncheckedUpdateInput>
+    /**
+     * Choose, which TrustedDevice to update.
+     */
+    where: TrustedDeviceWhereUniqueInput
+  }
+
+  /**
+   * TrustedDevice updateMany
+   */
+  export type TrustedDeviceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TrustedDevices.
+     */
+    data: XOR<TrustedDeviceUpdateManyMutationInput, TrustedDeviceUncheckedUpdateManyInput>
+    /**
+     * Filter which TrustedDevices to update
+     */
+    where?: TrustedDeviceWhereInput
+    /**
+     * Limit how many TrustedDevices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TrustedDevice updateManyAndReturn
+   */
+  export type TrustedDeviceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * The data used to update TrustedDevices.
+     */
+    data: XOR<TrustedDeviceUpdateManyMutationInput, TrustedDeviceUncheckedUpdateManyInput>
+    /**
+     * Filter which TrustedDevices to update
+     */
+    where?: TrustedDeviceWhereInput
+    /**
+     * Limit how many TrustedDevices to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TrustedDevice upsert
+   */
+  export type TrustedDeviceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TrustedDevice to update in case it exists.
+     */
+    where: TrustedDeviceWhereUniqueInput
+    /**
+     * In case the TrustedDevice found by the `where` argument doesn't exist, create a new TrustedDevice with this data.
+     */
+    create: XOR<TrustedDeviceCreateInput, TrustedDeviceUncheckedCreateInput>
+    /**
+     * In case the TrustedDevice was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TrustedDeviceUpdateInput, TrustedDeviceUncheckedUpdateInput>
+  }
+
+  /**
+   * TrustedDevice delete
+   */
+  export type TrustedDeviceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+    /**
+     * Filter which TrustedDevice to delete.
+     */
+    where: TrustedDeviceWhereUniqueInput
+  }
+
+  /**
+   * TrustedDevice deleteMany
+   */
+  export type TrustedDeviceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TrustedDevices to delete
+     */
+    where?: TrustedDeviceWhereInput
+    /**
+     * Limit how many TrustedDevices to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TrustedDevice without action
+   */
+  export type TrustedDeviceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TrustedDevice
+     */
+    select?: TrustedDeviceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TrustedDevice
+     */
+    omit?: TrustedDeviceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TrustedDeviceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SecurityEvent
+   */
+
+  export type AggregateSecurityEvent = {
+    _count: SecurityEventCountAggregateOutputType | null
+    _avg: SecurityEventAvgAggregateOutputType | null
+    _sum: SecurityEventSumAggregateOutputType | null
+    _min: SecurityEventMinAggregateOutputType | null
+    _max: SecurityEventMaxAggregateOutputType | null
+  }
+
+  export type SecurityEventAvgAggregateOutputType = {
+    riskScore: number | null
+  }
+
+  export type SecurityEventSumAggregateOutputType = {
+    riskScore: number | null
+  }
+
+  export type SecurityEventMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    event: $Enums.ESecurityEvent | null
+    severity: $Enums.ESecuritySeverity | null
+    ip: string | null
+    userAgent: string | null
+    country: string | null
+    city: string | null
+    deviceId: string | null
+    riskScore: number | null
+    resolved: boolean | null
+    resolvedAt: Date | null
+    resolvedBy: string | null
+    createdAt: Date | null
+  }
+
+  export type SecurityEventMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    event: $Enums.ESecurityEvent | null
+    severity: $Enums.ESecuritySeverity | null
+    ip: string | null
+    userAgent: string | null
+    country: string | null
+    city: string | null
+    deviceId: string | null
+    riskScore: number | null
+    resolved: boolean | null
+    resolvedAt: Date | null
+    resolvedBy: string | null
+    createdAt: Date | null
+  }
+
+  export type SecurityEventCountAggregateOutputType = {
+    id: number
+    userId: number
+    event: number
+    severity: number
+    ip: number
+    userAgent: number
+    country: number
+    city: number
+    deviceId: number
+    riskScore: number
+    riskFactors: number
+    resolved: number
+    resolvedAt: number
+    resolvedBy: number
+    metadata: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type SecurityEventAvgAggregateInputType = {
+    riskScore?: true
+  }
+
+  export type SecurityEventSumAggregateInputType = {
+    riskScore?: true
+  }
+
+  export type SecurityEventMinAggregateInputType = {
+    id?: true
+    userId?: true
+    event?: true
+    severity?: true
+    ip?: true
+    userAgent?: true
+    country?: true
+    city?: true
+    deviceId?: true
+    riskScore?: true
+    resolved?: true
+    resolvedAt?: true
+    resolvedBy?: true
+    createdAt?: true
+  }
+
+  export type SecurityEventMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    event?: true
+    severity?: true
+    ip?: true
+    userAgent?: true
+    country?: true
+    city?: true
+    deviceId?: true
+    riskScore?: true
+    resolved?: true
+    resolvedAt?: true
+    resolvedBy?: true
+    createdAt?: true
+  }
+
+  export type SecurityEventCountAggregateInputType = {
+    id?: true
+    userId?: true
+    event?: true
+    severity?: true
+    ip?: true
+    userAgent?: true
+    country?: true
+    city?: true
+    deviceId?: true
+    riskScore?: true
+    riskFactors?: true
+    resolved?: true
+    resolvedAt?: true
+    resolvedBy?: true
+    metadata?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type SecurityEventAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SecurityEvent to aggregate.
+     */
+    where?: SecurityEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityEvents to fetch.
+     */
+    orderBy?: SecurityEventOrderByWithRelationInput | SecurityEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SecurityEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SecurityEvents
+    **/
+    _count?: true | SecurityEventCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SecurityEventAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SecurityEventSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SecurityEventMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SecurityEventMaxAggregateInputType
+  }
+
+  export type GetSecurityEventAggregateType<T extends SecurityEventAggregateArgs> = {
+        [P in keyof T & keyof AggregateSecurityEvent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSecurityEvent[P]>
+      : GetScalarType<T[P], AggregateSecurityEvent[P]>
+  }
+
+
+
+
+  export type SecurityEventGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SecurityEventWhereInput
+    orderBy?: SecurityEventOrderByWithAggregationInput | SecurityEventOrderByWithAggregationInput[]
+    by: SecurityEventScalarFieldEnum[] | SecurityEventScalarFieldEnum
+    having?: SecurityEventScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SecurityEventCountAggregateInputType | true
+    _avg?: SecurityEventAvgAggregateInputType
+    _sum?: SecurityEventSumAggregateInputType
+    _min?: SecurityEventMinAggregateInputType
+    _max?: SecurityEventMaxAggregateInputType
+  }
+
+  export type SecurityEventGroupByOutputType = {
+    id: string
+    userId: string
+    event: $Enums.ESecurityEvent
+    severity: $Enums.ESecuritySeverity
+    ip: string | null
+    userAgent: string | null
+    country: string | null
+    city: string | null
+    deviceId: string | null
+    riskScore: number | null
+    riskFactors: JsonValue | null
+    resolved: boolean
+    resolvedAt: Date | null
+    resolvedBy: string | null
+    metadata: JsonValue | null
+    createdAt: Date
+    _count: SecurityEventCountAggregateOutputType | null
+    _avg: SecurityEventAvgAggregateOutputType | null
+    _sum: SecurityEventSumAggregateOutputType | null
+    _min: SecurityEventMinAggregateOutputType | null
+    _max: SecurityEventMaxAggregateOutputType | null
+  }
+
+  type GetSecurityEventGroupByPayload<T extends SecurityEventGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SecurityEventGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SecurityEventGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SecurityEventGroupByOutputType[P]>
+            : GetScalarType<T[P], SecurityEventGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SecurityEventSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    event?: boolean
+    severity?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    country?: boolean
+    city?: boolean
+    deviceId?: boolean
+    riskScore?: boolean
+    riskFactors?: boolean
+    resolved?: boolean
+    resolvedAt?: boolean
+    resolvedBy?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["securityEvent"]>
+
+  export type SecurityEventSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    event?: boolean
+    severity?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    country?: boolean
+    city?: boolean
+    deviceId?: boolean
+    riskScore?: boolean
+    riskFactors?: boolean
+    resolved?: boolean
+    resolvedAt?: boolean
+    resolvedBy?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["securityEvent"]>
+
+  export type SecurityEventSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    event?: boolean
+    severity?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    country?: boolean
+    city?: boolean
+    deviceId?: boolean
+    riskScore?: boolean
+    riskFactors?: boolean
+    resolved?: boolean
+    resolvedAt?: boolean
+    resolvedBy?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["securityEvent"]>
+
+  export type SecurityEventSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    event?: boolean
+    severity?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    country?: boolean
+    city?: boolean
+    deviceId?: boolean
+    riskScore?: boolean
+    riskFactors?: boolean
+    resolved?: boolean
+    resolvedAt?: boolean
+    resolvedBy?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+  }
+
+  export type SecurityEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "event" | "severity" | "ip" | "userAgent" | "country" | "city" | "deviceId" | "riskScore" | "riskFactors" | "resolved" | "resolvedAt" | "resolvedBy" | "metadata" | "createdAt", ExtArgs["result"]["securityEvent"]>
+  export type SecurityEventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type SecurityEventIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type SecurityEventIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $SecurityEventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SecurityEvent"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      /**
+       * Type of security event (LOGIN_SUCCESS, TWO_FA_FAILED, etc.)
+       */
+      event: $Enums.ESecurityEvent
+      /**
+       * Event severity level
+       */
+      severity: $Enums.ESecuritySeverity
+      ip: string | null
+      userAgent: string | null
+      country: string | null
+      city: string | null
+      /**
+       * Associated device fingerprint
+       */
+      deviceId: string | null
+      /**
+       * Calculated risk score for this specific event (0-100)
+       */
+      riskScore: number | null
+      /**
+       * Risk factors that contributed to the score
+       */
+      riskFactors: Prisma.JsonValue | null
+      /**
+       * Whether this event has been reviewed and resolved
+       */
+      resolved: boolean
+      /**
+       * When the event was marked as resolved
+       */
+      resolvedAt: Date | null
+      /**
+       * Admin user who resolved the event
+       */
+      resolvedBy: string | null
+      /**
+       * Additional context data
+       */
+      metadata: Prisma.JsonValue | null
+      createdAt: Date
+    }, ExtArgs["result"]["securityEvent"]>
+    composites: {}
+  }
+
+  type SecurityEventGetPayload<S extends boolean | null | undefined | SecurityEventDefaultArgs> = $Result.GetResult<Prisma.$SecurityEventPayload, S>
+
+  type SecurityEventCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SecurityEventFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SecurityEventCountAggregateInputType | true
+    }
+
+  export interface SecurityEventDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SecurityEvent'], meta: { name: 'SecurityEvent' } }
+    /**
+     * Find zero or one SecurityEvent that matches the filter.
+     * @param {SecurityEventFindUniqueArgs} args - Arguments to find a SecurityEvent
+     * @example
+     * // Get one SecurityEvent
+     * const securityEvent = await prisma.securityEvent.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SecurityEventFindUniqueArgs>(args: SelectSubset<T, SecurityEventFindUniqueArgs<ExtArgs>>): Prisma__SecurityEventClient<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SecurityEvent that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SecurityEventFindUniqueOrThrowArgs} args - Arguments to find a SecurityEvent
+     * @example
+     * // Get one SecurityEvent
+     * const securityEvent = await prisma.securityEvent.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SecurityEventFindUniqueOrThrowArgs>(args: SelectSubset<T, SecurityEventFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SecurityEventClient<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SecurityEvent that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityEventFindFirstArgs} args - Arguments to find a SecurityEvent
+     * @example
+     * // Get one SecurityEvent
+     * const securityEvent = await prisma.securityEvent.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SecurityEventFindFirstArgs>(args?: SelectSubset<T, SecurityEventFindFirstArgs<ExtArgs>>): Prisma__SecurityEventClient<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SecurityEvent that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityEventFindFirstOrThrowArgs} args - Arguments to find a SecurityEvent
+     * @example
+     * // Get one SecurityEvent
+     * const securityEvent = await prisma.securityEvent.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SecurityEventFindFirstOrThrowArgs>(args?: SelectSubset<T, SecurityEventFindFirstOrThrowArgs<ExtArgs>>): Prisma__SecurityEventClient<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SecurityEvents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityEventFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SecurityEvents
+     * const securityEvents = await prisma.securityEvent.findMany()
+     * 
+     * // Get first 10 SecurityEvents
+     * const securityEvents = await prisma.securityEvent.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const securityEventWithIdOnly = await prisma.securityEvent.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SecurityEventFindManyArgs>(args?: SelectSubset<T, SecurityEventFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SecurityEvent.
+     * @param {SecurityEventCreateArgs} args - Arguments to create a SecurityEvent.
+     * @example
+     * // Create one SecurityEvent
+     * const SecurityEvent = await prisma.securityEvent.create({
+     *   data: {
+     *     // ... data to create a SecurityEvent
+     *   }
+     * })
+     * 
+     */
+    create<T extends SecurityEventCreateArgs>(args: SelectSubset<T, SecurityEventCreateArgs<ExtArgs>>): Prisma__SecurityEventClient<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SecurityEvents.
+     * @param {SecurityEventCreateManyArgs} args - Arguments to create many SecurityEvents.
+     * @example
+     * // Create many SecurityEvents
+     * const securityEvent = await prisma.securityEvent.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SecurityEventCreateManyArgs>(args?: SelectSubset<T, SecurityEventCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SecurityEvents and returns the data saved in the database.
+     * @param {SecurityEventCreateManyAndReturnArgs} args - Arguments to create many SecurityEvents.
+     * @example
+     * // Create many SecurityEvents
+     * const securityEvent = await prisma.securityEvent.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SecurityEvents and only return the `id`
+     * const securityEventWithIdOnly = await prisma.securityEvent.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SecurityEventCreateManyAndReturnArgs>(args?: SelectSubset<T, SecurityEventCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SecurityEvent.
+     * @param {SecurityEventDeleteArgs} args - Arguments to delete one SecurityEvent.
+     * @example
+     * // Delete one SecurityEvent
+     * const SecurityEvent = await prisma.securityEvent.delete({
+     *   where: {
+     *     // ... filter to delete one SecurityEvent
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SecurityEventDeleteArgs>(args: SelectSubset<T, SecurityEventDeleteArgs<ExtArgs>>): Prisma__SecurityEventClient<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SecurityEvent.
+     * @param {SecurityEventUpdateArgs} args - Arguments to update one SecurityEvent.
+     * @example
+     * // Update one SecurityEvent
+     * const securityEvent = await prisma.securityEvent.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SecurityEventUpdateArgs>(args: SelectSubset<T, SecurityEventUpdateArgs<ExtArgs>>): Prisma__SecurityEventClient<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SecurityEvents.
+     * @param {SecurityEventDeleteManyArgs} args - Arguments to filter SecurityEvents to delete.
+     * @example
+     * // Delete a few SecurityEvents
+     * const { count } = await prisma.securityEvent.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SecurityEventDeleteManyArgs>(args?: SelectSubset<T, SecurityEventDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SecurityEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityEventUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SecurityEvents
+     * const securityEvent = await prisma.securityEvent.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SecurityEventUpdateManyArgs>(args: SelectSubset<T, SecurityEventUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SecurityEvents and returns the data updated in the database.
+     * @param {SecurityEventUpdateManyAndReturnArgs} args - Arguments to update many SecurityEvents.
+     * @example
+     * // Update many SecurityEvents
+     * const securityEvent = await prisma.securityEvent.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SecurityEvents and only return the `id`
+     * const securityEventWithIdOnly = await prisma.securityEvent.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SecurityEventUpdateManyAndReturnArgs>(args: SelectSubset<T, SecurityEventUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SecurityEvent.
+     * @param {SecurityEventUpsertArgs} args - Arguments to update or create a SecurityEvent.
+     * @example
+     * // Update or create a SecurityEvent
+     * const securityEvent = await prisma.securityEvent.upsert({
+     *   create: {
+     *     // ... data to create a SecurityEvent
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SecurityEvent we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SecurityEventUpsertArgs>(args: SelectSubset<T, SecurityEventUpsertArgs<ExtArgs>>): Prisma__SecurityEventClient<$Result.GetResult<Prisma.$SecurityEventPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SecurityEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityEventCountArgs} args - Arguments to filter SecurityEvents to count.
+     * @example
+     * // Count the number of SecurityEvents
+     * const count = await prisma.securityEvent.count({
+     *   where: {
+     *     // ... the filter for the SecurityEvents we want to count
+     *   }
+     * })
+    **/
+    count<T extends SecurityEventCountArgs>(
+      args?: Subset<T, SecurityEventCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SecurityEventCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SecurityEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityEventAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SecurityEventAggregateArgs>(args: Subset<T, SecurityEventAggregateArgs>): Prisma.PrismaPromise<GetSecurityEventAggregateType<T>>
+
+    /**
+     * Group by SecurityEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SecurityEventGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SecurityEventGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SecurityEventGroupByArgs['orderBy'] }
+        : { orderBy?: SecurityEventGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SecurityEventGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSecurityEventGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SecurityEvent model
+   */
+  readonly fields: SecurityEventFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SecurityEvent.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SecurityEventClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SecurityEvent model
+   */
+  interface SecurityEventFieldRefs {
+    readonly id: FieldRef<"SecurityEvent", 'String'>
+    readonly userId: FieldRef<"SecurityEvent", 'String'>
+    readonly event: FieldRef<"SecurityEvent", 'ESecurityEvent'>
+    readonly severity: FieldRef<"SecurityEvent", 'ESecuritySeverity'>
+    readonly ip: FieldRef<"SecurityEvent", 'String'>
+    readonly userAgent: FieldRef<"SecurityEvent", 'String'>
+    readonly country: FieldRef<"SecurityEvent", 'String'>
+    readonly city: FieldRef<"SecurityEvent", 'String'>
+    readonly deviceId: FieldRef<"SecurityEvent", 'String'>
+    readonly riskScore: FieldRef<"SecurityEvent", 'Float'>
+    readonly riskFactors: FieldRef<"SecurityEvent", 'Json'>
+    readonly resolved: FieldRef<"SecurityEvent", 'Boolean'>
+    readonly resolvedAt: FieldRef<"SecurityEvent", 'DateTime'>
+    readonly resolvedBy: FieldRef<"SecurityEvent", 'String'>
+    readonly metadata: FieldRef<"SecurityEvent", 'Json'>
+    readonly createdAt: FieldRef<"SecurityEvent", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SecurityEvent findUnique
+   */
+  export type SecurityEventFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityEvent to fetch.
+     */
+    where: SecurityEventWhereUniqueInput
+  }
+
+  /**
+   * SecurityEvent findUniqueOrThrow
+   */
+  export type SecurityEventFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityEvent to fetch.
+     */
+    where: SecurityEventWhereUniqueInput
+  }
+
+  /**
+   * SecurityEvent findFirst
+   */
+  export type SecurityEventFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityEvent to fetch.
+     */
+    where?: SecurityEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityEvents to fetch.
+     */
+    orderBy?: SecurityEventOrderByWithRelationInput | SecurityEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SecurityEvents.
+     */
+    cursor?: SecurityEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SecurityEvents.
+     */
+    distinct?: SecurityEventScalarFieldEnum | SecurityEventScalarFieldEnum[]
+  }
+
+  /**
+   * SecurityEvent findFirstOrThrow
+   */
+  export type SecurityEventFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityEvent to fetch.
+     */
+    where?: SecurityEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityEvents to fetch.
+     */
+    orderBy?: SecurityEventOrderByWithRelationInput | SecurityEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SecurityEvents.
+     */
+    cursor?: SecurityEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SecurityEvents.
+     */
+    distinct?: SecurityEventScalarFieldEnum | SecurityEventScalarFieldEnum[]
+  }
+
+  /**
+   * SecurityEvent findMany
+   */
+  export type SecurityEventFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+    /**
+     * Filter, which SecurityEvents to fetch.
+     */
+    where?: SecurityEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SecurityEvents to fetch.
+     */
+    orderBy?: SecurityEventOrderByWithRelationInput | SecurityEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SecurityEvents.
+     */
+    cursor?: SecurityEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SecurityEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SecurityEvents.
+     */
+    skip?: number
+    distinct?: SecurityEventScalarFieldEnum | SecurityEventScalarFieldEnum[]
+  }
+
+  /**
+   * SecurityEvent create
+   */
+  export type SecurityEventCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SecurityEvent.
+     */
+    data: XOR<SecurityEventCreateInput, SecurityEventUncheckedCreateInput>
+  }
+
+  /**
+   * SecurityEvent createMany
+   */
+  export type SecurityEventCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SecurityEvents.
+     */
+    data: SecurityEventCreateManyInput | SecurityEventCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SecurityEvent createManyAndReturn
+   */
+  export type SecurityEventCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * The data used to create many SecurityEvents.
+     */
+    data: SecurityEventCreateManyInput | SecurityEventCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SecurityEvent update
+   */
+  export type SecurityEventUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SecurityEvent.
+     */
+    data: XOR<SecurityEventUpdateInput, SecurityEventUncheckedUpdateInput>
+    /**
+     * Choose, which SecurityEvent to update.
+     */
+    where: SecurityEventWhereUniqueInput
+  }
+
+  /**
+   * SecurityEvent updateMany
+   */
+  export type SecurityEventUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SecurityEvents.
+     */
+    data: XOR<SecurityEventUpdateManyMutationInput, SecurityEventUncheckedUpdateManyInput>
+    /**
+     * Filter which SecurityEvents to update
+     */
+    where?: SecurityEventWhereInput
+    /**
+     * Limit how many SecurityEvents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SecurityEvent updateManyAndReturn
+   */
+  export type SecurityEventUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * The data used to update SecurityEvents.
+     */
+    data: XOR<SecurityEventUpdateManyMutationInput, SecurityEventUncheckedUpdateManyInput>
+    /**
+     * Filter which SecurityEvents to update
+     */
+    where?: SecurityEventWhereInput
+    /**
+     * Limit how many SecurityEvents to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SecurityEvent upsert
+   */
+  export type SecurityEventUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SecurityEvent to update in case it exists.
+     */
+    where: SecurityEventWhereUniqueInput
+    /**
+     * In case the SecurityEvent found by the `where` argument doesn't exist, create a new SecurityEvent with this data.
+     */
+    create: XOR<SecurityEventCreateInput, SecurityEventUncheckedCreateInput>
+    /**
+     * In case the SecurityEvent was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SecurityEventUpdateInput, SecurityEventUncheckedUpdateInput>
+  }
+
+  /**
+   * SecurityEvent delete
+   */
+  export type SecurityEventDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+    /**
+     * Filter which SecurityEvent to delete.
+     */
+    where: SecurityEventWhereUniqueInput
+  }
+
+  /**
+   * SecurityEvent deleteMany
+   */
+  export type SecurityEventDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SecurityEvents to delete
+     */
+    where?: SecurityEventWhereInput
+    /**
+     * Limit how many SecurityEvents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SecurityEvent without action
+   */
+  export type SecurityEventDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SecurityEvent
+     */
+    select?: SecurityEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SecurityEvent
+     */
+    omit?: SecurityEventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SecurityEventInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Session
+   */
+
+  export type AggregateSession = {
+    _count: SessionCountAggregateOutputType | null
+    _avg: SessionAvgAggregateOutputType | null
+    _sum: SessionSumAggregateOutputType | null
+    _min: SessionMinAggregateOutputType | null
+    _max: SessionMaxAggregateOutputType | null
+  }
+
+  export type SessionAvgAggregateOutputType = {
+    riskScore: number | null
+  }
+
+  export type SessionSumAggregateOutputType = {
+    riskScore: number | null
+  }
+
+  export type SessionMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    token: string | null
+    refreshToken: string | null
+    deviceId: string | null
+    userAgent: string | null
+    ip: string | null
+    country: string | null
+    city: string | null
+    browser: string | null
+    os: string | null
+    device: string | null
+    isTrusted: boolean | null
+    riskScore: number | null
+    is2FAVerified: boolean | null
+    verified2FAAt: Date | null
+    expiresAt: Date | null
+    lastUsedAt: Date | null
+    revokedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SessionMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    token: string | null
+    refreshToken: string | null
+    deviceId: string | null
+    userAgent: string | null
+    ip: string | null
+    country: string | null
+    city: string | null
+    browser: string | null
+    os: string | null
+    device: string | null
+    isTrusted: boolean | null
+    riskScore: number | null
+    is2FAVerified: boolean | null
+    verified2FAAt: Date | null
+    expiresAt: Date | null
+    lastUsedAt: Date | null
+    revokedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SessionCountAggregateOutputType = {
+    id: number
+    userId: number
+    token: number
+    refreshToken: number
+    deviceId: number
+    userAgent: number
+    ip: number
+    country: number
+    city: number
+    browser: number
+    os: number
+    device: number
+    isTrusted: number
+    riskScore: number
+    is2FAVerified: number
+    verified2FAAt: number
+    expiresAt: number
+    lastUsedAt: number
+    revokedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SessionAvgAggregateInputType = {
+    riskScore?: true
+  }
+
+  export type SessionSumAggregateInputType = {
+    riskScore?: true
+  }
+
+  export type SessionMinAggregateInputType = {
+    id?: true
+    userId?: true
+    token?: true
+    refreshToken?: true
+    deviceId?: true
+    userAgent?: true
+    ip?: true
+    country?: true
+    city?: true
+    browser?: true
+    os?: true
+    device?: true
+    isTrusted?: true
+    riskScore?: true
+    is2FAVerified?: true
+    verified2FAAt?: true
+    expiresAt?: true
+    lastUsedAt?: true
+    revokedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SessionMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    token?: true
+    refreshToken?: true
+    deviceId?: true
+    userAgent?: true
+    ip?: true
+    country?: true
+    city?: true
+    browser?: true
+    os?: true
+    device?: true
+    isTrusted?: true
+    riskScore?: true
+    is2FAVerified?: true
+    verified2FAAt?: true
+    expiresAt?: true
+    lastUsedAt?: true
+    revokedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SessionCountAggregateInputType = {
+    id?: true
+    userId?: true
+    token?: true
+    refreshToken?: true
+    deviceId?: true
+    userAgent?: true
+    ip?: true
+    country?: true
+    city?: true
+    browser?: true
+    os?: true
+    device?: true
+    isTrusted?: true
+    riskScore?: true
+    is2FAVerified?: true
+    verified2FAAt?: true
+    expiresAt?: true
+    lastUsedAt?: true
+    revokedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SessionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Session to aggregate.
+     */
+    where?: SessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Sessions to fetch.
+     */
+    orderBy?: SessionOrderByWithRelationInput | SessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Sessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Sessions
+    **/
+    _count?: true | SessionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SessionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SessionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SessionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SessionMaxAggregateInputType
+  }
+
+  export type GetSessionAggregateType<T extends SessionAggregateArgs> = {
+        [P in keyof T & keyof AggregateSession]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSession[P]>
+      : GetScalarType<T[P], AggregateSession[P]>
+  }
+
+
+
+
+  export type SessionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SessionWhereInput
+    orderBy?: SessionOrderByWithAggregationInput | SessionOrderByWithAggregationInput[]
+    by: SessionScalarFieldEnum[] | SessionScalarFieldEnum
+    having?: SessionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SessionCountAggregateInputType | true
+    _avg?: SessionAvgAggregateInputType
+    _sum?: SessionSumAggregateInputType
+    _min?: SessionMinAggregateInputType
+    _max?: SessionMaxAggregateInputType
+  }
+
+  export type SessionGroupByOutputType = {
+    id: string
+    userId: string
+    token: string
+    refreshToken: string | null
+    deviceId: string | null
+    userAgent: string | null
+    ip: string | null
+    country: string | null
+    city: string | null
+    browser: string | null
+    os: string | null
+    device: string | null
+    isTrusted: boolean
+    riskScore: number | null
+    is2FAVerified: boolean
+    verified2FAAt: Date | null
+    expiresAt: Date
+    lastUsedAt: Date
+    revokedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: SessionCountAggregateOutputType | null
+    _avg: SessionAvgAggregateOutputType | null
+    _sum: SessionSumAggregateOutputType | null
+    _min: SessionMinAggregateOutputType | null
+    _max: SessionMaxAggregateOutputType | null
+  }
+
+  type GetSessionGroupByPayload<T extends SessionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SessionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SessionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SessionGroupByOutputType[P]>
+            : GetScalarType<T[P], SessionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    token?: boolean
+    refreshToken?: boolean
+    deviceId?: boolean
+    userAgent?: boolean
+    ip?: boolean
+    country?: boolean
+    city?: boolean
+    browser?: boolean
+    os?: boolean
+    device?: boolean
+    isTrusted?: boolean
+    riskScore?: boolean
+    is2FAVerified?: boolean
+    verified2FAAt?: boolean
+    expiresAt?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["session"]>
+
+  export type SessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    token?: boolean
+    refreshToken?: boolean
+    deviceId?: boolean
+    userAgent?: boolean
+    ip?: boolean
+    country?: boolean
+    city?: boolean
+    browser?: boolean
+    os?: boolean
+    device?: boolean
+    isTrusted?: boolean
+    riskScore?: boolean
+    is2FAVerified?: boolean
+    verified2FAAt?: boolean
+    expiresAt?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["session"]>
+
+  export type SessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    token?: boolean
+    refreshToken?: boolean
+    deviceId?: boolean
+    userAgent?: boolean
+    ip?: boolean
+    country?: boolean
+    city?: boolean
+    browser?: boolean
+    os?: boolean
+    device?: boolean
+    isTrusted?: boolean
+    riskScore?: boolean
+    is2FAVerified?: boolean
+    verified2FAAt?: boolean
+    expiresAt?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["session"]>
+
+  export type SessionSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    token?: boolean
+    refreshToken?: boolean
+    deviceId?: boolean
+    userAgent?: boolean
+    ip?: boolean
+    country?: boolean
+    city?: boolean
+    browser?: boolean
+    os?: boolean
+    device?: boolean
+    isTrusted?: boolean
+    riskScore?: boolean
+    is2FAVerified?: boolean
+    verified2FAAt?: boolean
+    expiresAt?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "token" | "refreshToken" | "deviceId" | "userAgent" | "ip" | "country" | "city" | "browser" | "os" | "device" | "isTrusted" | "riskScore" | "is2FAVerified" | "verified2FAAt" | "expiresAt" | "lastUsedAt" | "revokedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["session"]>
+  export type SessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type SessionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type SessionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $SessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Session"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      token: string
+      refreshToken: string | null
+      deviceId: string | null
+      userAgent: string | null
+      ip: string | null
+      country: string | null
+      city: string | null
+      browser: string | null
+      os: string | null
+      device: string | null
+      /**
+       * Whether this session is from a trusted device
+       */
+      isTrusted: boolean
+      /**
+       * Risk score for this session (0-100)
+       */
+      riskScore: number | null
+      /**
+       * Whether 2FA has been verified for this session
+       */
+      is2FAVerified: boolean
+      /**
+       * When 2FA was successfully verified
+       */
+      verified2FAAt: Date | null
+      expiresAt: Date
+      lastUsedAt: Date
+      revokedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["session"]>
+    composites: {}
+  }
+
+  type SessionGetPayload<S extends boolean | null | undefined | SessionDefaultArgs> = $Result.GetResult<Prisma.$SessionPayload, S>
+
+  type SessionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SessionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SessionCountAggregateInputType | true
+    }
+
+  export interface SessionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Session'], meta: { name: 'Session' } }
+    /**
+     * Find zero or one Session that matches the filter.
+     * @param {SessionFindUniqueArgs} args - Arguments to find a Session
+     * @example
+     * // Get one Session
+     * const session = await prisma.session.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SessionFindUniqueArgs>(args: SelectSubset<T, SessionFindUniqueArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Session that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SessionFindUniqueOrThrowArgs} args - Arguments to find a Session
+     * @example
+     * // Get one Session
+     * const session = await prisma.session.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SessionFindUniqueOrThrowArgs>(args: SelectSubset<T, SessionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Session that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionFindFirstArgs} args - Arguments to find a Session
+     * @example
+     * // Get one Session
+     * const session = await prisma.session.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SessionFindFirstArgs>(args?: SelectSubset<T, SessionFindFirstArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Session that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionFindFirstOrThrowArgs} args - Arguments to find a Session
+     * @example
+     * // Get one Session
+     * const session = await prisma.session.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SessionFindFirstOrThrowArgs>(args?: SelectSubset<T, SessionFindFirstOrThrowArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Sessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Sessions
+     * const sessions = await prisma.session.findMany()
+     * 
+     * // Get first 10 Sessions
+     * const sessions = await prisma.session.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const sessionWithIdOnly = await prisma.session.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SessionFindManyArgs>(args?: SelectSubset<T, SessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Session.
+     * @param {SessionCreateArgs} args - Arguments to create a Session.
+     * @example
+     * // Create one Session
+     * const Session = await prisma.session.create({
+     *   data: {
+     *     // ... data to create a Session
+     *   }
+     * })
+     * 
+     */
+    create<T extends SessionCreateArgs>(args: SelectSubset<T, SessionCreateArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Sessions.
+     * @param {SessionCreateManyArgs} args - Arguments to create many Sessions.
+     * @example
+     * // Create many Sessions
+     * const session = await prisma.session.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SessionCreateManyArgs>(args?: SelectSubset<T, SessionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Sessions and returns the data saved in the database.
+     * @param {SessionCreateManyAndReturnArgs} args - Arguments to create many Sessions.
+     * @example
+     * // Create many Sessions
+     * const session = await prisma.session.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Sessions and only return the `id`
+     * const sessionWithIdOnly = await prisma.session.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SessionCreateManyAndReturnArgs>(args?: SelectSubset<T, SessionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Session.
+     * @param {SessionDeleteArgs} args - Arguments to delete one Session.
+     * @example
+     * // Delete one Session
+     * const Session = await prisma.session.delete({
+     *   where: {
+     *     // ... filter to delete one Session
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SessionDeleteArgs>(args: SelectSubset<T, SessionDeleteArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Session.
+     * @param {SessionUpdateArgs} args - Arguments to update one Session.
+     * @example
+     * // Update one Session
+     * const session = await prisma.session.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SessionUpdateArgs>(args: SelectSubset<T, SessionUpdateArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Sessions.
+     * @param {SessionDeleteManyArgs} args - Arguments to filter Sessions to delete.
+     * @example
+     * // Delete a few Sessions
+     * const { count } = await prisma.session.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SessionDeleteManyArgs>(args?: SelectSubset<T, SessionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Sessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Sessions
+     * const session = await prisma.session.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SessionUpdateManyArgs>(args: SelectSubset<T, SessionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Sessions and returns the data updated in the database.
+     * @param {SessionUpdateManyAndReturnArgs} args - Arguments to update many Sessions.
+     * @example
+     * // Update many Sessions
+     * const session = await prisma.session.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Sessions and only return the `id`
+     * const sessionWithIdOnly = await prisma.session.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SessionUpdateManyAndReturnArgs>(args: SelectSubset<T, SessionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Session.
+     * @param {SessionUpsertArgs} args - Arguments to update or create a Session.
+     * @example
+     * // Update or create a Session
+     * const session = await prisma.session.upsert({
+     *   create: {
+     *     // ... data to create a Session
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Session we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SessionUpsertArgs>(args: SelectSubset<T, SessionUpsertArgs<ExtArgs>>): Prisma__SessionClient<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Sessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionCountArgs} args - Arguments to filter Sessions to count.
+     * @example
+     * // Count the number of Sessions
+     * const count = await prisma.session.count({
+     *   where: {
+     *     // ... the filter for the Sessions we want to count
+     *   }
+     * })
+    **/
+    count<T extends SessionCountArgs>(
+      args?: Subset<T, SessionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SessionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Session.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SessionAggregateArgs>(args: Subset<T, SessionAggregateArgs>): Prisma.PrismaPromise<GetSessionAggregateType<T>>
+
+    /**
+     * Group by Session.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SessionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SessionGroupByArgs['orderBy'] }
+        : { orderBy?: SessionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SessionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSessionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Session model
+   */
+  readonly fields: SessionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Session.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Session model
+   */
+  interface SessionFieldRefs {
+    readonly id: FieldRef<"Session", 'String'>
+    readonly userId: FieldRef<"Session", 'String'>
+    readonly token: FieldRef<"Session", 'String'>
+    readonly refreshToken: FieldRef<"Session", 'String'>
+    readonly deviceId: FieldRef<"Session", 'String'>
+    readonly userAgent: FieldRef<"Session", 'String'>
+    readonly ip: FieldRef<"Session", 'String'>
+    readonly country: FieldRef<"Session", 'String'>
+    readonly city: FieldRef<"Session", 'String'>
+    readonly browser: FieldRef<"Session", 'String'>
+    readonly os: FieldRef<"Session", 'String'>
+    readonly device: FieldRef<"Session", 'String'>
+    readonly isTrusted: FieldRef<"Session", 'Boolean'>
+    readonly riskScore: FieldRef<"Session", 'Float'>
+    readonly is2FAVerified: FieldRef<"Session", 'Boolean'>
+    readonly verified2FAAt: FieldRef<"Session", 'DateTime'>
+    readonly expiresAt: FieldRef<"Session", 'DateTime'>
+    readonly lastUsedAt: FieldRef<"Session", 'DateTime'>
+    readonly revokedAt: FieldRef<"Session", 'DateTime'>
+    readonly createdAt: FieldRef<"Session", 'DateTime'>
+    readonly updatedAt: FieldRef<"Session", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Session findUnique
+   */
+  export type SessionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    /**
+     * Filter, which Session to fetch.
+     */
+    where: SessionWhereUniqueInput
+  }
+
+  /**
+   * Session findUniqueOrThrow
+   */
+  export type SessionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    /**
+     * Filter, which Session to fetch.
+     */
+    where: SessionWhereUniqueInput
+  }
+
+  /**
+   * Session findFirst
+   */
+  export type SessionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    /**
+     * Filter, which Session to fetch.
+     */
+    where?: SessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Sessions to fetch.
+     */
+    orderBy?: SessionOrderByWithRelationInput | SessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Sessions.
+     */
+    cursor?: SessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Sessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Sessions.
+     */
+    distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
+   * Session findFirstOrThrow
+   */
+  export type SessionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    /**
+     * Filter, which Session to fetch.
+     */
+    where?: SessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Sessions to fetch.
+     */
+    orderBy?: SessionOrderByWithRelationInput | SessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Sessions.
+     */
+    cursor?: SessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Sessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Sessions.
+     */
+    distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
+   * Session findMany
+   */
+  export type SessionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    /**
+     * Filter, which Sessions to fetch.
+     */
+    where?: SessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Sessions to fetch.
+     */
+    orderBy?: SessionOrderByWithRelationInput | SessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Sessions.
+     */
+    cursor?: SessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Sessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Sessions.
+     */
+    skip?: number
+    distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
+   * Session create
+   */
+  export type SessionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Session.
+     */
+    data: XOR<SessionCreateInput, SessionUncheckedCreateInput>
+  }
+
+  /**
+   * Session createMany
+   */
+  export type SessionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Sessions.
+     */
+    data: SessionCreateManyInput | SessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Session createManyAndReturn
+   */
+  export type SessionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * The data used to create many Sessions.
+     */
+    data: SessionCreateManyInput | SessionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Session update
+   */
+  export type SessionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Session.
+     */
+    data: XOR<SessionUpdateInput, SessionUncheckedUpdateInput>
+    /**
+     * Choose, which Session to update.
+     */
+    where: SessionWhereUniqueInput
+  }
+
+  /**
+   * Session updateMany
+   */
+  export type SessionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Sessions.
+     */
+    data: XOR<SessionUpdateManyMutationInput, SessionUncheckedUpdateManyInput>
+    /**
+     * Filter which Sessions to update
+     */
+    where?: SessionWhereInput
+    /**
+     * Limit how many Sessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Session updateManyAndReturn
+   */
+  export type SessionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * The data used to update Sessions.
+     */
+    data: XOR<SessionUpdateManyMutationInput, SessionUncheckedUpdateManyInput>
+    /**
+     * Filter which Sessions to update
+     */
+    where?: SessionWhereInput
+    /**
+     * Limit how many Sessions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Session upsert
+   */
+  export type SessionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Session to update in case it exists.
+     */
+    where: SessionWhereUniqueInput
+    /**
+     * In case the Session found by the `where` argument doesn't exist, create a new Session with this data.
+     */
+    create: XOR<SessionCreateInput, SessionUncheckedCreateInput>
+    /**
+     * In case the Session was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SessionUpdateInput, SessionUncheckedUpdateInput>
+  }
+
+  /**
+   * Session delete
+   */
+  export type SessionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+    /**
+     * Filter which Session to delete.
+     */
+    where: SessionWhereUniqueInput
+  }
+
+  /**
+   * Session deleteMany
+   */
+  export type SessionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Sessions to delete
+     */
+    where?: SessionWhereInput
+    /**
+     * Limit how many Sessions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Session without action
+   */
+  export type SessionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Session
+     */
+    select?: SessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Session
+     */
+    omit?: SessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AccountLock
+   */
+
+  export type AggregateAccountLock = {
+    _count: AccountLockCountAggregateOutputType | null
+    _avg: AccountLockAvgAggregateOutputType | null
+    _sum: AccountLockSumAggregateOutputType | null
+    _min: AccountLockMinAggregateOutputType | null
+    _max: AccountLockMaxAggregateOutputType | null
+  }
+
+  export type AccountLockAvgAggregateOutputType = {
+    failedAttempts: number | null
+  }
+
+  export type AccountLockSumAggregateOutputType = {
+    failedAttempts: number | null
+  }
+
+  export type AccountLockMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    reason: string | null
+    failedAttempts: number | null
+    lockedAt: Date | null
+    expiresAt: Date | null
+    unlockedAt: Date | null
+    ip: string | null
+    userAgent: string | null
+    createdAt: Date | null
+  }
+
+  export type AccountLockMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    reason: string | null
+    failedAttempts: number | null
+    lockedAt: Date | null
+    expiresAt: Date | null
+    unlockedAt: Date | null
+    ip: string | null
+    userAgent: string | null
+    createdAt: Date | null
+  }
+
+  export type AccountLockCountAggregateOutputType = {
+    id: number
+    userId: number
+    reason: number
+    failedAttempts: number
+    lockedAt: number
+    expiresAt: number
+    unlockedAt: number
+    ip: number
+    userAgent: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type AccountLockAvgAggregateInputType = {
+    failedAttempts?: true
+  }
+
+  export type AccountLockSumAggregateInputType = {
+    failedAttempts?: true
+  }
+
+  export type AccountLockMinAggregateInputType = {
+    id?: true
+    userId?: true
+    reason?: true
+    failedAttempts?: true
+    lockedAt?: true
+    expiresAt?: true
+    unlockedAt?: true
+    ip?: true
+    userAgent?: true
+    createdAt?: true
+  }
+
+  export type AccountLockMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    reason?: true
+    failedAttempts?: true
+    lockedAt?: true
+    expiresAt?: true
+    unlockedAt?: true
+    ip?: true
+    userAgent?: true
+    createdAt?: true
+  }
+
+  export type AccountLockCountAggregateInputType = {
+    id?: true
+    userId?: true
+    reason?: true
+    failedAttempts?: true
+    lockedAt?: true
+    expiresAt?: true
+    unlockedAt?: true
+    ip?: true
+    userAgent?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type AccountLockAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AccountLock to aggregate.
+     */
+    where?: AccountLockWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AccountLocks to fetch.
+     */
+    orderBy?: AccountLockOrderByWithRelationInput | AccountLockOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AccountLockWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AccountLocks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AccountLocks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AccountLocks
+    **/
+    _count?: true | AccountLockCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AccountLockAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AccountLockSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AccountLockMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AccountLockMaxAggregateInputType
+  }
+
+  export type GetAccountLockAggregateType<T extends AccountLockAggregateArgs> = {
+        [P in keyof T & keyof AggregateAccountLock]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAccountLock[P]>
+      : GetScalarType<T[P], AggregateAccountLock[P]>
+  }
+
+
+
+
+  export type AccountLockGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AccountLockWhereInput
+    orderBy?: AccountLockOrderByWithAggregationInput | AccountLockOrderByWithAggregationInput[]
+    by: AccountLockScalarFieldEnum[] | AccountLockScalarFieldEnum
+    having?: AccountLockScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AccountLockCountAggregateInputType | true
+    _avg?: AccountLockAvgAggregateInputType
+    _sum?: AccountLockSumAggregateInputType
+    _min?: AccountLockMinAggregateInputType
+    _max?: AccountLockMaxAggregateInputType
+  }
+
+  export type AccountLockGroupByOutputType = {
+    id: string
+    userId: string
+    reason: string
+    failedAttempts: number
+    lockedAt: Date
+    expiresAt: Date | null
+    unlockedAt: Date | null
+    ip: string | null
+    userAgent: string | null
+    createdAt: Date
+    _count: AccountLockCountAggregateOutputType | null
+    _avg: AccountLockAvgAggregateOutputType | null
+    _sum: AccountLockSumAggregateOutputType | null
+    _min: AccountLockMinAggregateOutputType | null
+    _max: AccountLockMaxAggregateOutputType | null
+  }
+
+  type GetAccountLockGroupByPayload<T extends AccountLockGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AccountLockGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AccountLockGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AccountLockGroupByOutputType[P]>
+            : GetScalarType<T[P], AccountLockGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AccountLockSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    reason?: boolean
+    failedAttempts?: boolean
+    lockedAt?: boolean
+    expiresAt?: boolean
+    unlockedAt?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["accountLock"]>
+
+  export type AccountLockSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    reason?: boolean
+    failedAttempts?: boolean
+    lockedAt?: boolean
+    expiresAt?: boolean
+    unlockedAt?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["accountLock"]>
+
+  export type AccountLockSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    reason?: boolean
+    failedAttempts?: boolean
+    lockedAt?: boolean
+    expiresAt?: boolean
+    unlockedAt?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["accountLock"]>
+
+  export type AccountLockSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    reason?: boolean
+    failedAttempts?: boolean
+    lockedAt?: boolean
+    expiresAt?: boolean
+    unlockedAt?: boolean
+    ip?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+  }
+
+  export type AccountLockOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "reason" | "failedAttempts" | "lockedAt" | "expiresAt" | "unlockedAt" | "ip" | "userAgent" | "createdAt", ExtArgs["result"]["accountLock"]>
+  export type AccountLockInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type AccountLockIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type AccountLockIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $AccountLockPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AccountLock"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      reason: string
+      failedAttempts: number
+      lockedAt: Date
+      expiresAt: Date | null
+      unlockedAt: Date | null
+      ip: string | null
+      userAgent: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["accountLock"]>
+    composites: {}
+  }
+
+  type AccountLockGetPayload<S extends boolean | null | undefined | AccountLockDefaultArgs> = $Result.GetResult<Prisma.$AccountLockPayload, S>
+
+  type AccountLockCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AccountLockFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AccountLockCountAggregateInputType | true
+    }
+
+  export interface AccountLockDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AccountLock'], meta: { name: 'AccountLock' } }
+    /**
+     * Find zero or one AccountLock that matches the filter.
+     * @param {AccountLockFindUniqueArgs} args - Arguments to find a AccountLock
+     * @example
+     * // Get one AccountLock
+     * const accountLock = await prisma.accountLock.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AccountLockFindUniqueArgs>(args: SelectSubset<T, AccountLockFindUniqueArgs<ExtArgs>>): Prisma__AccountLockClient<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AccountLock that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AccountLockFindUniqueOrThrowArgs} args - Arguments to find a AccountLock
+     * @example
+     * // Get one AccountLock
+     * const accountLock = await prisma.accountLock.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AccountLockFindUniqueOrThrowArgs>(args: SelectSubset<T, AccountLockFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AccountLockClient<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AccountLock that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountLockFindFirstArgs} args - Arguments to find a AccountLock
+     * @example
+     * // Get one AccountLock
+     * const accountLock = await prisma.accountLock.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AccountLockFindFirstArgs>(args?: SelectSubset<T, AccountLockFindFirstArgs<ExtArgs>>): Prisma__AccountLockClient<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AccountLock that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountLockFindFirstOrThrowArgs} args - Arguments to find a AccountLock
+     * @example
+     * // Get one AccountLock
+     * const accountLock = await prisma.accountLock.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AccountLockFindFirstOrThrowArgs>(args?: SelectSubset<T, AccountLockFindFirstOrThrowArgs<ExtArgs>>): Prisma__AccountLockClient<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AccountLocks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountLockFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AccountLocks
+     * const accountLocks = await prisma.accountLock.findMany()
+     * 
+     * // Get first 10 AccountLocks
+     * const accountLocks = await prisma.accountLock.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const accountLockWithIdOnly = await prisma.accountLock.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AccountLockFindManyArgs>(args?: SelectSubset<T, AccountLockFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AccountLock.
+     * @param {AccountLockCreateArgs} args - Arguments to create a AccountLock.
+     * @example
+     * // Create one AccountLock
+     * const AccountLock = await prisma.accountLock.create({
+     *   data: {
+     *     // ... data to create a AccountLock
+     *   }
+     * })
+     * 
+     */
+    create<T extends AccountLockCreateArgs>(args: SelectSubset<T, AccountLockCreateArgs<ExtArgs>>): Prisma__AccountLockClient<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AccountLocks.
+     * @param {AccountLockCreateManyArgs} args - Arguments to create many AccountLocks.
+     * @example
+     * // Create many AccountLocks
+     * const accountLock = await prisma.accountLock.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AccountLockCreateManyArgs>(args?: SelectSubset<T, AccountLockCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AccountLocks and returns the data saved in the database.
+     * @param {AccountLockCreateManyAndReturnArgs} args - Arguments to create many AccountLocks.
+     * @example
+     * // Create many AccountLocks
+     * const accountLock = await prisma.accountLock.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AccountLocks and only return the `id`
+     * const accountLockWithIdOnly = await prisma.accountLock.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AccountLockCreateManyAndReturnArgs>(args?: SelectSubset<T, AccountLockCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AccountLock.
+     * @param {AccountLockDeleteArgs} args - Arguments to delete one AccountLock.
+     * @example
+     * // Delete one AccountLock
+     * const AccountLock = await prisma.accountLock.delete({
+     *   where: {
+     *     // ... filter to delete one AccountLock
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AccountLockDeleteArgs>(args: SelectSubset<T, AccountLockDeleteArgs<ExtArgs>>): Prisma__AccountLockClient<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AccountLock.
+     * @param {AccountLockUpdateArgs} args - Arguments to update one AccountLock.
+     * @example
+     * // Update one AccountLock
+     * const accountLock = await prisma.accountLock.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AccountLockUpdateArgs>(args: SelectSubset<T, AccountLockUpdateArgs<ExtArgs>>): Prisma__AccountLockClient<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AccountLocks.
+     * @param {AccountLockDeleteManyArgs} args - Arguments to filter AccountLocks to delete.
+     * @example
+     * // Delete a few AccountLocks
+     * const { count } = await prisma.accountLock.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AccountLockDeleteManyArgs>(args?: SelectSubset<T, AccountLockDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AccountLocks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountLockUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AccountLocks
+     * const accountLock = await prisma.accountLock.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AccountLockUpdateManyArgs>(args: SelectSubset<T, AccountLockUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AccountLocks and returns the data updated in the database.
+     * @param {AccountLockUpdateManyAndReturnArgs} args - Arguments to update many AccountLocks.
+     * @example
+     * // Update many AccountLocks
+     * const accountLock = await prisma.accountLock.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AccountLocks and only return the `id`
+     * const accountLockWithIdOnly = await prisma.accountLock.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AccountLockUpdateManyAndReturnArgs>(args: SelectSubset<T, AccountLockUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AccountLock.
+     * @param {AccountLockUpsertArgs} args - Arguments to update or create a AccountLock.
+     * @example
+     * // Update or create a AccountLock
+     * const accountLock = await prisma.accountLock.upsert({
+     *   create: {
+     *     // ... data to create a AccountLock
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AccountLock we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AccountLockUpsertArgs>(args: SelectSubset<T, AccountLockUpsertArgs<ExtArgs>>): Prisma__AccountLockClient<$Result.GetResult<Prisma.$AccountLockPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AccountLocks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountLockCountArgs} args - Arguments to filter AccountLocks to count.
+     * @example
+     * // Count the number of AccountLocks
+     * const count = await prisma.accountLock.count({
+     *   where: {
+     *     // ... the filter for the AccountLocks we want to count
+     *   }
+     * })
+    **/
+    count<T extends AccountLockCountArgs>(
+      args?: Subset<T, AccountLockCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AccountLockCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AccountLock.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountLockAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AccountLockAggregateArgs>(args: Subset<T, AccountLockAggregateArgs>): Prisma.PrismaPromise<GetAccountLockAggregateType<T>>
+
+    /**
+     * Group by AccountLock.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AccountLockGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AccountLockGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AccountLockGroupByArgs['orderBy'] }
+        : { orderBy?: AccountLockGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AccountLockGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAccountLockGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AccountLock model
+   */
+  readonly fields: AccountLockFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AccountLock.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AccountLockClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AccountLock model
+   */
+  interface AccountLockFieldRefs {
+    readonly id: FieldRef<"AccountLock", 'String'>
+    readonly userId: FieldRef<"AccountLock", 'String'>
+    readonly reason: FieldRef<"AccountLock", 'String'>
+    readonly failedAttempts: FieldRef<"AccountLock", 'Int'>
+    readonly lockedAt: FieldRef<"AccountLock", 'DateTime'>
+    readonly expiresAt: FieldRef<"AccountLock", 'DateTime'>
+    readonly unlockedAt: FieldRef<"AccountLock", 'DateTime'>
+    readonly ip: FieldRef<"AccountLock", 'String'>
+    readonly userAgent: FieldRef<"AccountLock", 'String'>
+    readonly createdAt: FieldRef<"AccountLock", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AccountLock findUnique
+   */
+  export type AccountLockFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+    /**
+     * Filter, which AccountLock to fetch.
+     */
+    where: AccountLockWhereUniqueInput
+  }
+
+  /**
+   * AccountLock findUniqueOrThrow
+   */
+  export type AccountLockFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+    /**
+     * Filter, which AccountLock to fetch.
+     */
+    where: AccountLockWhereUniqueInput
+  }
+
+  /**
+   * AccountLock findFirst
+   */
+  export type AccountLockFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+    /**
+     * Filter, which AccountLock to fetch.
+     */
+    where?: AccountLockWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AccountLocks to fetch.
+     */
+    orderBy?: AccountLockOrderByWithRelationInput | AccountLockOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AccountLocks.
+     */
+    cursor?: AccountLockWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AccountLocks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AccountLocks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AccountLocks.
+     */
+    distinct?: AccountLockScalarFieldEnum | AccountLockScalarFieldEnum[]
+  }
+
+  /**
+   * AccountLock findFirstOrThrow
+   */
+  export type AccountLockFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+    /**
+     * Filter, which AccountLock to fetch.
+     */
+    where?: AccountLockWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AccountLocks to fetch.
+     */
+    orderBy?: AccountLockOrderByWithRelationInput | AccountLockOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AccountLocks.
+     */
+    cursor?: AccountLockWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AccountLocks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AccountLocks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AccountLocks.
+     */
+    distinct?: AccountLockScalarFieldEnum | AccountLockScalarFieldEnum[]
+  }
+
+  /**
+   * AccountLock findMany
+   */
+  export type AccountLockFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+    /**
+     * Filter, which AccountLocks to fetch.
+     */
+    where?: AccountLockWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AccountLocks to fetch.
+     */
+    orderBy?: AccountLockOrderByWithRelationInput | AccountLockOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AccountLocks.
+     */
+    cursor?: AccountLockWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AccountLocks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AccountLocks.
+     */
+    skip?: number
+    distinct?: AccountLockScalarFieldEnum | AccountLockScalarFieldEnum[]
+  }
+
+  /**
+   * AccountLock create
+   */
+  export type AccountLockCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AccountLock.
+     */
+    data: XOR<AccountLockCreateInput, AccountLockUncheckedCreateInput>
+  }
+
+  /**
+   * AccountLock createMany
+   */
+  export type AccountLockCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AccountLocks.
+     */
+    data: AccountLockCreateManyInput | AccountLockCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AccountLock createManyAndReturn
+   */
+  export type AccountLockCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * The data used to create many AccountLocks.
+     */
+    data: AccountLockCreateManyInput | AccountLockCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AccountLock update
+   */
+  export type AccountLockUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AccountLock.
+     */
+    data: XOR<AccountLockUpdateInput, AccountLockUncheckedUpdateInput>
+    /**
+     * Choose, which AccountLock to update.
+     */
+    where: AccountLockWhereUniqueInput
+  }
+
+  /**
+   * AccountLock updateMany
+   */
+  export type AccountLockUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AccountLocks.
+     */
+    data: XOR<AccountLockUpdateManyMutationInput, AccountLockUncheckedUpdateManyInput>
+    /**
+     * Filter which AccountLocks to update
+     */
+    where?: AccountLockWhereInput
+    /**
+     * Limit how many AccountLocks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AccountLock updateManyAndReturn
+   */
+  export type AccountLockUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * The data used to update AccountLocks.
+     */
+    data: XOR<AccountLockUpdateManyMutationInput, AccountLockUncheckedUpdateManyInput>
+    /**
+     * Filter which AccountLocks to update
+     */
+    where?: AccountLockWhereInput
+    /**
+     * Limit how many AccountLocks to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AccountLock upsert
+   */
+  export type AccountLockUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AccountLock to update in case it exists.
+     */
+    where: AccountLockWhereUniqueInput
+    /**
+     * In case the AccountLock found by the `where` argument doesn't exist, create a new AccountLock with this data.
+     */
+    create: XOR<AccountLockCreateInput, AccountLockUncheckedCreateInput>
+    /**
+     * In case the AccountLock was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AccountLockUpdateInput, AccountLockUncheckedUpdateInput>
+  }
+
+  /**
+   * AccountLock delete
+   */
+  export type AccountLockDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+    /**
+     * Filter which AccountLock to delete.
+     */
+    where: AccountLockWhereUniqueInput
+  }
+
+  /**
+   * AccountLock deleteMany
+   */
+  export type AccountLockDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AccountLocks to delete
+     */
+    where?: AccountLockWhereInput
+    /**
+     * Limit how many AccountLocks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AccountLock without action
+   */
+  export type AccountLockDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AccountLock
+     */
+    select?: AccountLockSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AccountLock
+     */
+    omit?: AccountLockOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AccountLockInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model Token
    */
 
   export type AggregateToken = {
     _count: TokenCountAggregateOutputType | null
+    _avg: TokenAvgAggregateOutputType | null
+    _sum: TokenSumAggregateOutputType | null
     _min: TokenMinAggregateOutputType | null
     _max: TokenMaxAggregateOutputType | null
+  }
+
+  export type TokenAvgAggregateOutputType = {
+    maxUses: number | null
+    useCount: number | null
+  }
+
+  export type TokenSumAggregateOutputType = {
+    maxUses: number | null
+    useCount: number | null
   }
 
   export type TokenMinAggregateOutputType = {
@@ -2504,7 +9647,12 @@ export namespace Prisma {
     token: string | null
     type: $Enums.ETokenType | null
     expiresIn: Date | null
+    usedAt: Date | null
+    maxUses: number | null
+    useCount: number | null
     userId: string | null
+    createdIp: string | null
+    usedIp: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2514,7 +9662,12 @@ export namespace Prisma {
     token: string | null
     type: $Enums.ETokenType | null
     expiresIn: Date | null
+    usedAt: Date | null
+    maxUses: number | null
+    useCount: number | null
     userId: string | null
+    createdIp: string | null
+    usedIp: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2524,19 +9677,39 @@ export namespace Prisma {
     token: number
     type: number
     expiresIn: number
+    usedAt: number
+    maxUses: number
+    useCount: number
     userId: number
+    createdIp: number
+    usedIp: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
 
+  export type TokenAvgAggregateInputType = {
+    maxUses?: true
+    useCount?: true
+  }
+
+  export type TokenSumAggregateInputType = {
+    maxUses?: true
+    useCount?: true
+  }
+
   export type TokenMinAggregateInputType = {
     id?: true
     token?: true
     type?: true
     expiresIn?: true
+    usedAt?: true
+    maxUses?: true
+    useCount?: true
     userId?: true
+    createdIp?: true
+    usedIp?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2546,7 +9719,12 @@ export namespace Prisma {
     token?: true
     type?: true
     expiresIn?: true
+    usedAt?: true
+    maxUses?: true
+    useCount?: true
     userId?: true
+    createdIp?: true
+    usedIp?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2556,7 +9734,12 @@ export namespace Prisma {
     token?: true
     type?: true
     expiresIn?: true
+    usedAt?: true
+    maxUses?: true
+    useCount?: true
     userId?: true
+    createdIp?: true
+    usedIp?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2600,6 +9783,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: TokenAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TokenSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: TokenMinAggregateInputType
@@ -2630,6 +9825,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: TokenCountAggregateInputType | true
+    _avg?: TokenAvgAggregateInputType
+    _sum?: TokenSumAggregateInputType
     _min?: TokenMinAggregateInputType
     _max?: TokenMaxAggregateInputType
   }
@@ -2639,10 +9836,17 @@ export namespace Prisma {
     token: string
     type: $Enums.ETokenType
     expiresIn: Date
+    usedAt: Date | null
+    maxUses: number
+    useCount: number
     userId: string | null
+    createdIp: string | null
+    usedIp: string | null
     createdAt: Date
     updatedAt: Date
     _count: TokenCountAggregateOutputType | null
+    _avg: TokenAvgAggregateOutputType | null
+    _sum: TokenSumAggregateOutputType | null
     _min: TokenMinAggregateOutputType | null
     _max: TokenMaxAggregateOutputType | null
   }
@@ -2666,7 +9870,12 @@ export namespace Prisma {
     token?: boolean
     type?: boolean
     expiresIn?: boolean
+    usedAt?: boolean
+    maxUses?: boolean
+    useCount?: boolean
     userId?: boolean
+    createdIp?: boolean
+    usedIp?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Token$userArgs<ExtArgs>
@@ -2677,7 +9886,12 @@ export namespace Prisma {
     token?: boolean
     type?: boolean
     expiresIn?: boolean
+    usedAt?: boolean
+    maxUses?: boolean
+    useCount?: boolean
     userId?: boolean
+    createdIp?: boolean
+    usedIp?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Token$userArgs<ExtArgs>
@@ -2688,7 +9902,12 @@ export namespace Prisma {
     token?: boolean
     type?: boolean
     expiresIn?: boolean
+    usedAt?: boolean
+    maxUses?: boolean
+    useCount?: boolean
     userId?: boolean
+    createdIp?: boolean
+    usedIp?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Token$userArgs<ExtArgs>
@@ -2699,12 +9918,17 @@ export namespace Prisma {
     token?: boolean
     type?: boolean
     expiresIn?: boolean
+    usedAt?: boolean
+    maxUses?: boolean
+    useCount?: boolean
     userId?: boolean
+    createdIp?: boolean
+    usedIp?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "token" | "type" | "expiresIn" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["token"]>
+  export type TokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "token" | "type" | "expiresIn" | "usedAt" | "maxUses" | "useCount" | "userId" | "createdIp" | "usedIp" | "createdAt" | "updatedAt", ExtArgs["result"]["token"]>
   export type TokenInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Token$userArgs<ExtArgs>
   }
@@ -2725,7 +9949,12 @@ export namespace Prisma {
       token: string
       type: $Enums.ETokenType
       expiresIn: Date
+      usedAt: Date | null
+      maxUses: number
+      useCount: number
       userId: string | null
+      createdIp: string | null
+      usedIp: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["token"]>
@@ -3156,7 +10385,12 @@ export namespace Prisma {
     readonly token: FieldRef<"Token", 'String'>
     readonly type: FieldRef<"Token", 'ETokenType'>
     readonly expiresIn: FieldRef<"Token", 'DateTime'>
+    readonly usedAt: FieldRef<"Token", 'DateTime'>
+    readonly maxUses: FieldRef<"Token", 'Int'>
+    readonly useCount: FieldRef<"Token", 'Int'>
     readonly userId: FieldRef<"Token", 'String'>
+    readonly createdIp: FieldRef<"Token", 'String'>
+    readonly usedIp: FieldRef<"Token", 'String'>
     readonly createdAt: FieldRef<"Token", 'DateTime'>
     readonly updatedAt: FieldRef<"Token", 'DateTime'>
   }
@@ -3605,27 +10839,36 @@ export namespace Prisma {
   export type BackupCodeMinAggregateOutputType = {
     id: string | null
     userId: string | null
-    type: $Enums.EBackupCodeType | null
+    authMethodId: string | null
+    type: $Enums.E2FAMethod | null
     code: string | null
     usedAt: Date | null
+    usedIp: string | null
+    expiresAt: Date | null
     createdAt: Date | null
   }
 
   export type BackupCodeMaxAggregateOutputType = {
     id: string | null
     userId: string | null
-    type: $Enums.EBackupCodeType | null
+    authMethodId: string | null
+    type: $Enums.E2FAMethod | null
     code: string | null
     usedAt: Date | null
+    usedIp: string | null
+    expiresAt: Date | null
     createdAt: Date | null
   }
 
   export type BackupCodeCountAggregateOutputType = {
     id: number
     userId: number
+    authMethodId: number
     type: number
     code: number
     usedAt: number
+    usedIp: number
+    expiresAt: number
     createdAt: number
     _all: number
   }
@@ -3634,27 +10877,36 @@ export namespace Prisma {
   export type BackupCodeMinAggregateInputType = {
     id?: true
     userId?: true
+    authMethodId?: true
     type?: true
     code?: true
     usedAt?: true
+    usedIp?: true
+    expiresAt?: true
     createdAt?: true
   }
 
   export type BackupCodeMaxAggregateInputType = {
     id?: true
     userId?: true
+    authMethodId?: true
     type?: true
     code?: true
     usedAt?: true
+    usedIp?: true
+    expiresAt?: true
     createdAt?: true
   }
 
   export type BackupCodeCountAggregateInputType = {
     id?: true
     userId?: true
+    authMethodId?: true
     type?: true
     code?: true
     usedAt?: true
+    usedIp?: true
+    expiresAt?: true
     createdAt?: true
     _all?: true
   }
@@ -3734,9 +10986,12 @@ export namespace Prisma {
   export type BackupCodeGroupByOutputType = {
     id: string
     userId: string
-    type: $Enums.EBackupCodeType
+    authMethodId: string | null
+    type: $Enums.E2FAMethod
     code: string
     usedAt: Date | null
+    usedIp: string | null
+    expiresAt: Date | null
     createdAt: Date
     _count: BackupCodeCountAggregateOutputType | null
     _min: BackupCodeMinAggregateOutputType | null
@@ -3760,9 +11015,12 @@ export namespace Prisma {
   export type BackupCodeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    authMethodId?: boolean
     type?: boolean
     code?: boolean
     usedAt?: boolean
+    usedIp?: boolean
+    expiresAt?: boolean
     createdAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["backupCode"]>
@@ -3770,9 +11028,12 @@ export namespace Prisma {
   export type BackupCodeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    authMethodId?: boolean
     type?: boolean
     code?: boolean
     usedAt?: boolean
+    usedIp?: boolean
+    expiresAt?: boolean
     createdAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["backupCode"]>
@@ -3780,9 +11041,12 @@ export namespace Prisma {
   export type BackupCodeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    authMethodId?: boolean
     type?: boolean
     code?: boolean
     usedAt?: boolean
+    usedIp?: boolean
+    expiresAt?: boolean
     createdAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["backupCode"]>
@@ -3790,13 +11054,16 @@ export namespace Prisma {
   export type BackupCodeSelectScalar = {
     id?: boolean
     userId?: boolean
+    authMethodId?: boolean
     type?: boolean
     code?: boolean
     usedAt?: boolean
+    usedIp?: boolean
+    expiresAt?: boolean
     createdAt?: boolean
   }
 
-  export type BackupCodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "type" | "code" | "usedAt" | "createdAt", ExtArgs["result"]["backupCode"]>
+  export type BackupCodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "authMethodId" | "type" | "code" | "usedAt" | "usedIp" | "expiresAt" | "createdAt", ExtArgs["result"]["backupCode"]>
   export type BackupCodeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -3815,9 +11082,24 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
-      type: $Enums.EBackupCodeType
+      /**
+       * Link to specific authentication method (optional)
+       */
+      authMethodId: string | null
+      /**
+       * Which 2FA method this backup code is for
+       */
+      type: $Enums.E2FAMethod
+      /**
+       * Hashed backup code (Argon2id)
+       */
       code: string
       usedAt: Date | null
+      usedIp: string | null
+      /**
+       * Optional expiration for compliance
+       */
+      expiresAt: Date | null
       createdAt: Date
     }, ExtArgs["result"]["backupCode"]>
     composites: {}
@@ -4245,9 +11527,12 @@ export namespace Prisma {
   interface BackupCodeFieldRefs {
     readonly id: FieldRef<"BackupCode", 'String'>
     readonly userId: FieldRef<"BackupCode", 'String'>
-    readonly type: FieldRef<"BackupCode", 'EBackupCodeType'>
+    readonly authMethodId: FieldRef<"BackupCode", 'String'>
+    readonly type: FieldRef<"BackupCode", 'E2FAMethod'>
     readonly code: FieldRef<"BackupCode", 'String'>
     readonly usedAt: FieldRef<"BackupCode", 'DateTime'>
+    readonly usedIp: FieldRef<"BackupCode", 'String'>
+    readonly expiresAt: FieldRef<"BackupCode", 'DateTime'>
     readonly createdAt: FieldRef<"BackupCode", 'DateTime'>
   }
     
@@ -4677,8 +11962,12 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     action: string | null
+    category: $Enums.EAuditCategory | null
+    success: boolean | null
     ip: string | null
     userAgent: string | null
+    country: string | null
+    city: string | null
     createdAt: Date | null
   }
 
@@ -4686,8 +11975,12 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     action: string | null
+    category: $Enums.EAuditCategory | null
+    success: boolean | null
     ip: string | null
     userAgent: string | null
+    country: string | null
+    city: string | null
     createdAt: Date | null
   }
 
@@ -4695,9 +11988,13 @@ export namespace Prisma {
     id: number
     userId: number
     action: number
-    metadata: number
+    category: number
+    success: number
     ip: number
     userAgent: number
+    country: number
+    city: number
+    metadata: number
     createdAt: number
     _all: number
   }
@@ -4707,8 +12004,12 @@ export namespace Prisma {
     id?: true
     userId?: true
     action?: true
+    category?: true
+    success?: true
     ip?: true
     userAgent?: true
+    country?: true
+    city?: true
     createdAt?: true
   }
 
@@ -4716,8 +12017,12 @@ export namespace Prisma {
     id?: true
     userId?: true
     action?: true
+    category?: true
+    success?: true
     ip?: true
     userAgent?: true
+    country?: true
+    city?: true
     createdAt?: true
   }
 
@@ -4725,9 +12030,13 @@ export namespace Prisma {
     id?: true
     userId?: true
     action?: true
-    metadata?: true
+    category?: true
+    success?: true
     ip?: true
     userAgent?: true
+    country?: true
+    city?: true
+    metadata?: true
     createdAt?: true
     _all?: true
   }
@@ -4808,9 +12117,13 @@ export namespace Prisma {
     id: string
     userId: string
     action: string
-    metadata: JsonValue | null
+    category: $Enums.EAuditCategory
+    success: boolean
     ip: string | null
     userAgent: string | null
+    country: string | null
+    city: string | null
+    metadata: JsonValue | null
     createdAt: Date
     _count: AuditLogCountAggregateOutputType | null
     _min: AuditLogMinAggregateOutputType | null
@@ -4835,9 +12148,13 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     action?: boolean
-    metadata?: boolean
+    category?: boolean
+    success?: boolean
     ip?: boolean
     userAgent?: boolean
+    country?: boolean
+    city?: boolean
+    metadata?: boolean
     createdAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["auditLog"]>
@@ -4846,9 +12163,13 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     action?: boolean
-    metadata?: boolean
+    category?: boolean
+    success?: boolean
     ip?: boolean
     userAgent?: boolean
+    country?: boolean
+    city?: boolean
+    metadata?: boolean
     createdAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["auditLog"]>
@@ -4857,9 +12178,13 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     action?: boolean
-    metadata?: boolean
+    category?: boolean
+    success?: boolean
     ip?: boolean
     userAgent?: boolean
+    country?: boolean
+    city?: boolean
+    metadata?: boolean
     createdAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["auditLog"]>
@@ -4868,13 +12193,17 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     action?: boolean
-    metadata?: boolean
+    category?: boolean
+    success?: boolean
     ip?: boolean
     userAgent?: boolean
+    country?: boolean
+    city?: boolean
+    metadata?: boolean
     createdAt?: boolean
   }
 
-  export type AuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "action" | "metadata" | "ip" | "userAgent" | "createdAt", ExtArgs["result"]["auditLog"]>
+  export type AuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "action" | "category" | "success" | "ip" | "userAgent" | "country" | "city" | "metadata" | "createdAt", ExtArgs["result"]["auditLog"]>
   export type AuditLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -4894,9 +12223,13 @@ export namespace Prisma {
       id: string
       userId: string
       action: string
-      metadata: Prisma.JsonValue | null
+      category: $Enums.EAuditCategory
+      success: boolean
       ip: string | null
       userAgent: string | null
+      country: string | null
+      city: string | null
+      metadata: Prisma.JsonValue | null
       createdAt: Date
     }, ExtArgs["result"]["auditLog"]>
     composites: {}
@@ -5325,9 +12658,13 @@ export namespace Prisma {
     readonly id: FieldRef<"AuditLog", 'String'>
     readonly userId: FieldRef<"AuditLog", 'String'>
     readonly action: FieldRef<"AuditLog", 'String'>
-    readonly metadata: FieldRef<"AuditLog", 'Json'>
+    readonly category: FieldRef<"AuditLog", 'EAuditCategory'>
+    readonly success: FieldRef<"AuditLog", 'Boolean'>
     readonly ip: FieldRef<"AuditLog", 'String'>
     readonly userAgent: FieldRef<"AuditLog", 'String'>
+    readonly country: FieldRef<"AuditLog", 'String'>
+    readonly city: FieldRef<"AuditLog", 'String'>
+    readonly metadata: FieldRef<"AuditLog", 'Json'>
     readonly createdAt: FieldRef<"AuditLog", 'DateTime'>
   }
     
@@ -5768,10 +13105,21 @@ export namespace Prisma {
     bio: 'bio',
     password: 'password',
     isEmailVerified: 'isEmailVerified',
-    isTotpEnabled: 'isTotpEnabled',
-    totpSecret: 'totpSecret',
-    isOtpEnabled: 'isOtpEnabled',
-    otpSecret: 'otpSecret',
+    emailVerifiedAt: 'emailVerifiedAt',
+    isUnsubscribed: 'isUnsubscribed',
+    emailBouncedAt: 'emailBouncedAt',
+    isPhoneVerified: 'isPhoneVerified',
+    phoneVerifiedAt: 'phoneVerifiedAt',
+    phoneBouncedAt: 'phoneBouncedAt',
+    is2FAEnabled: 'is2FAEnabled',
+    preferred2FAMethod: 'preferred2FAMethod',
+    require2FA: 'require2FA',
+    lastLoginAt: 'lastLoginAt',
+    lastLoginIp: 'lastLoginIp',
+    passwordChangedAt: 'passwordChangedAt',
+    riskScore: 'riskScore',
+    lastRiskAssessAt: 'lastRiskAssessAt',
+    deletedAt: 'deletedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -5779,12 +13127,125 @@ export namespace Prisma {
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+  export const AuthenticationMethodScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    method: 'method',
+    data: 'data',
+    name: 'name',
+    isActive: 'isActive',
+    isPrimary: 'isPrimary',
+    lastUsedAt: 'lastUsedAt',
+    useCount: 'useCount',
+    credentialId: 'credentialId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AuthenticationMethodScalarFieldEnum = (typeof AuthenticationMethodScalarFieldEnum)[keyof typeof AuthenticationMethodScalarFieldEnum]
+
+
+  export const TrustedDeviceScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    deviceId: 'deviceId',
+    fingerprint: 'fingerprint',
+    name: 'name',
+    userAgent: 'userAgent',
+    browser: 'browser',
+    os: 'os',
+    device: 'device',
+    trustScore: 'trustScore',
+    lastIp: 'lastIp',
+    lastCountry: 'lastCountry',
+    lastCity: 'lastCity',
+    isActive: 'isActive',
+    lastSeenAt: 'lastSeenAt',
+    expiresAt: 'expiresAt',
+    revokedAt: 'revokedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TrustedDeviceScalarFieldEnum = (typeof TrustedDeviceScalarFieldEnum)[keyof typeof TrustedDeviceScalarFieldEnum]
+
+
+  export const SecurityEventScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    event: 'event',
+    severity: 'severity',
+    ip: 'ip',
+    userAgent: 'userAgent',
+    country: 'country',
+    city: 'city',
+    deviceId: 'deviceId',
+    riskScore: 'riskScore',
+    riskFactors: 'riskFactors',
+    resolved: 'resolved',
+    resolvedAt: 'resolvedAt',
+    resolvedBy: 'resolvedBy',
+    metadata: 'metadata',
+    createdAt: 'createdAt'
+  };
+
+  export type SecurityEventScalarFieldEnum = (typeof SecurityEventScalarFieldEnum)[keyof typeof SecurityEventScalarFieldEnum]
+
+
+  export const SessionScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    token: 'token',
+    refreshToken: 'refreshToken',
+    deviceId: 'deviceId',
+    userAgent: 'userAgent',
+    ip: 'ip',
+    country: 'country',
+    city: 'city',
+    browser: 'browser',
+    os: 'os',
+    device: 'device',
+    isTrusted: 'isTrusted',
+    riskScore: 'riskScore',
+    is2FAVerified: 'is2FAVerified',
+    verified2FAAt: 'verified2FAAt',
+    expiresAt: 'expiresAt',
+    lastUsedAt: 'lastUsedAt',
+    revokedAt: 'revokedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+  export const AccountLockScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    reason: 'reason',
+    failedAttempts: 'failedAttempts',
+    lockedAt: 'lockedAt',
+    expiresAt: 'expiresAt',
+    unlockedAt: 'unlockedAt',
+    ip: 'ip',
+    userAgent: 'userAgent',
+    createdAt: 'createdAt'
+  };
+
+  export type AccountLockScalarFieldEnum = (typeof AccountLockScalarFieldEnum)[keyof typeof AccountLockScalarFieldEnum]
+
+
   export const TokenScalarFieldEnum: {
     id: 'id',
     token: 'token',
     type: 'type',
     expiresIn: 'expiresIn',
+    usedAt: 'usedAt',
+    maxUses: 'maxUses',
+    useCount: 'useCount',
     userId: 'userId',
+    createdIp: 'createdIp',
+    usedIp: 'usedIp',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -5795,9 +13256,12 @@ export namespace Prisma {
   export const BackupCodeScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
+    authMethodId: 'authMethodId',
     type: 'type',
     code: 'code',
     usedAt: 'usedAt',
+    usedIp: 'usedIp',
+    expiresAt: 'expiresAt',
     createdAt: 'createdAt'
   };
 
@@ -5808,9 +13272,13 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     action: 'action',
-    metadata: 'metadata',
+    category: 'category',
+    success: 'success',
     ip: 'ip',
     userAgent: 'userAgent',
+    country: 'country',
+    city: 'city',
+    metadata: 'metadata',
     createdAt: 'createdAt'
   };
 
@@ -5823,6 +13291,13 @@ export namespace Prisma {
   };
 
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const NullableJsonNullValueInput: {
@@ -5899,30 +13374,30 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'ETokenType'
+   * Reference to a field of type 'E2FAMethod'
    */
-  export type EnumETokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ETokenType'>
+  export type EnumE2FAMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'E2FAMethod'>
     
 
 
   /**
-   * Reference to a field of type 'ETokenType[]'
+   * Reference to a field of type 'E2FAMethod[]'
    */
-  export type ListEnumETokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ETokenType[]'>
+  export type ListEnumE2FAMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'E2FAMethod[]'>
     
 
 
   /**
-   * Reference to a field of type 'EBackupCodeType'
+   * Reference to a field of type 'Float'
    */
-  export type EnumEBackupCodeTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EBackupCodeType'>
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
     
 
 
   /**
-   * Reference to a field of type 'EBackupCodeType[]'
+   * Reference to a field of type 'Float[]'
    */
-  export type ListEnumEBackupCodeTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EBackupCodeType[]'>
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 
@@ -5952,6 +13427,62 @@ export namespace Prisma {
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
+
+
+  /**
+   * Reference to a field of type 'ESecurityEvent'
+   */
+  export type EnumESecurityEventFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ESecurityEvent'>
+    
+
+
+  /**
+   * Reference to a field of type 'ESecurityEvent[]'
+   */
+  export type ListEnumESecurityEventFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ESecurityEvent[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ESecuritySeverity'
+   */
+  export type EnumESecuritySeverityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ESecuritySeverity'>
+    
+
+
+  /**
+   * Reference to a field of type 'ESecuritySeverity[]'
+   */
+  export type ListEnumESecuritySeverityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ESecuritySeverity[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ETokenType'
+   */
+  export type EnumETokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ETokenType'>
+    
+
+
+  /**
+   * Reference to a field of type 'ETokenType[]'
+   */
+  export type ListEnumETokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ETokenType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'EAuditCategory'
+   */
+  export type EnumEAuditCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EAuditCategory'>
+    
+
+
+  /**
+   * Reference to a field of type 'EAuditCategory[]'
+   */
+  export type ListEnumEAuditCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EAuditCategory[]'>
+    
   /**
    * Deep Input Types
    */
@@ -5971,15 +13502,31 @@ export namespace Prisma {
     bio?: StringNullableFilter<"User"> | string | null
     password?: StringFilter<"User"> | string
     isEmailVerified?: BoolFilter<"User"> | boolean
-    isTotpEnabled?: BoolFilter<"User"> | boolean
-    totpSecret?: StringNullableFilter<"User"> | string | null
-    isOtpEnabled?: BoolFilter<"User"> | boolean
-    otpSecret?: StringNullableFilter<"User"> | string | null
+    emailVerifiedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    isUnsubscribed?: BoolNullableFilter<"User"> | boolean | null
+    emailBouncedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    isPhoneVerified?: BoolFilter<"User"> | boolean
+    phoneVerifiedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    phoneBouncedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    is2FAEnabled?: BoolFilter<"User"> | boolean
+    preferred2FAMethod?: EnumE2FAMethodNullableFilter<"User"> | $Enums.E2FAMethod | null
+    require2FA?: BoolFilter<"User"> | boolean
+    lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    lastLoginIp?: StringNullableFilter<"User"> | string | null
+    passwordChangedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    riskScore?: FloatNullableFilter<"User"> | number | null
+    lastRiskAssessAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    authenticationMethods?: AuthenticationMethodListRelationFilter
     backupCodes?: BackupCodeListRelationFilter
+    trustedDevices?: TrustedDeviceListRelationFilter
     auditLogs?: AuditLogListRelationFilter
     tokens?: TokenListRelationFilter
+    sessions?: SessionListRelationFilter
+    accountLocks?: AccountLockListRelationFilter
+    securityEvents?: SecurityEventListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -5993,15 +13540,31 @@ export namespace Prisma {
     bio?: SortOrderInput | SortOrder
     password?: SortOrder
     isEmailVerified?: SortOrder
-    isTotpEnabled?: SortOrder
-    totpSecret?: SortOrderInput | SortOrder
-    isOtpEnabled?: SortOrder
-    otpSecret?: SortOrderInput | SortOrder
+    emailVerifiedAt?: SortOrderInput | SortOrder
+    isUnsubscribed?: SortOrderInput | SortOrder
+    emailBouncedAt?: SortOrderInput | SortOrder
+    isPhoneVerified?: SortOrder
+    phoneVerifiedAt?: SortOrderInput | SortOrder
+    phoneBouncedAt?: SortOrderInput | SortOrder
+    is2FAEnabled?: SortOrder
+    preferred2FAMethod?: SortOrderInput | SortOrder
+    require2FA?: SortOrder
+    lastLoginAt?: SortOrderInput | SortOrder
+    lastLoginIp?: SortOrderInput | SortOrder
+    passwordChangedAt?: SortOrderInput | SortOrder
+    riskScore?: SortOrderInput | SortOrder
+    lastRiskAssessAt?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    authenticationMethods?: AuthenticationMethodOrderByRelationAggregateInput
     backupCodes?: BackupCodeOrderByRelationAggregateInput
+    trustedDevices?: TrustedDeviceOrderByRelationAggregateInput
     auditLogs?: AuditLogOrderByRelationAggregateInput
     tokens?: TokenOrderByRelationAggregateInput
+    sessions?: SessionOrderByRelationAggregateInput
+    accountLocks?: AccountLockOrderByRelationAggregateInput
+    securityEvents?: SecurityEventOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -6018,15 +13581,31 @@ export namespace Prisma {
     bio?: StringNullableFilter<"User"> | string | null
     password?: StringFilter<"User"> | string
     isEmailVerified?: BoolFilter<"User"> | boolean
-    isTotpEnabled?: BoolFilter<"User"> | boolean
-    totpSecret?: StringNullableFilter<"User"> | string | null
-    isOtpEnabled?: BoolFilter<"User"> | boolean
-    otpSecret?: StringNullableFilter<"User"> | string | null
+    emailVerifiedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    isUnsubscribed?: BoolNullableFilter<"User"> | boolean | null
+    emailBouncedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    isPhoneVerified?: BoolFilter<"User"> | boolean
+    phoneVerifiedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    phoneBouncedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    is2FAEnabled?: BoolFilter<"User"> | boolean
+    preferred2FAMethod?: EnumE2FAMethodNullableFilter<"User"> | $Enums.E2FAMethod | null
+    require2FA?: BoolFilter<"User"> | boolean
+    lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    lastLoginIp?: StringNullableFilter<"User"> | string | null
+    passwordChangedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    riskScore?: FloatNullableFilter<"User"> | number | null
+    lastRiskAssessAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    authenticationMethods?: AuthenticationMethodListRelationFilter
     backupCodes?: BackupCodeListRelationFilter
+    trustedDevices?: TrustedDeviceListRelationFilter
     auditLogs?: AuditLogListRelationFilter
     tokens?: TokenListRelationFilter
+    sessions?: SessionListRelationFilter
+    accountLocks?: AccountLockListRelationFilter
+    securityEvents?: SecurityEventListRelationFilter
   }, "id" | "phone" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -6040,15 +13619,28 @@ export namespace Prisma {
     bio?: SortOrderInput | SortOrder
     password?: SortOrder
     isEmailVerified?: SortOrder
-    isTotpEnabled?: SortOrder
-    totpSecret?: SortOrderInput | SortOrder
-    isOtpEnabled?: SortOrder
-    otpSecret?: SortOrderInput | SortOrder
+    emailVerifiedAt?: SortOrderInput | SortOrder
+    isUnsubscribed?: SortOrderInput | SortOrder
+    emailBouncedAt?: SortOrderInput | SortOrder
+    isPhoneVerified?: SortOrder
+    phoneVerifiedAt?: SortOrderInput | SortOrder
+    phoneBouncedAt?: SortOrderInput | SortOrder
+    is2FAEnabled?: SortOrder
+    preferred2FAMethod?: SortOrderInput | SortOrder
+    require2FA?: SortOrder
+    lastLoginAt?: SortOrderInput | SortOrder
+    lastLoginIp?: SortOrderInput | SortOrder
+    passwordChangedAt?: SortOrderInput | SortOrder
+    riskScore?: SortOrderInput | SortOrder
+    lastRiskAssessAt?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
+    _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
+    _sum?: UserSumOrderByAggregateInput
   }
 
   export type UserScalarWhereWithAggregatesInput = {
@@ -6065,12 +13657,574 @@ export namespace Prisma {
     bio?: StringNullableWithAggregatesFilter<"User"> | string | null
     password?: StringWithAggregatesFilter<"User"> | string
     isEmailVerified?: BoolWithAggregatesFilter<"User"> | boolean
-    isTotpEnabled?: BoolWithAggregatesFilter<"User"> | boolean
-    totpSecret?: StringNullableWithAggregatesFilter<"User"> | string | null
-    isOtpEnabled?: BoolWithAggregatesFilter<"User"> | boolean
-    otpSecret?: StringNullableWithAggregatesFilter<"User"> | string | null
+    emailVerifiedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    isUnsubscribed?: BoolNullableWithAggregatesFilter<"User"> | boolean | null
+    emailBouncedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    isPhoneVerified?: BoolWithAggregatesFilter<"User"> | boolean
+    phoneVerifiedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    phoneBouncedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    is2FAEnabled?: BoolWithAggregatesFilter<"User"> | boolean
+    preferred2FAMethod?: EnumE2FAMethodNullableWithAggregatesFilter<"User"> | $Enums.E2FAMethod | null
+    require2FA?: BoolWithAggregatesFilter<"User"> | boolean
+    lastLoginAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    lastLoginIp?: StringNullableWithAggregatesFilter<"User"> | string | null
+    passwordChangedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    riskScore?: FloatNullableWithAggregatesFilter<"User"> | number | null
+    lastRiskAssessAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+  }
+
+  export type AuthenticationMethodWhereInput = {
+    AND?: AuthenticationMethodWhereInput | AuthenticationMethodWhereInput[]
+    OR?: AuthenticationMethodWhereInput[]
+    NOT?: AuthenticationMethodWhereInput | AuthenticationMethodWhereInput[]
+    id?: StringFilter<"AuthenticationMethod"> | string
+    userId?: StringFilter<"AuthenticationMethod"> | string
+    method?: EnumE2FAMethodFilter<"AuthenticationMethod"> | $Enums.E2FAMethod
+    data?: JsonFilter<"AuthenticationMethod">
+    name?: StringNullableFilter<"AuthenticationMethod"> | string | null
+    isActive?: BoolFilter<"AuthenticationMethod"> | boolean
+    isPrimary?: BoolFilter<"AuthenticationMethod"> | boolean
+    lastUsedAt?: DateTimeNullableFilter<"AuthenticationMethod"> | Date | string | null
+    useCount?: IntFilter<"AuthenticationMethod"> | number
+    credentialId?: StringNullableFilter<"AuthenticationMethod"> | string | null
+    createdAt?: DateTimeFilter<"AuthenticationMethod"> | Date | string
+    updatedAt?: DateTimeFilter<"AuthenticationMethod"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type AuthenticationMethodOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    method?: SortOrder
+    data?: SortOrder
+    name?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    isPrimary?: SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
+    useCount?: SortOrder
+    credentialId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type AuthenticationMethodWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    credentialId?: string
+    userId_method_credentialId?: AuthenticationMethodUserIdMethodCredentialIdCompoundUniqueInput
+    AND?: AuthenticationMethodWhereInput | AuthenticationMethodWhereInput[]
+    OR?: AuthenticationMethodWhereInput[]
+    NOT?: AuthenticationMethodWhereInput | AuthenticationMethodWhereInput[]
+    userId?: StringFilter<"AuthenticationMethod"> | string
+    method?: EnumE2FAMethodFilter<"AuthenticationMethod"> | $Enums.E2FAMethod
+    data?: JsonFilter<"AuthenticationMethod">
+    name?: StringNullableFilter<"AuthenticationMethod"> | string | null
+    isActive?: BoolFilter<"AuthenticationMethod"> | boolean
+    isPrimary?: BoolFilter<"AuthenticationMethod"> | boolean
+    lastUsedAt?: DateTimeNullableFilter<"AuthenticationMethod"> | Date | string | null
+    useCount?: IntFilter<"AuthenticationMethod"> | number
+    createdAt?: DateTimeFilter<"AuthenticationMethod"> | Date | string
+    updatedAt?: DateTimeFilter<"AuthenticationMethod"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "credentialId" | "userId_method_credentialId">
+
+  export type AuthenticationMethodOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    method?: SortOrder
+    data?: SortOrder
+    name?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    isPrimary?: SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
+    useCount?: SortOrder
+    credentialId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AuthenticationMethodCountOrderByAggregateInput
+    _avg?: AuthenticationMethodAvgOrderByAggregateInput
+    _max?: AuthenticationMethodMaxOrderByAggregateInput
+    _min?: AuthenticationMethodMinOrderByAggregateInput
+    _sum?: AuthenticationMethodSumOrderByAggregateInput
+  }
+
+  export type AuthenticationMethodScalarWhereWithAggregatesInput = {
+    AND?: AuthenticationMethodScalarWhereWithAggregatesInput | AuthenticationMethodScalarWhereWithAggregatesInput[]
+    OR?: AuthenticationMethodScalarWhereWithAggregatesInput[]
+    NOT?: AuthenticationMethodScalarWhereWithAggregatesInput | AuthenticationMethodScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AuthenticationMethod"> | string
+    userId?: StringWithAggregatesFilter<"AuthenticationMethod"> | string
+    method?: EnumE2FAMethodWithAggregatesFilter<"AuthenticationMethod"> | $Enums.E2FAMethod
+    data?: JsonWithAggregatesFilter<"AuthenticationMethod">
+    name?: StringNullableWithAggregatesFilter<"AuthenticationMethod"> | string | null
+    isActive?: BoolWithAggregatesFilter<"AuthenticationMethod"> | boolean
+    isPrimary?: BoolWithAggregatesFilter<"AuthenticationMethod"> | boolean
+    lastUsedAt?: DateTimeNullableWithAggregatesFilter<"AuthenticationMethod"> | Date | string | null
+    useCount?: IntWithAggregatesFilter<"AuthenticationMethod"> | number
+    credentialId?: StringNullableWithAggregatesFilter<"AuthenticationMethod"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AuthenticationMethod"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AuthenticationMethod"> | Date | string
+  }
+
+  export type TrustedDeviceWhereInput = {
+    AND?: TrustedDeviceWhereInput | TrustedDeviceWhereInput[]
+    OR?: TrustedDeviceWhereInput[]
+    NOT?: TrustedDeviceWhereInput | TrustedDeviceWhereInput[]
+    id?: StringFilter<"TrustedDevice"> | string
+    userId?: StringFilter<"TrustedDevice"> | string
+    deviceId?: StringFilter<"TrustedDevice"> | string
+    fingerprint?: JsonFilter<"TrustedDevice">
+    name?: StringNullableFilter<"TrustedDevice"> | string | null
+    userAgent?: StringFilter<"TrustedDevice"> | string
+    browser?: StringNullableFilter<"TrustedDevice"> | string | null
+    os?: StringNullableFilter<"TrustedDevice"> | string | null
+    device?: StringNullableFilter<"TrustedDevice"> | string | null
+    trustScore?: FloatFilter<"TrustedDevice"> | number
+    lastIp?: StringNullableFilter<"TrustedDevice"> | string | null
+    lastCountry?: StringNullableFilter<"TrustedDevice"> | string | null
+    lastCity?: StringNullableFilter<"TrustedDevice"> | string | null
+    isActive?: BoolFilter<"TrustedDevice"> | boolean
+    lastSeenAt?: DateTimeFilter<"TrustedDevice"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"TrustedDevice"> | Date | string | null
+    revokedAt?: DateTimeNullableFilter<"TrustedDevice"> | Date | string | null
+    createdAt?: DateTimeFilter<"TrustedDevice"> | Date | string
+    updatedAt?: DateTimeFilter<"TrustedDevice"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type TrustedDeviceOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    deviceId?: SortOrder
+    fingerprint?: SortOrder
+    name?: SortOrderInput | SortOrder
+    userAgent?: SortOrder
+    browser?: SortOrderInput | SortOrder
+    os?: SortOrderInput | SortOrder
+    device?: SortOrderInput | SortOrder
+    trustScore?: SortOrder
+    lastIp?: SortOrderInput | SortOrder
+    lastCountry?: SortOrderInput | SortOrder
+    lastCity?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    lastSeenAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type TrustedDeviceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    deviceId?: string
+    AND?: TrustedDeviceWhereInput | TrustedDeviceWhereInput[]
+    OR?: TrustedDeviceWhereInput[]
+    NOT?: TrustedDeviceWhereInput | TrustedDeviceWhereInput[]
+    userId?: StringFilter<"TrustedDevice"> | string
+    fingerprint?: JsonFilter<"TrustedDevice">
+    name?: StringNullableFilter<"TrustedDevice"> | string | null
+    userAgent?: StringFilter<"TrustedDevice"> | string
+    browser?: StringNullableFilter<"TrustedDevice"> | string | null
+    os?: StringNullableFilter<"TrustedDevice"> | string | null
+    device?: StringNullableFilter<"TrustedDevice"> | string | null
+    trustScore?: FloatFilter<"TrustedDevice"> | number
+    lastIp?: StringNullableFilter<"TrustedDevice"> | string | null
+    lastCountry?: StringNullableFilter<"TrustedDevice"> | string | null
+    lastCity?: StringNullableFilter<"TrustedDevice"> | string | null
+    isActive?: BoolFilter<"TrustedDevice"> | boolean
+    lastSeenAt?: DateTimeFilter<"TrustedDevice"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"TrustedDevice"> | Date | string | null
+    revokedAt?: DateTimeNullableFilter<"TrustedDevice"> | Date | string | null
+    createdAt?: DateTimeFilter<"TrustedDevice"> | Date | string
+    updatedAt?: DateTimeFilter<"TrustedDevice"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "deviceId">
+
+  export type TrustedDeviceOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    deviceId?: SortOrder
+    fingerprint?: SortOrder
+    name?: SortOrderInput | SortOrder
+    userAgent?: SortOrder
+    browser?: SortOrderInput | SortOrder
+    os?: SortOrderInput | SortOrder
+    device?: SortOrderInput | SortOrder
+    trustScore?: SortOrder
+    lastIp?: SortOrderInput | SortOrder
+    lastCountry?: SortOrderInput | SortOrder
+    lastCity?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    lastSeenAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TrustedDeviceCountOrderByAggregateInput
+    _avg?: TrustedDeviceAvgOrderByAggregateInput
+    _max?: TrustedDeviceMaxOrderByAggregateInput
+    _min?: TrustedDeviceMinOrderByAggregateInput
+    _sum?: TrustedDeviceSumOrderByAggregateInput
+  }
+
+  export type TrustedDeviceScalarWhereWithAggregatesInput = {
+    AND?: TrustedDeviceScalarWhereWithAggregatesInput | TrustedDeviceScalarWhereWithAggregatesInput[]
+    OR?: TrustedDeviceScalarWhereWithAggregatesInput[]
+    NOT?: TrustedDeviceScalarWhereWithAggregatesInput | TrustedDeviceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TrustedDevice"> | string
+    userId?: StringWithAggregatesFilter<"TrustedDevice"> | string
+    deviceId?: StringWithAggregatesFilter<"TrustedDevice"> | string
+    fingerprint?: JsonWithAggregatesFilter<"TrustedDevice">
+    name?: StringNullableWithAggregatesFilter<"TrustedDevice"> | string | null
+    userAgent?: StringWithAggregatesFilter<"TrustedDevice"> | string
+    browser?: StringNullableWithAggregatesFilter<"TrustedDevice"> | string | null
+    os?: StringNullableWithAggregatesFilter<"TrustedDevice"> | string | null
+    device?: StringNullableWithAggregatesFilter<"TrustedDevice"> | string | null
+    trustScore?: FloatWithAggregatesFilter<"TrustedDevice"> | number
+    lastIp?: StringNullableWithAggregatesFilter<"TrustedDevice"> | string | null
+    lastCountry?: StringNullableWithAggregatesFilter<"TrustedDevice"> | string | null
+    lastCity?: StringNullableWithAggregatesFilter<"TrustedDevice"> | string | null
+    isActive?: BoolWithAggregatesFilter<"TrustedDevice"> | boolean
+    lastSeenAt?: DateTimeWithAggregatesFilter<"TrustedDevice"> | Date | string
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"TrustedDevice"> | Date | string | null
+    revokedAt?: DateTimeNullableWithAggregatesFilter<"TrustedDevice"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"TrustedDevice"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TrustedDevice"> | Date | string
+  }
+
+  export type SecurityEventWhereInput = {
+    AND?: SecurityEventWhereInput | SecurityEventWhereInput[]
+    OR?: SecurityEventWhereInput[]
+    NOT?: SecurityEventWhereInput | SecurityEventWhereInput[]
+    id?: StringFilter<"SecurityEvent"> | string
+    userId?: StringFilter<"SecurityEvent"> | string
+    event?: EnumESecurityEventFilter<"SecurityEvent"> | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityFilter<"SecurityEvent"> | $Enums.ESecuritySeverity
+    ip?: StringNullableFilter<"SecurityEvent"> | string | null
+    userAgent?: StringNullableFilter<"SecurityEvent"> | string | null
+    country?: StringNullableFilter<"SecurityEvent"> | string | null
+    city?: StringNullableFilter<"SecurityEvent"> | string | null
+    deviceId?: StringNullableFilter<"SecurityEvent"> | string | null
+    riskScore?: FloatNullableFilter<"SecurityEvent"> | number | null
+    riskFactors?: JsonNullableFilter<"SecurityEvent">
+    resolved?: BoolFilter<"SecurityEvent"> | boolean
+    resolvedAt?: DateTimeNullableFilter<"SecurityEvent"> | Date | string | null
+    resolvedBy?: StringNullableFilter<"SecurityEvent"> | string | null
+    metadata?: JsonNullableFilter<"SecurityEvent">
+    createdAt?: DateTimeFilter<"SecurityEvent"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type SecurityEventOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    event?: SortOrder
+    severity?: SortOrder
+    ip?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    deviceId?: SortOrderInput | SortOrder
+    riskScore?: SortOrderInput | SortOrder
+    riskFactors?: SortOrderInput | SortOrder
+    resolved?: SortOrder
+    resolvedAt?: SortOrderInput | SortOrder
+    resolvedBy?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type SecurityEventWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SecurityEventWhereInput | SecurityEventWhereInput[]
+    OR?: SecurityEventWhereInput[]
+    NOT?: SecurityEventWhereInput | SecurityEventWhereInput[]
+    userId?: StringFilter<"SecurityEvent"> | string
+    event?: EnumESecurityEventFilter<"SecurityEvent"> | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityFilter<"SecurityEvent"> | $Enums.ESecuritySeverity
+    ip?: StringNullableFilter<"SecurityEvent"> | string | null
+    userAgent?: StringNullableFilter<"SecurityEvent"> | string | null
+    country?: StringNullableFilter<"SecurityEvent"> | string | null
+    city?: StringNullableFilter<"SecurityEvent"> | string | null
+    deviceId?: StringNullableFilter<"SecurityEvent"> | string | null
+    riskScore?: FloatNullableFilter<"SecurityEvent"> | number | null
+    riskFactors?: JsonNullableFilter<"SecurityEvent">
+    resolved?: BoolFilter<"SecurityEvent"> | boolean
+    resolvedAt?: DateTimeNullableFilter<"SecurityEvent"> | Date | string | null
+    resolvedBy?: StringNullableFilter<"SecurityEvent"> | string | null
+    metadata?: JsonNullableFilter<"SecurityEvent">
+    createdAt?: DateTimeFilter<"SecurityEvent"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type SecurityEventOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    event?: SortOrder
+    severity?: SortOrder
+    ip?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    deviceId?: SortOrderInput | SortOrder
+    riskScore?: SortOrderInput | SortOrder
+    riskFactors?: SortOrderInput | SortOrder
+    resolved?: SortOrder
+    resolvedAt?: SortOrderInput | SortOrder
+    resolvedBy?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: SecurityEventCountOrderByAggregateInput
+    _avg?: SecurityEventAvgOrderByAggregateInput
+    _max?: SecurityEventMaxOrderByAggregateInput
+    _min?: SecurityEventMinOrderByAggregateInput
+    _sum?: SecurityEventSumOrderByAggregateInput
+  }
+
+  export type SecurityEventScalarWhereWithAggregatesInput = {
+    AND?: SecurityEventScalarWhereWithAggregatesInput | SecurityEventScalarWhereWithAggregatesInput[]
+    OR?: SecurityEventScalarWhereWithAggregatesInput[]
+    NOT?: SecurityEventScalarWhereWithAggregatesInput | SecurityEventScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SecurityEvent"> | string
+    userId?: StringWithAggregatesFilter<"SecurityEvent"> | string
+    event?: EnumESecurityEventWithAggregatesFilter<"SecurityEvent"> | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityWithAggregatesFilter<"SecurityEvent"> | $Enums.ESecuritySeverity
+    ip?: StringNullableWithAggregatesFilter<"SecurityEvent"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"SecurityEvent"> | string | null
+    country?: StringNullableWithAggregatesFilter<"SecurityEvent"> | string | null
+    city?: StringNullableWithAggregatesFilter<"SecurityEvent"> | string | null
+    deviceId?: StringNullableWithAggregatesFilter<"SecurityEvent"> | string | null
+    riskScore?: FloatNullableWithAggregatesFilter<"SecurityEvent"> | number | null
+    riskFactors?: JsonNullableWithAggregatesFilter<"SecurityEvent">
+    resolved?: BoolWithAggregatesFilter<"SecurityEvent"> | boolean
+    resolvedAt?: DateTimeNullableWithAggregatesFilter<"SecurityEvent"> | Date | string | null
+    resolvedBy?: StringNullableWithAggregatesFilter<"SecurityEvent"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"SecurityEvent">
+    createdAt?: DateTimeWithAggregatesFilter<"SecurityEvent"> | Date | string
+  }
+
+  export type SessionWhereInput = {
+    AND?: SessionWhereInput | SessionWhereInput[]
+    OR?: SessionWhereInput[]
+    NOT?: SessionWhereInput | SessionWhereInput[]
+    id?: StringFilter<"Session"> | string
+    userId?: StringFilter<"Session"> | string
+    token?: StringFilter<"Session"> | string
+    refreshToken?: StringNullableFilter<"Session"> | string | null
+    deviceId?: StringNullableFilter<"Session"> | string | null
+    userAgent?: StringNullableFilter<"Session"> | string | null
+    ip?: StringNullableFilter<"Session"> | string | null
+    country?: StringNullableFilter<"Session"> | string | null
+    city?: StringNullableFilter<"Session"> | string | null
+    browser?: StringNullableFilter<"Session"> | string | null
+    os?: StringNullableFilter<"Session"> | string | null
+    device?: StringNullableFilter<"Session"> | string | null
+    isTrusted?: BoolFilter<"Session"> | boolean
+    riskScore?: FloatNullableFilter<"Session"> | number | null
+    is2FAVerified?: BoolFilter<"Session"> | boolean
+    verified2FAAt?: DateTimeNullableFilter<"Session"> | Date | string | null
+    expiresAt?: DateTimeFilter<"Session"> | Date | string
+    lastUsedAt?: DateTimeFilter<"Session"> | Date | string
+    revokedAt?: DateTimeNullableFilter<"Session"> | Date | string | null
+    createdAt?: DateTimeFilter<"Session"> | Date | string
+    updatedAt?: DateTimeFilter<"Session"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type SessionOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    token?: SortOrder
+    refreshToken?: SortOrderInput | SortOrder
+    deviceId?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    ip?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    browser?: SortOrderInput | SortOrder
+    os?: SortOrderInput | SortOrder
+    device?: SortOrderInput | SortOrder
+    isTrusted?: SortOrder
+    riskScore?: SortOrderInput | SortOrder
+    is2FAVerified?: SortOrder
+    verified2FAAt?: SortOrderInput | SortOrder
+    expiresAt?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type SessionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    token?: string
+    refreshToken?: string
+    AND?: SessionWhereInput | SessionWhereInput[]
+    OR?: SessionWhereInput[]
+    NOT?: SessionWhereInput | SessionWhereInput[]
+    userId?: StringFilter<"Session"> | string
+    deviceId?: StringNullableFilter<"Session"> | string | null
+    userAgent?: StringNullableFilter<"Session"> | string | null
+    ip?: StringNullableFilter<"Session"> | string | null
+    country?: StringNullableFilter<"Session"> | string | null
+    city?: StringNullableFilter<"Session"> | string | null
+    browser?: StringNullableFilter<"Session"> | string | null
+    os?: StringNullableFilter<"Session"> | string | null
+    device?: StringNullableFilter<"Session"> | string | null
+    isTrusted?: BoolFilter<"Session"> | boolean
+    riskScore?: FloatNullableFilter<"Session"> | number | null
+    is2FAVerified?: BoolFilter<"Session"> | boolean
+    verified2FAAt?: DateTimeNullableFilter<"Session"> | Date | string | null
+    expiresAt?: DateTimeFilter<"Session"> | Date | string
+    lastUsedAt?: DateTimeFilter<"Session"> | Date | string
+    revokedAt?: DateTimeNullableFilter<"Session"> | Date | string | null
+    createdAt?: DateTimeFilter<"Session"> | Date | string
+    updatedAt?: DateTimeFilter<"Session"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "token" | "refreshToken">
+
+  export type SessionOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    token?: SortOrder
+    refreshToken?: SortOrderInput | SortOrder
+    deviceId?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    ip?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    browser?: SortOrderInput | SortOrder
+    os?: SortOrderInput | SortOrder
+    device?: SortOrderInput | SortOrder
+    isTrusted?: SortOrder
+    riskScore?: SortOrderInput | SortOrder
+    is2FAVerified?: SortOrder
+    verified2FAAt?: SortOrderInput | SortOrder
+    expiresAt?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SessionCountOrderByAggregateInput
+    _avg?: SessionAvgOrderByAggregateInput
+    _max?: SessionMaxOrderByAggregateInput
+    _min?: SessionMinOrderByAggregateInput
+    _sum?: SessionSumOrderByAggregateInput
+  }
+
+  export type SessionScalarWhereWithAggregatesInput = {
+    AND?: SessionScalarWhereWithAggregatesInput | SessionScalarWhereWithAggregatesInput[]
+    OR?: SessionScalarWhereWithAggregatesInput[]
+    NOT?: SessionScalarWhereWithAggregatesInput | SessionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Session"> | string
+    userId?: StringWithAggregatesFilter<"Session"> | string
+    token?: StringWithAggregatesFilter<"Session"> | string
+    refreshToken?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    deviceId?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    ip?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    country?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    city?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    browser?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    os?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    device?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    isTrusted?: BoolWithAggregatesFilter<"Session"> | boolean
+    riskScore?: FloatNullableWithAggregatesFilter<"Session"> | number | null
+    is2FAVerified?: BoolWithAggregatesFilter<"Session"> | boolean
+    verified2FAAt?: DateTimeNullableWithAggregatesFilter<"Session"> | Date | string | null
+    expiresAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
+    lastUsedAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
+    revokedAt?: DateTimeNullableWithAggregatesFilter<"Session"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
+  }
+
+  export type AccountLockWhereInput = {
+    AND?: AccountLockWhereInput | AccountLockWhereInput[]
+    OR?: AccountLockWhereInput[]
+    NOT?: AccountLockWhereInput | AccountLockWhereInput[]
+    id?: StringFilter<"AccountLock"> | string
+    userId?: StringFilter<"AccountLock"> | string
+    reason?: StringFilter<"AccountLock"> | string
+    failedAttempts?: IntFilter<"AccountLock"> | number
+    lockedAt?: DateTimeFilter<"AccountLock"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"AccountLock"> | Date | string | null
+    unlockedAt?: DateTimeNullableFilter<"AccountLock"> | Date | string | null
+    ip?: StringNullableFilter<"AccountLock"> | string | null
+    userAgent?: StringNullableFilter<"AccountLock"> | string | null
+    createdAt?: DateTimeFilter<"AccountLock"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type AccountLockOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    reason?: SortOrder
+    failedAttempts?: SortOrder
+    lockedAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    unlockedAt?: SortOrderInput | SortOrder
+    ip?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type AccountLockWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AccountLockWhereInput | AccountLockWhereInput[]
+    OR?: AccountLockWhereInput[]
+    NOT?: AccountLockWhereInput | AccountLockWhereInput[]
+    userId?: StringFilter<"AccountLock"> | string
+    reason?: StringFilter<"AccountLock"> | string
+    failedAttempts?: IntFilter<"AccountLock"> | number
+    lockedAt?: DateTimeFilter<"AccountLock"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"AccountLock"> | Date | string | null
+    unlockedAt?: DateTimeNullableFilter<"AccountLock"> | Date | string | null
+    ip?: StringNullableFilter<"AccountLock"> | string | null
+    userAgent?: StringNullableFilter<"AccountLock"> | string | null
+    createdAt?: DateTimeFilter<"AccountLock"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type AccountLockOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    reason?: SortOrder
+    failedAttempts?: SortOrder
+    lockedAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    unlockedAt?: SortOrderInput | SortOrder
+    ip?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: AccountLockCountOrderByAggregateInput
+    _avg?: AccountLockAvgOrderByAggregateInput
+    _max?: AccountLockMaxOrderByAggregateInput
+    _min?: AccountLockMinOrderByAggregateInput
+    _sum?: AccountLockSumOrderByAggregateInput
+  }
+
+  export type AccountLockScalarWhereWithAggregatesInput = {
+    AND?: AccountLockScalarWhereWithAggregatesInput | AccountLockScalarWhereWithAggregatesInput[]
+    OR?: AccountLockScalarWhereWithAggregatesInput[]
+    NOT?: AccountLockScalarWhereWithAggregatesInput | AccountLockScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AccountLock"> | string
+    userId?: StringWithAggregatesFilter<"AccountLock"> | string
+    reason?: StringWithAggregatesFilter<"AccountLock"> | string
+    failedAttempts?: IntWithAggregatesFilter<"AccountLock"> | number
+    lockedAt?: DateTimeWithAggregatesFilter<"AccountLock"> | Date | string
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"AccountLock"> | Date | string | null
+    unlockedAt?: DateTimeNullableWithAggregatesFilter<"AccountLock"> | Date | string | null
+    ip?: StringNullableWithAggregatesFilter<"AccountLock"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"AccountLock"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AccountLock"> | Date | string
   }
 
   export type TokenWhereInput = {
@@ -6081,7 +14235,12 @@ export namespace Prisma {
     token?: StringFilter<"Token"> | string
     type?: EnumETokenTypeFilter<"Token"> | $Enums.ETokenType
     expiresIn?: DateTimeFilter<"Token"> | Date | string
+    usedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
+    maxUses?: IntFilter<"Token"> | number
+    useCount?: IntFilter<"Token"> | number
     userId?: StringNullableFilter<"Token"> | string | null
+    createdIp?: StringNullableFilter<"Token"> | string | null
+    usedIp?: StringNullableFilter<"Token"> | string | null
     createdAt?: DateTimeFilter<"Token"> | Date | string
     updatedAt?: DateTimeFilter<"Token"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -6092,7 +14251,12 @@ export namespace Prisma {
     token?: SortOrder
     type?: SortOrder
     expiresIn?: SortOrder
+    usedAt?: SortOrderInput | SortOrder
+    maxUses?: SortOrder
+    useCount?: SortOrder
     userId?: SortOrderInput | SortOrder
+    createdIp?: SortOrderInput | SortOrder
+    usedIp?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -6107,7 +14271,12 @@ export namespace Prisma {
     NOT?: TokenWhereInput | TokenWhereInput[]
     type?: EnumETokenTypeFilter<"Token"> | $Enums.ETokenType
     expiresIn?: DateTimeFilter<"Token"> | Date | string
+    usedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
+    maxUses?: IntFilter<"Token"> | number
+    useCount?: IntFilter<"Token"> | number
     userId?: StringNullableFilter<"Token"> | string | null
+    createdIp?: StringNullableFilter<"Token"> | string | null
+    usedIp?: StringNullableFilter<"Token"> | string | null
     createdAt?: DateTimeFilter<"Token"> | Date | string
     updatedAt?: DateTimeFilter<"Token"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -6118,12 +14287,19 @@ export namespace Prisma {
     token?: SortOrder
     type?: SortOrder
     expiresIn?: SortOrder
+    usedAt?: SortOrderInput | SortOrder
+    maxUses?: SortOrder
+    useCount?: SortOrder
     userId?: SortOrderInput | SortOrder
+    createdIp?: SortOrderInput | SortOrder
+    usedIp?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: TokenCountOrderByAggregateInput
+    _avg?: TokenAvgOrderByAggregateInput
     _max?: TokenMaxOrderByAggregateInput
     _min?: TokenMinOrderByAggregateInput
+    _sum?: TokenSumOrderByAggregateInput
   }
 
   export type TokenScalarWhereWithAggregatesInput = {
@@ -6134,7 +14310,12 @@ export namespace Prisma {
     token?: StringWithAggregatesFilter<"Token"> | string
     type?: EnumETokenTypeWithAggregatesFilter<"Token"> | $Enums.ETokenType
     expiresIn?: DateTimeWithAggregatesFilter<"Token"> | Date | string
+    usedAt?: DateTimeNullableWithAggregatesFilter<"Token"> | Date | string | null
+    maxUses?: IntWithAggregatesFilter<"Token"> | number
+    useCount?: IntWithAggregatesFilter<"Token"> | number
     userId?: StringNullableWithAggregatesFilter<"Token"> | string | null
+    createdIp?: StringNullableWithAggregatesFilter<"Token"> | string | null
+    usedIp?: StringNullableWithAggregatesFilter<"Token"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Token"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Token"> | Date | string
   }
@@ -6145,9 +14326,12 @@ export namespace Prisma {
     NOT?: BackupCodeWhereInput | BackupCodeWhereInput[]
     id?: StringFilter<"BackupCode"> | string
     userId?: StringFilter<"BackupCode"> | string
-    type?: EnumEBackupCodeTypeFilter<"BackupCode"> | $Enums.EBackupCodeType
+    authMethodId?: StringNullableFilter<"BackupCode"> | string | null
+    type?: EnumE2FAMethodFilter<"BackupCode"> | $Enums.E2FAMethod
     code?: StringFilter<"BackupCode"> | string
     usedAt?: DateTimeNullableFilter<"BackupCode"> | Date | string | null
+    usedIp?: StringNullableFilter<"BackupCode"> | string | null
+    expiresAt?: DateTimeNullableFilter<"BackupCode"> | Date | string | null
     createdAt?: DateTimeFilter<"BackupCode"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -6155,9 +14339,12 @@ export namespace Prisma {
   export type BackupCodeOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
+    authMethodId?: SortOrderInput | SortOrder
     type?: SortOrder
     code?: SortOrder
     usedAt?: SortOrderInput | SortOrder
+    usedIp?: SortOrderInput | SortOrder
+    expiresAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     user?: UserOrderByWithRelationInput
   }
@@ -6168,9 +14355,12 @@ export namespace Prisma {
     OR?: BackupCodeWhereInput[]
     NOT?: BackupCodeWhereInput | BackupCodeWhereInput[]
     userId?: StringFilter<"BackupCode"> | string
-    type?: EnumEBackupCodeTypeFilter<"BackupCode"> | $Enums.EBackupCodeType
+    authMethodId?: StringNullableFilter<"BackupCode"> | string | null
+    type?: EnumE2FAMethodFilter<"BackupCode"> | $Enums.E2FAMethod
     code?: StringFilter<"BackupCode"> | string
     usedAt?: DateTimeNullableFilter<"BackupCode"> | Date | string | null
+    usedIp?: StringNullableFilter<"BackupCode"> | string | null
+    expiresAt?: DateTimeNullableFilter<"BackupCode"> | Date | string | null
     createdAt?: DateTimeFilter<"BackupCode"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -6178,9 +14368,12 @@ export namespace Prisma {
   export type BackupCodeOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
+    authMethodId?: SortOrderInput | SortOrder
     type?: SortOrder
     code?: SortOrder
     usedAt?: SortOrderInput | SortOrder
+    usedIp?: SortOrderInput | SortOrder
+    expiresAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: BackupCodeCountOrderByAggregateInput
     _max?: BackupCodeMaxOrderByAggregateInput
@@ -6193,9 +14386,12 @@ export namespace Prisma {
     NOT?: BackupCodeScalarWhereWithAggregatesInput | BackupCodeScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"BackupCode"> | string
     userId?: StringWithAggregatesFilter<"BackupCode"> | string
-    type?: EnumEBackupCodeTypeWithAggregatesFilter<"BackupCode"> | $Enums.EBackupCodeType
+    authMethodId?: StringNullableWithAggregatesFilter<"BackupCode"> | string | null
+    type?: EnumE2FAMethodWithAggregatesFilter<"BackupCode"> | $Enums.E2FAMethod
     code?: StringWithAggregatesFilter<"BackupCode"> | string
     usedAt?: DateTimeNullableWithAggregatesFilter<"BackupCode"> | Date | string | null
+    usedIp?: StringNullableWithAggregatesFilter<"BackupCode"> | string | null
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"BackupCode"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"BackupCode"> | Date | string
   }
 
@@ -6206,9 +14402,13 @@ export namespace Prisma {
     id?: StringFilter<"AuditLog"> | string
     userId?: StringFilter<"AuditLog"> | string
     action?: StringFilter<"AuditLog"> | string
-    metadata?: JsonNullableFilter<"AuditLog">
+    category?: EnumEAuditCategoryFilter<"AuditLog"> | $Enums.EAuditCategory
+    success?: BoolFilter<"AuditLog"> | boolean
     ip?: StringNullableFilter<"AuditLog"> | string | null
     userAgent?: StringNullableFilter<"AuditLog"> | string | null
+    country?: StringNullableFilter<"AuditLog"> | string | null
+    city?: StringNullableFilter<"AuditLog"> | string | null
+    metadata?: JsonNullableFilter<"AuditLog">
     createdAt?: DateTimeFilter<"AuditLog"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -6217,9 +14417,13 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     action?: SortOrder
-    metadata?: SortOrderInput | SortOrder
+    category?: SortOrder
+    success?: SortOrder
     ip?: SortOrderInput | SortOrder
     userAgent?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     user?: UserOrderByWithRelationInput
   }
@@ -6231,9 +14435,13 @@ export namespace Prisma {
     NOT?: AuditLogWhereInput | AuditLogWhereInput[]
     userId?: StringFilter<"AuditLog"> | string
     action?: StringFilter<"AuditLog"> | string
-    metadata?: JsonNullableFilter<"AuditLog">
+    category?: EnumEAuditCategoryFilter<"AuditLog"> | $Enums.EAuditCategory
+    success?: BoolFilter<"AuditLog"> | boolean
     ip?: StringNullableFilter<"AuditLog"> | string | null
     userAgent?: StringNullableFilter<"AuditLog"> | string | null
+    country?: StringNullableFilter<"AuditLog"> | string | null
+    city?: StringNullableFilter<"AuditLog"> | string | null
+    metadata?: JsonNullableFilter<"AuditLog">
     createdAt?: DateTimeFilter<"AuditLog"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -6242,9 +14450,13 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     action?: SortOrder
-    metadata?: SortOrderInput | SortOrder
+    category?: SortOrder
+    success?: SortOrder
     ip?: SortOrderInput | SortOrder
     userAgent?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: AuditLogCountOrderByAggregateInput
     _max?: AuditLogMaxOrderByAggregateInput
@@ -6258,9 +14470,13 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"AuditLog"> | string
     userId?: StringWithAggregatesFilter<"AuditLog"> | string
     action?: StringWithAggregatesFilter<"AuditLog"> | string
-    metadata?: JsonNullableWithAggregatesFilter<"AuditLog">
+    category?: EnumEAuditCategoryWithAggregatesFilter<"AuditLog"> | $Enums.EAuditCategory
+    success?: BoolWithAggregatesFilter<"AuditLog"> | boolean
     ip?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
     userAgent?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
+    country?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
+    city?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"AuditLog">
     createdAt?: DateTimeWithAggregatesFilter<"AuditLog"> | Date | string
   }
 
@@ -6275,15 +14491,31 @@ export namespace Prisma {
     bio?: string | null
     password: string
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: string | null
-    isOtpEnabled?: boolean
-    otpSecret?: string | null
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodCreateNestedManyWithoutUserInput
     backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -6297,15 +14529,31 @@ export namespace Prisma {
     bio?: string | null
     password: string
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: string | null
-    isOtpEnabled?: boolean
-    otpSecret?: string | null
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedCreateNestedManyWithoutUserInput
     backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockUncheckedCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -6319,15 +14567,31 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
-    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUpdateManyWithoutUserNestedInput
     backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -6341,15 +14605,31 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
-    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedUpdateManyWithoutUserNestedInput
     backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUncheckedUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -6363,10 +14643,21 @@ export namespace Prisma {
     bio?: string | null
     password: string
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: string | null
-    isOtpEnabled?: boolean
-    otpSecret?: string | null
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -6382,10 +14673,21 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
-    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6401,12 +14703,669 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
-    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuthenticationMethodCreateInput = {
+    id?: string
+    method: $Enums.E2FAMethod
+    data: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    isActive?: boolean
+    isPrimary?: boolean
+    lastUsedAt?: Date | string | null
+    useCount?: number
+    credentialId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAuthenticationMethodsInput
+  }
+
+  export type AuthenticationMethodUncheckedCreateInput = {
+    id?: string
+    userId: string
+    method: $Enums.E2FAMethod
+    data: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    isActive?: boolean
+    isPrimary?: boolean
+    lastUsedAt?: Date | string | null
+    useCount?: number
+    credentialId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AuthenticationMethodUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    method?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
+    data?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    useCount?: IntFieldUpdateOperationsInput | number
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAuthenticationMethodsNestedInput
+  }
+
+  export type AuthenticationMethodUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    method?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
+    data?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    useCount?: IntFieldUpdateOperationsInput | number
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuthenticationMethodCreateManyInput = {
+    id?: string
+    userId: string
+    method: $Enums.E2FAMethod
+    data: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    isActive?: boolean
+    isPrimary?: boolean
+    lastUsedAt?: Date | string | null
+    useCount?: number
+    credentialId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AuthenticationMethodUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    method?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
+    data?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    useCount?: IntFieldUpdateOperationsInput | number
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuthenticationMethodUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    method?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
+    data?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    useCount?: IntFieldUpdateOperationsInput | number
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TrustedDeviceCreateInput = {
+    id?: string
+    deviceId: string
+    fingerprint: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    userAgent: string
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    trustScore?: number
+    lastIp?: string | null
+    lastCountry?: string | null
+    lastCity?: string | null
+    isActive?: boolean
+    lastSeenAt?: Date | string
+    expiresAt?: Date | string | null
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutTrustedDevicesInput
+  }
+
+  export type TrustedDeviceUncheckedCreateInput = {
+    id?: string
+    userId: string
+    deviceId: string
+    fingerprint: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    userAgent: string
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    trustScore?: number
+    lastIp?: string | null
+    lastCountry?: string | null
+    lastCity?: string | null
+    isActive?: boolean
+    lastSeenAt?: Date | string
+    expiresAt?: Date | string | null
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TrustedDeviceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    deviceId?: StringFieldUpdateOperationsInput | string
+    fingerprint?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: StringFieldUpdateOperationsInput | string
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    trustScore?: FloatFieldUpdateOperationsInput | number
+    lastIp?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCity?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutTrustedDevicesNestedInput
+  }
+
+  export type TrustedDeviceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    deviceId?: StringFieldUpdateOperationsInput | string
+    fingerprint?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: StringFieldUpdateOperationsInput | string
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    trustScore?: FloatFieldUpdateOperationsInput | number
+    lastIp?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCity?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TrustedDeviceCreateManyInput = {
+    id?: string
+    userId: string
+    deviceId: string
+    fingerprint: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    userAgent: string
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    trustScore?: number
+    lastIp?: string | null
+    lastCountry?: string | null
+    lastCity?: string | null
+    isActive?: boolean
+    lastSeenAt?: Date | string
+    expiresAt?: Date | string | null
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TrustedDeviceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    deviceId?: StringFieldUpdateOperationsInput | string
+    fingerprint?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: StringFieldUpdateOperationsInput | string
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    trustScore?: FloatFieldUpdateOperationsInput | number
+    lastIp?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCity?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TrustedDeviceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    deviceId?: StringFieldUpdateOperationsInput | string
+    fingerprint?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: StringFieldUpdateOperationsInput | string
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    trustScore?: FloatFieldUpdateOperationsInput | number
+    lastIp?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCity?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityEventCreateInput = {
+    id?: string
+    event: $Enums.ESecurityEvent
+    severity?: $Enums.ESecuritySeverity
+    ip?: string | null
+    userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    deviceId?: string | null
+    riskScore?: number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: boolean
+    resolvedAt?: Date | string | null
+    resolvedBy?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutSecurityEventsInput
+  }
+
+  export type SecurityEventUncheckedCreateInput = {
+    id?: string
+    userId: string
+    event: $Enums.ESecurityEvent
+    severity?: $Enums.ESecuritySeverity
+    ip?: string | null
+    userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    deviceId?: string | null
+    riskScore?: number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: boolean
+    resolvedAt?: Date | string | null
+    resolvedBy?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type SecurityEventUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    event?: EnumESecurityEventFieldUpdateOperationsInput | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityFieldUpdateOperationsInput | $Enums.ESecuritySeverity
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: BoolFieldUpdateOperationsInput | boolean
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutSecurityEventsNestedInput
+  }
+
+  export type SecurityEventUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    event?: EnumESecurityEventFieldUpdateOperationsInput | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityFieldUpdateOperationsInput | $Enums.ESecuritySeverity
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: BoolFieldUpdateOperationsInput | boolean
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityEventCreateManyInput = {
+    id?: string
+    userId: string
+    event: $Enums.ESecurityEvent
+    severity?: $Enums.ESecuritySeverity
+    ip?: string | null
+    userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    deviceId?: string | null
+    riskScore?: number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: boolean
+    resolvedAt?: Date | string | null
+    resolvedBy?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type SecurityEventUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    event?: EnumESecurityEventFieldUpdateOperationsInput | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityFieldUpdateOperationsInput | $Enums.ESecuritySeverity
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: BoolFieldUpdateOperationsInput | boolean
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityEventUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    event?: EnumESecurityEventFieldUpdateOperationsInput | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityFieldUpdateOperationsInput | $Enums.ESecuritySeverity
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: BoolFieldUpdateOperationsInput | boolean
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionCreateInput = {
+    id?: string
+    token: string
+    refreshToken?: string | null
+    deviceId?: string | null
+    userAgent?: string | null
+    ip?: string | null
+    country?: string | null
+    city?: string | null
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    isTrusted?: boolean
+    riskScore?: number | null
+    is2FAVerified?: boolean
+    verified2FAAt?: Date | string | null
+    expiresAt: Date | string
+    lastUsedAt?: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutSessionsInput
+  }
+
+  export type SessionUncheckedCreateInput = {
+    id?: string
+    userId: string
+    token: string
+    refreshToken?: string | null
+    deviceId?: string | null
+    userAgent?: string | null
+    ip?: string | null
+    country?: string | null
+    city?: string | null
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    isTrusted?: boolean
+    riskScore?: number | null
+    is2FAVerified?: boolean
+    verified2FAAt?: Date | string | null
+    expiresAt: Date | string
+    lastUsedAt?: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrusted?: BoolFieldUpdateOperationsInput | boolean
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    is2FAVerified?: BoolFieldUpdateOperationsInput | boolean
+    verified2FAAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutSessionsNestedInput
+  }
+
+  export type SessionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrusted?: BoolFieldUpdateOperationsInput | boolean
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    is2FAVerified?: BoolFieldUpdateOperationsInput | boolean
+    verified2FAAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionCreateManyInput = {
+    id?: string
+    userId: string
+    token: string
+    refreshToken?: string | null
+    deviceId?: string | null
+    userAgent?: string | null
+    ip?: string | null
+    country?: string | null
+    city?: string | null
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    isTrusted?: boolean
+    riskScore?: number | null
+    is2FAVerified?: boolean
+    verified2FAAt?: Date | string | null
+    expiresAt: Date | string
+    lastUsedAt?: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrusted?: BoolFieldUpdateOperationsInput | boolean
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    is2FAVerified?: BoolFieldUpdateOperationsInput | boolean
+    verified2FAAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrusted?: BoolFieldUpdateOperationsInput | boolean
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    is2FAVerified?: BoolFieldUpdateOperationsInput | boolean
+    verified2FAAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AccountLockCreateInput = {
+    id?: string
+    reason: string
+    failedAttempts?: number
+    lockedAt?: Date | string
+    expiresAt?: Date | string | null
+    unlockedAt?: Date | string | null
+    ip?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutAccountLocksInput
+  }
+
+  export type AccountLockUncheckedCreateInput = {
+    id?: string
+    userId: string
+    reason: string
+    failedAttempts?: number
+    lockedAt?: Date | string
+    expiresAt?: Date | string | null
+    unlockedAt?: Date | string | null
+    ip?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AccountLockUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    failedAttempts?: IntFieldUpdateOperationsInput | number
+    lockedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAccountLocksNestedInput
+  }
+
+  export type AccountLockUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    failedAttempts?: IntFieldUpdateOperationsInput | number
+    lockedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AccountLockCreateManyInput = {
+    id?: string
+    userId: string
+    reason: string
+    failedAttempts?: number
+    lockedAt?: Date | string
+    expiresAt?: Date | string | null
+    unlockedAt?: Date | string | null
+    ip?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AccountLockUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    failedAttempts?: IntFieldUpdateOperationsInput | number
+    lockedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AccountLockUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    failedAttempts?: IntFieldUpdateOperationsInput | number
+    lockedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TokenCreateInput = {
@@ -6414,6 +15373,11 @@ export namespace Prisma {
     token: string
     type: $Enums.ETokenType
     expiresIn: Date | string
+    usedAt?: Date | string | null
+    maxUses?: number
+    useCount?: number
+    createdIp?: string | null
+    usedIp?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutTokensInput
@@ -6424,7 +15388,12 @@ export namespace Prisma {
     token: string
     type: $Enums.ETokenType
     expiresIn: Date | string
+    usedAt?: Date | string | null
+    maxUses?: number
+    useCount?: number
     userId?: string | null
+    createdIp?: string | null
+    usedIp?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -6434,6 +15403,11 @@ export namespace Prisma {
     token?: StringFieldUpdateOperationsInput | string
     type?: EnumETokenTypeFieldUpdateOperationsInput | $Enums.ETokenType
     expiresIn?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxUses?: IntFieldUpdateOperationsInput | number
+    useCount?: IntFieldUpdateOperationsInput | number
+    createdIp?: NullableStringFieldUpdateOperationsInput | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutTokensNestedInput
@@ -6444,7 +15418,12 @@ export namespace Prisma {
     token?: StringFieldUpdateOperationsInput | string
     type?: EnumETokenTypeFieldUpdateOperationsInput | $Enums.ETokenType
     expiresIn?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxUses?: IntFieldUpdateOperationsInput | number
+    useCount?: IntFieldUpdateOperationsInput | number
     userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdIp?: NullableStringFieldUpdateOperationsInput | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6454,7 +15433,12 @@ export namespace Prisma {
     token: string
     type: $Enums.ETokenType
     expiresIn: Date | string
+    usedAt?: Date | string | null
+    maxUses?: number
+    useCount?: number
     userId?: string | null
+    createdIp?: string | null
+    usedIp?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -6464,6 +15448,11 @@ export namespace Prisma {
     token?: StringFieldUpdateOperationsInput | string
     type?: EnumETokenTypeFieldUpdateOperationsInput | $Enums.ETokenType
     expiresIn?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxUses?: IntFieldUpdateOperationsInput | number
+    useCount?: IntFieldUpdateOperationsInput | number
+    createdIp?: NullableStringFieldUpdateOperationsInput | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6473,16 +15462,24 @@ export namespace Prisma {
     token?: StringFieldUpdateOperationsInput | string
     type?: EnumETokenTypeFieldUpdateOperationsInput | $Enums.ETokenType
     expiresIn?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxUses?: IntFieldUpdateOperationsInput | number
+    useCount?: IntFieldUpdateOperationsInput | number
     userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdIp?: NullableStringFieldUpdateOperationsInput | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BackupCodeCreateInput = {
     id?: string
-    type?: $Enums.EBackupCodeType
+    authMethodId?: string | null
+    type?: $Enums.E2FAMethod
     code: string
     usedAt?: Date | string | null
+    usedIp?: string | null
+    expiresAt?: Date | string | null
     createdAt?: Date | string
     user: UserCreateNestedOneWithoutBackupCodesInput
   }
@@ -6490,17 +15487,23 @@ export namespace Prisma {
   export type BackupCodeUncheckedCreateInput = {
     id?: string
     userId: string
-    type?: $Enums.EBackupCodeType
+    authMethodId?: string | null
+    type?: $Enums.E2FAMethod
     code: string
     usedAt?: Date | string | null
+    usedIp?: string | null
+    expiresAt?: Date | string | null
     createdAt?: Date | string
   }
 
   export type BackupCodeUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumEBackupCodeTypeFieldUpdateOperationsInput | $Enums.EBackupCodeType
+    authMethodId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
     code?: StringFieldUpdateOperationsInput | string
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutBackupCodesNestedInput
   }
@@ -6508,44 +15511,60 @@ export namespace Prisma {
   export type BackupCodeUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    type?: EnumEBackupCodeTypeFieldUpdateOperationsInput | $Enums.EBackupCodeType
+    authMethodId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
     code?: StringFieldUpdateOperationsInput | string
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BackupCodeCreateManyInput = {
     id?: string
     userId: string
-    type?: $Enums.EBackupCodeType
+    authMethodId?: string | null
+    type?: $Enums.E2FAMethod
     code: string
     usedAt?: Date | string | null
+    usedIp?: string | null
+    expiresAt?: Date | string | null
     createdAt?: Date | string
   }
 
   export type BackupCodeUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumEBackupCodeTypeFieldUpdateOperationsInput | $Enums.EBackupCodeType
+    authMethodId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
     code?: StringFieldUpdateOperationsInput | string
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BackupCodeUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    type?: EnumEBackupCodeTypeFieldUpdateOperationsInput | $Enums.EBackupCodeType
+    authMethodId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
     code?: StringFieldUpdateOperationsInput | string
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AuditLogCreateInput = {
     id?: string
     action: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: $Enums.EAuditCategory
+    success?: boolean
     ip?: string | null
     userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     user: UserCreateNestedOneWithoutAuditLogsInput
   }
@@ -6554,18 +15573,26 @@ export namespace Prisma {
     id?: string
     userId: string
     action: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: $Enums.EAuditCategory
+    success?: boolean
     ip?: string | null
     userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
   export type AuditLogUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: EnumEAuditCategoryFieldUpdateOperationsInput | $Enums.EAuditCategory
+    success?: BoolFieldUpdateOperationsInput | boolean
     ip?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutAuditLogsNestedInput
   }
@@ -6574,9 +15601,13 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: EnumEAuditCategoryFieldUpdateOperationsInput | $Enums.EAuditCategory
+    success?: BoolFieldUpdateOperationsInput | boolean
     ip?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -6584,18 +15615,26 @@ export namespace Prisma {
     id?: string
     userId: string
     action: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: $Enums.EAuditCategory
+    success?: boolean
     ip?: string | null
     userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
   export type AuditLogUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: EnumEAuditCategoryFieldUpdateOperationsInput | $Enums.EAuditCategory
+    success?: BoolFieldUpdateOperationsInput | boolean
     ip?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -6603,9 +15642,13 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: EnumEAuditCategoryFieldUpdateOperationsInput | $Enums.EAuditCategory
+    success?: BoolFieldUpdateOperationsInput | boolean
     ip?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -6644,6 +15687,40 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type BoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type EnumE2FAMethodNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.E2FAMethod | EnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    in?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumE2FAMethodNullableFilter<$PrismaModel> | $Enums.E2FAMethod | null
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -6655,10 +15732,22 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type AuthenticationMethodListRelationFilter = {
+    every?: AuthenticationMethodWhereInput
+    some?: AuthenticationMethodWhereInput
+    none?: AuthenticationMethodWhereInput
+  }
+
   export type BackupCodeListRelationFilter = {
     every?: BackupCodeWhereInput
     some?: BackupCodeWhereInput
     none?: BackupCodeWhereInput
+  }
+
+  export type TrustedDeviceListRelationFilter = {
+    every?: TrustedDeviceWhereInput
+    some?: TrustedDeviceWhereInput
+    none?: TrustedDeviceWhereInput
   }
 
   export type AuditLogListRelationFilter = {
@@ -6673,12 +15762,38 @@ export namespace Prisma {
     none?: TokenWhereInput
   }
 
+  export type SessionListRelationFilter = {
+    every?: SessionWhereInput
+    some?: SessionWhereInput
+    none?: SessionWhereInput
+  }
+
+  export type AccountLockListRelationFilter = {
+    every?: AccountLockWhereInput
+    some?: AccountLockWhereInput
+    none?: AccountLockWhereInput
+  }
+
+  export type SecurityEventListRelationFilter = {
+    every?: SecurityEventWhereInput
+    some?: SecurityEventWhereInput
+    none?: SecurityEventWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
   }
 
+  export type AuthenticationMethodOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type BackupCodeOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TrustedDeviceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -6687,6 +15802,18 @@ export namespace Prisma {
   }
 
   export type TokenOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SessionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AccountLockOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SecurityEventOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -6701,12 +15828,27 @@ export namespace Prisma {
     bio?: SortOrder
     password?: SortOrder
     isEmailVerified?: SortOrder
-    isTotpEnabled?: SortOrder
-    totpSecret?: SortOrder
-    isOtpEnabled?: SortOrder
-    otpSecret?: SortOrder
+    emailVerifiedAt?: SortOrder
+    isUnsubscribed?: SortOrder
+    emailBouncedAt?: SortOrder
+    isPhoneVerified?: SortOrder
+    phoneVerifiedAt?: SortOrder
+    phoneBouncedAt?: SortOrder
+    is2FAEnabled?: SortOrder
+    preferred2FAMethod?: SortOrder
+    require2FA?: SortOrder
+    lastLoginAt?: SortOrder
+    lastLoginIp?: SortOrder
+    passwordChangedAt?: SortOrder
+    riskScore?: SortOrder
+    lastRiskAssessAt?: SortOrder
+    deletedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type UserAvgOrderByAggregateInput = {
+    riskScore?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -6720,10 +15862,21 @@ export namespace Prisma {
     bio?: SortOrder
     password?: SortOrder
     isEmailVerified?: SortOrder
-    isTotpEnabled?: SortOrder
-    totpSecret?: SortOrder
-    isOtpEnabled?: SortOrder
-    otpSecret?: SortOrder
+    emailVerifiedAt?: SortOrder
+    isUnsubscribed?: SortOrder
+    emailBouncedAt?: SortOrder
+    isPhoneVerified?: SortOrder
+    phoneVerifiedAt?: SortOrder
+    phoneBouncedAt?: SortOrder
+    is2FAEnabled?: SortOrder
+    preferred2FAMethod?: SortOrder
+    require2FA?: SortOrder
+    lastLoginAt?: SortOrder
+    lastLoginIp?: SortOrder
+    passwordChangedAt?: SortOrder
+    riskScore?: SortOrder
+    lastRiskAssessAt?: SortOrder
+    deletedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6739,12 +15892,27 @@ export namespace Prisma {
     bio?: SortOrder
     password?: SortOrder
     isEmailVerified?: SortOrder
-    isTotpEnabled?: SortOrder
-    totpSecret?: SortOrder
-    isOtpEnabled?: SortOrder
-    otpSecret?: SortOrder
+    emailVerifiedAt?: SortOrder
+    isUnsubscribed?: SortOrder
+    emailBouncedAt?: SortOrder
+    isPhoneVerified?: SortOrder
+    phoneVerifiedAt?: SortOrder
+    phoneBouncedAt?: SortOrder
+    is2FAEnabled?: SortOrder
+    preferred2FAMethod?: SortOrder
+    require2FA?: SortOrder
+    lastLoginAt?: SortOrder
+    lastLoginIp?: SortOrder
+    passwordChangedAt?: SortOrder
+    riskScore?: SortOrder
+    lastRiskAssessAt?: SortOrder
+    deletedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type UserSumOrderByAggregateInput = {
+    riskScore?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -6791,6 +15959,54 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
+
+  export type EnumE2FAMethodNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.E2FAMethod | EnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    in?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumE2FAMethodNullableWithAggregatesFilter<$PrismaModel> | $Enums.E2FAMethod | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumE2FAMethodNullableFilter<$PrismaModel>
+    _max?: NestedEnumE2FAMethodNullableFilter<$PrismaModel>
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -6805,79 +16021,45 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type EnumETokenTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.ETokenType | EnumETokenTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumETokenTypeFilter<$PrismaModel> | $Enums.ETokenType
+  export type EnumE2FAMethodFilter<$PrismaModel = never> = {
+    equals?: $Enums.E2FAMethod | EnumE2FAMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumE2FAMethodFilter<$PrismaModel> | $Enums.E2FAMethod
+  }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type UserNullableScalarRelationFilter = {
-    is?: UserWhereInput | null
-    isNot?: UserWhereInput | null
-  }
-
-  export type TokenUserIdTypeCompoundUniqueInput = {
-    userId: string
-    type: $Enums.ETokenType
-  }
-
-  export type TokenCountOrderByAggregateInput = {
-    id?: SortOrder
-    token?: SortOrder
-    type?: SortOrder
-    expiresIn?: SortOrder
-    userId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type TokenMaxOrderByAggregateInput = {
-    id?: SortOrder
-    token?: SortOrder
-    type?: SortOrder
-    expiresIn?: SortOrder
-    userId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type TokenMinOrderByAggregateInput = {
-    id?: SortOrder
-    token?: SortOrder
-    type?: SortOrder
-    expiresIn?: SortOrder
-    userId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type EnumETokenTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.ETokenType | EnumETokenTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumETokenTypeWithAggregatesFilter<$PrismaModel> | $Enums.ETokenType
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumETokenTypeFilter<$PrismaModel>
-    _max?: NestedEnumETokenTypeFilter<$PrismaModel>
-  }
-
-  export type EnumEBackupCodeTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.EBackupCodeType | EnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.EBackupCodeType[] | ListEnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.EBackupCodeType[] | ListEnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumEBackupCodeTypeFilter<$PrismaModel> | $Enums.EBackupCodeType
-  }
-
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type UserScalarRelationFilter = {
@@ -6885,55 +16067,226 @@ export namespace Prisma {
     isNot?: UserWhereInput
   }
 
-  export type BackupCodeCountOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    type?: SortOrder
-    code?: SortOrder
-    usedAt?: SortOrder
-    createdAt?: SortOrder
+  export type AuthenticationMethodUserIdMethodCredentialIdCompoundUniqueInput = {
+    userId: string
+    method: $Enums.E2FAMethod
+    credentialId: string
   }
 
-  export type BackupCodeMaxOrderByAggregateInput = {
+  export type AuthenticationMethodCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    type?: SortOrder
-    code?: SortOrder
-    usedAt?: SortOrder
+    method?: SortOrder
+    data?: SortOrder
+    name?: SortOrder
+    isActive?: SortOrder
+    isPrimary?: SortOrder
+    lastUsedAt?: SortOrder
+    useCount?: SortOrder
+    credentialId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
-  export type BackupCodeMinOrderByAggregateInput = {
+  export type AuthenticationMethodAvgOrderByAggregateInput = {
+    useCount?: SortOrder
+  }
+
+  export type AuthenticationMethodMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    type?: SortOrder
-    code?: SortOrder
-    usedAt?: SortOrder
+    method?: SortOrder
+    name?: SortOrder
+    isActive?: SortOrder
+    isPrimary?: SortOrder
+    lastUsedAt?: SortOrder
+    useCount?: SortOrder
+    credentialId?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
-  export type EnumEBackupCodeTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.EBackupCodeType | EnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.EBackupCodeType[] | ListEnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.EBackupCodeType[] | ListEnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumEBackupCodeTypeWithAggregatesFilter<$PrismaModel> | $Enums.EBackupCodeType
+  export type AuthenticationMethodMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    method?: SortOrder
+    name?: SortOrder
+    isActive?: SortOrder
+    isPrimary?: SortOrder
+    lastUsedAt?: SortOrder
+    useCount?: SortOrder
+    credentialId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AuthenticationMethodSumOrderByAggregateInput = {
+    useCount?: SortOrder
+  }
+
+  export type EnumE2FAMethodWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.E2FAMethod | EnumE2FAMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumE2FAMethodWithAggregatesFilter<$PrismaModel> | $Enums.E2FAMethod
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumEBackupCodeTypeFilter<$PrismaModel>
-    _max?: NestedEnumEBackupCodeTypeFilter<$PrismaModel>
+    _min?: NestedEnumE2FAMethodFilter<$PrismaModel>
+    _max?: NestedEnumE2FAMethodFilter<$PrismaModel>
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
   }
 
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type TrustedDeviceCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    deviceId?: SortOrder
+    fingerprint?: SortOrder
+    name?: SortOrder
+    userAgent?: SortOrder
+    browser?: SortOrder
+    os?: SortOrder
+    device?: SortOrder
+    trustScore?: SortOrder
+    lastIp?: SortOrder
+    lastCountry?: SortOrder
+    lastCity?: SortOrder
+    isActive?: SortOrder
+    lastSeenAt?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TrustedDeviceAvgOrderByAggregateInput = {
+    trustScore?: SortOrder
+  }
+
+  export type TrustedDeviceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    deviceId?: SortOrder
+    name?: SortOrder
+    userAgent?: SortOrder
+    browser?: SortOrder
+    os?: SortOrder
+    device?: SortOrder
+    trustScore?: SortOrder
+    lastIp?: SortOrder
+    lastCountry?: SortOrder
+    lastCity?: SortOrder
+    isActive?: SortOrder
+    lastSeenAt?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TrustedDeviceMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    deviceId?: SortOrder
+    name?: SortOrder
+    userAgent?: SortOrder
+    browser?: SortOrder
+    os?: SortOrder
+    device?: SortOrder
+    trustScore?: SortOrder
+    lastIp?: SortOrder
+    lastCountry?: SortOrder
+    lastCity?: SortOrder
+    isActive?: SortOrder
+    lastSeenAt?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TrustedDeviceSumOrderByAggregateInput = {
+    trustScore?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type EnumESecurityEventFilter<$PrismaModel = never> = {
+    equals?: $Enums.ESecurityEvent | EnumESecurityEventFieldRefInput<$PrismaModel>
+    in?: $Enums.ESecurityEvent[] | ListEnumESecurityEventFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ESecurityEvent[] | ListEnumESecurityEventFieldRefInput<$PrismaModel>
+    not?: NestedEnumESecurityEventFilter<$PrismaModel> | $Enums.ESecurityEvent
+  }
+
+  export type EnumESecuritySeverityFilter<$PrismaModel = never> = {
+    equals?: $Enums.ESecuritySeverity | EnumESecuritySeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.ESecuritySeverity[] | ListEnumESecuritySeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ESecuritySeverity[] | ListEnumESecuritySeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumESecuritySeverityFilter<$PrismaModel> | $Enums.ESecuritySeverity
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -6959,32 +16312,85 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type AuditLogCountOrderByAggregateInput = {
+  export type SecurityEventCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    action?: SortOrder
+    event?: SortOrder
+    severity?: SortOrder
+    ip?: SortOrder
+    userAgent?: SortOrder
+    country?: SortOrder
+    city?: SortOrder
+    deviceId?: SortOrder
+    riskScore?: SortOrder
+    riskFactors?: SortOrder
+    resolved?: SortOrder
+    resolvedAt?: SortOrder
+    resolvedBy?: SortOrder
     metadata?: SortOrder
-    ip?: SortOrder
-    userAgent?: SortOrder
     createdAt?: SortOrder
   }
 
-  export type AuditLogMaxOrderByAggregateInput = {
+  export type SecurityEventAvgOrderByAggregateInput = {
+    riskScore?: SortOrder
+  }
+
+  export type SecurityEventMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    action?: SortOrder
+    event?: SortOrder
+    severity?: SortOrder
     ip?: SortOrder
     userAgent?: SortOrder
+    country?: SortOrder
+    city?: SortOrder
+    deviceId?: SortOrder
+    riskScore?: SortOrder
+    resolved?: SortOrder
+    resolvedAt?: SortOrder
+    resolvedBy?: SortOrder
     createdAt?: SortOrder
   }
 
-  export type AuditLogMinOrderByAggregateInput = {
+  export type SecurityEventMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    action?: SortOrder
+    event?: SortOrder
+    severity?: SortOrder
     ip?: SortOrder
     userAgent?: SortOrder
+    country?: SortOrder
+    city?: SortOrder
+    deviceId?: SortOrder
+    riskScore?: SortOrder
+    resolved?: SortOrder
+    resolvedAt?: SortOrder
+    resolvedBy?: SortOrder
     createdAt?: SortOrder
+  }
+
+  export type SecurityEventSumOrderByAggregateInput = {
+    riskScore?: SortOrder
+  }
+
+  export type EnumESecurityEventWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ESecurityEvent | EnumESecurityEventFieldRefInput<$PrismaModel>
+    in?: $Enums.ESecurityEvent[] | ListEnumESecurityEventFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ESecurityEvent[] | ListEnumESecurityEventFieldRefInput<$PrismaModel>
+    not?: NestedEnumESecurityEventWithAggregatesFilter<$PrismaModel> | $Enums.ESecurityEvent
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumESecurityEventFilter<$PrismaModel>
+    _max?: NestedEnumESecurityEventFilter<$PrismaModel>
+  }
+
+  export type EnumESecuritySeverityWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ESecuritySeverity | EnumESecuritySeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.ESecuritySeverity[] | ListEnumESecuritySeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ESecuritySeverity[] | ListEnumESecuritySeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumESecuritySeverityWithAggregatesFilter<$PrismaModel> | $Enums.ESecuritySeverity
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumESecuritySeverityFilter<$PrismaModel>
+    _max?: NestedEnumESecuritySeverityFilter<$PrismaModel>
   }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -7013,11 +16419,327 @@ export namespace Prisma {
     _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
+  export type SessionCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    token?: SortOrder
+    refreshToken?: SortOrder
+    deviceId?: SortOrder
+    userAgent?: SortOrder
+    ip?: SortOrder
+    country?: SortOrder
+    city?: SortOrder
+    browser?: SortOrder
+    os?: SortOrder
+    device?: SortOrder
+    isTrusted?: SortOrder
+    riskScore?: SortOrder
+    is2FAVerified?: SortOrder
+    verified2FAAt?: SortOrder
+    expiresAt?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionAvgOrderByAggregateInput = {
+    riskScore?: SortOrder
+  }
+
+  export type SessionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    token?: SortOrder
+    refreshToken?: SortOrder
+    deviceId?: SortOrder
+    userAgent?: SortOrder
+    ip?: SortOrder
+    country?: SortOrder
+    city?: SortOrder
+    browser?: SortOrder
+    os?: SortOrder
+    device?: SortOrder
+    isTrusted?: SortOrder
+    riskScore?: SortOrder
+    is2FAVerified?: SortOrder
+    verified2FAAt?: SortOrder
+    expiresAt?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    token?: SortOrder
+    refreshToken?: SortOrder
+    deviceId?: SortOrder
+    userAgent?: SortOrder
+    ip?: SortOrder
+    country?: SortOrder
+    city?: SortOrder
+    browser?: SortOrder
+    os?: SortOrder
+    device?: SortOrder
+    isTrusted?: SortOrder
+    riskScore?: SortOrder
+    is2FAVerified?: SortOrder
+    verified2FAAt?: SortOrder
+    expiresAt?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SessionSumOrderByAggregateInput = {
+    riskScore?: SortOrder
+  }
+
+  export type AccountLockCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    reason?: SortOrder
+    failedAttempts?: SortOrder
+    lockedAt?: SortOrder
+    expiresAt?: SortOrder
+    unlockedAt?: SortOrder
+    ip?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AccountLockAvgOrderByAggregateInput = {
+    failedAttempts?: SortOrder
+  }
+
+  export type AccountLockMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    reason?: SortOrder
+    failedAttempts?: SortOrder
+    lockedAt?: SortOrder
+    expiresAt?: SortOrder
+    unlockedAt?: SortOrder
+    ip?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AccountLockMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    reason?: SortOrder
+    failedAttempts?: SortOrder
+    lockedAt?: SortOrder
+    expiresAt?: SortOrder
+    unlockedAt?: SortOrder
+    ip?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AccountLockSumOrderByAggregateInput = {
+    failedAttempts?: SortOrder
+  }
+
+  export type EnumETokenTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ETokenType | EnumETokenTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumETokenTypeFilter<$PrismaModel> | $Enums.ETokenType
+  }
+
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
+  export type TokenUserIdTypeCompoundUniqueInput = {
+    userId: string
+    type: $Enums.ETokenType
+  }
+
+  export type TokenCountOrderByAggregateInput = {
+    id?: SortOrder
+    token?: SortOrder
+    type?: SortOrder
+    expiresIn?: SortOrder
+    usedAt?: SortOrder
+    maxUses?: SortOrder
+    useCount?: SortOrder
+    userId?: SortOrder
+    createdIp?: SortOrder
+    usedIp?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TokenAvgOrderByAggregateInput = {
+    maxUses?: SortOrder
+    useCount?: SortOrder
+  }
+
+  export type TokenMaxOrderByAggregateInput = {
+    id?: SortOrder
+    token?: SortOrder
+    type?: SortOrder
+    expiresIn?: SortOrder
+    usedAt?: SortOrder
+    maxUses?: SortOrder
+    useCount?: SortOrder
+    userId?: SortOrder
+    createdIp?: SortOrder
+    usedIp?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TokenMinOrderByAggregateInput = {
+    id?: SortOrder
+    token?: SortOrder
+    type?: SortOrder
+    expiresIn?: SortOrder
+    usedAt?: SortOrder
+    maxUses?: SortOrder
+    useCount?: SortOrder
+    userId?: SortOrder
+    createdIp?: SortOrder
+    usedIp?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TokenSumOrderByAggregateInput = {
+    maxUses?: SortOrder
+    useCount?: SortOrder
+  }
+
+  export type EnumETokenTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ETokenType | EnumETokenTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumETokenTypeWithAggregatesFilter<$PrismaModel> | $Enums.ETokenType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumETokenTypeFilter<$PrismaModel>
+    _max?: NestedEnumETokenTypeFilter<$PrismaModel>
+  }
+
+  export type BackupCodeCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    authMethodId?: SortOrder
+    type?: SortOrder
+    code?: SortOrder
+    usedAt?: SortOrder
+    usedIp?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BackupCodeMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    authMethodId?: SortOrder
+    type?: SortOrder
+    code?: SortOrder
+    usedAt?: SortOrder
+    usedIp?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type BackupCodeMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    authMethodId?: SortOrder
+    type?: SortOrder
+    code?: SortOrder
+    usedAt?: SortOrder
+    usedIp?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EnumEAuditCategoryFilter<$PrismaModel = never> = {
+    equals?: $Enums.EAuditCategory | EnumEAuditCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.EAuditCategory[] | ListEnumEAuditCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.EAuditCategory[] | ListEnumEAuditCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumEAuditCategoryFilter<$PrismaModel> | $Enums.EAuditCategory
+  }
+
+  export type AuditLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    action?: SortOrder
+    category?: SortOrder
+    success?: SortOrder
+    ip?: SortOrder
+    userAgent?: SortOrder
+    country?: SortOrder
+    city?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AuditLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    action?: SortOrder
+    category?: SortOrder
+    success?: SortOrder
+    ip?: SortOrder
+    userAgent?: SortOrder
+    country?: SortOrder
+    city?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AuditLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    action?: SortOrder
+    category?: SortOrder
+    success?: SortOrder
+    ip?: SortOrder
+    userAgent?: SortOrder
+    country?: SortOrder
+    city?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EnumEAuditCategoryWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.EAuditCategory | EnumEAuditCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.EAuditCategory[] | ListEnumEAuditCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.EAuditCategory[] | ListEnumEAuditCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumEAuditCategoryWithAggregatesFilter<$PrismaModel> | $Enums.EAuditCategory
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumEAuditCategoryFilter<$PrismaModel>
+    _max?: NestedEnumEAuditCategoryFilter<$PrismaModel>
+  }
+
+  export type AuthenticationMethodCreateNestedManyWithoutUserInput = {
+    create?: XOR<AuthenticationMethodCreateWithoutUserInput, AuthenticationMethodUncheckedCreateWithoutUserInput> | AuthenticationMethodCreateWithoutUserInput[] | AuthenticationMethodUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AuthenticationMethodCreateOrConnectWithoutUserInput | AuthenticationMethodCreateOrConnectWithoutUserInput[]
+    createMany?: AuthenticationMethodCreateManyUserInputEnvelope
+    connect?: AuthenticationMethodWhereUniqueInput | AuthenticationMethodWhereUniqueInput[]
+  }
+
   export type BackupCodeCreateNestedManyWithoutUserInput = {
     create?: XOR<BackupCodeCreateWithoutUserInput, BackupCodeUncheckedCreateWithoutUserInput> | BackupCodeCreateWithoutUserInput[] | BackupCodeUncheckedCreateWithoutUserInput[]
     connectOrCreate?: BackupCodeCreateOrConnectWithoutUserInput | BackupCodeCreateOrConnectWithoutUserInput[]
     createMany?: BackupCodeCreateManyUserInputEnvelope
     connect?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+  }
+
+  export type TrustedDeviceCreateNestedManyWithoutUserInput = {
+    create?: XOR<TrustedDeviceCreateWithoutUserInput, TrustedDeviceUncheckedCreateWithoutUserInput> | TrustedDeviceCreateWithoutUserInput[] | TrustedDeviceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TrustedDeviceCreateOrConnectWithoutUserInput | TrustedDeviceCreateOrConnectWithoutUserInput[]
+    createMany?: TrustedDeviceCreateManyUserInputEnvelope
+    connect?: TrustedDeviceWhereUniqueInput | TrustedDeviceWhereUniqueInput[]
   }
 
   export type AuditLogCreateNestedManyWithoutUserInput = {
@@ -7034,11 +16756,46 @@ export namespace Prisma {
     connect?: TokenWhereUniqueInput | TokenWhereUniqueInput[]
   }
 
+  export type SessionCreateNestedManyWithoutUserInput = {
+    create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
+    createMany?: SessionCreateManyUserInputEnvelope
+    connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+  }
+
+  export type AccountLockCreateNestedManyWithoutUserInput = {
+    create?: XOR<AccountLockCreateWithoutUserInput, AccountLockUncheckedCreateWithoutUserInput> | AccountLockCreateWithoutUserInput[] | AccountLockUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AccountLockCreateOrConnectWithoutUserInput | AccountLockCreateOrConnectWithoutUserInput[]
+    createMany?: AccountLockCreateManyUserInputEnvelope
+    connect?: AccountLockWhereUniqueInput | AccountLockWhereUniqueInput[]
+  }
+
+  export type SecurityEventCreateNestedManyWithoutUserInput = {
+    create?: XOR<SecurityEventCreateWithoutUserInput, SecurityEventUncheckedCreateWithoutUserInput> | SecurityEventCreateWithoutUserInput[] | SecurityEventUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SecurityEventCreateOrConnectWithoutUserInput | SecurityEventCreateOrConnectWithoutUserInput[]
+    createMany?: SecurityEventCreateManyUserInputEnvelope
+    connect?: SecurityEventWhereUniqueInput | SecurityEventWhereUniqueInput[]
+  }
+
+  export type AuthenticationMethodUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<AuthenticationMethodCreateWithoutUserInput, AuthenticationMethodUncheckedCreateWithoutUserInput> | AuthenticationMethodCreateWithoutUserInput[] | AuthenticationMethodUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AuthenticationMethodCreateOrConnectWithoutUserInput | AuthenticationMethodCreateOrConnectWithoutUserInput[]
+    createMany?: AuthenticationMethodCreateManyUserInputEnvelope
+    connect?: AuthenticationMethodWhereUniqueInput | AuthenticationMethodWhereUniqueInput[]
+  }
+
   export type BackupCodeUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<BackupCodeCreateWithoutUserInput, BackupCodeUncheckedCreateWithoutUserInput> | BackupCodeCreateWithoutUserInput[] | BackupCodeUncheckedCreateWithoutUserInput[]
     connectOrCreate?: BackupCodeCreateOrConnectWithoutUserInput | BackupCodeCreateOrConnectWithoutUserInput[]
     createMany?: BackupCodeCreateManyUserInputEnvelope
     connect?: BackupCodeWhereUniqueInput | BackupCodeWhereUniqueInput[]
+  }
+
+  export type TrustedDeviceUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<TrustedDeviceCreateWithoutUserInput, TrustedDeviceUncheckedCreateWithoutUserInput> | TrustedDeviceCreateWithoutUserInput[] | TrustedDeviceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TrustedDeviceCreateOrConnectWithoutUserInput | TrustedDeviceCreateOrConnectWithoutUserInput[]
+    createMany?: TrustedDeviceCreateManyUserInputEnvelope
+    connect?: TrustedDeviceWhereUniqueInput | TrustedDeviceWhereUniqueInput[]
   }
 
   export type AuditLogUncheckedCreateNestedManyWithoutUserInput = {
@@ -7055,6 +16812,27 @@ export namespace Prisma {
     connect?: TokenWhereUniqueInput | TokenWhereUniqueInput[]
   }
 
+  export type SessionUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
+    createMany?: SessionCreateManyUserInputEnvelope
+    connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+  }
+
+  export type AccountLockUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<AccountLockCreateWithoutUserInput, AccountLockUncheckedCreateWithoutUserInput> | AccountLockCreateWithoutUserInput[] | AccountLockUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AccountLockCreateOrConnectWithoutUserInput | AccountLockCreateOrConnectWithoutUserInput[]
+    createMany?: AccountLockCreateManyUserInputEnvelope
+    connect?: AccountLockWhereUniqueInput | AccountLockWhereUniqueInput[]
+  }
+
+  export type SecurityEventUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<SecurityEventCreateWithoutUserInput, SecurityEventUncheckedCreateWithoutUserInput> | SecurityEventCreateWithoutUserInput[] | SecurityEventUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SecurityEventCreateOrConnectWithoutUserInput | SecurityEventCreateOrConnectWithoutUserInput[]
+    createMany?: SecurityEventCreateManyUserInputEnvelope
+    connect?: SecurityEventWhereUniqueInput | SecurityEventWhereUniqueInput[]
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -7067,8 +16845,42 @@ export namespace Prisma {
     set?: boolean
   }
 
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type NullableBoolFieldUpdateOperationsInput = {
+    set?: boolean | null
+  }
+
+  export type NullableEnumE2FAMethodFieldUpdateOperationsInput = {
+    set?: $Enums.E2FAMethod | null
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type AuthenticationMethodUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AuthenticationMethodCreateWithoutUserInput, AuthenticationMethodUncheckedCreateWithoutUserInput> | AuthenticationMethodCreateWithoutUserInput[] | AuthenticationMethodUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AuthenticationMethodCreateOrConnectWithoutUserInput | AuthenticationMethodCreateOrConnectWithoutUserInput[]
+    upsert?: AuthenticationMethodUpsertWithWhereUniqueWithoutUserInput | AuthenticationMethodUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AuthenticationMethodCreateManyUserInputEnvelope
+    set?: AuthenticationMethodWhereUniqueInput | AuthenticationMethodWhereUniqueInput[]
+    disconnect?: AuthenticationMethodWhereUniqueInput | AuthenticationMethodWhereUniqueInput[]
+    delete?: AuthenticationMethodWhereUniqueInput | AuthenticationMethodWhereUniqueInput[]
+    connect?: AuthenticationMethodWhereUniqueInput | AuthenticationMethodWhereUniqueInput[]
+    update?: AuthenticationMethodUpdateWithWhereUniqueWithoutUserInput | AuthenticationMethodUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AuthenticationMethodUpdateManyWithWhereWithoutUserInput | AuthenticationMethodUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AuthenticationMethodScalarWhereInput | AuthenticationMethodScalarWhereInput[]
   }
 
   export type BackupCodeUpdateManyWithoutUserNestedInput = {
@@ -7083,6 +16895,20 @@ export namespace Prisma {
     update?: BackupCodeUpdateWithWhereUniqueWithoutUserInput | BackupCodeUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: BackupCodeUpdateManyWithWhereWithoutUserInput | BackupCodeUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: BackupCodeScalarWhereInput | BackupCodeScalarWhereInput[]
+  }
+
+  export type TrustedDeviceUpdateManyWithoutUserNestedInput = {
+    create?: XOR<TrustedDeviceCreateWithoutUserInput, TrustedDeviceUncheckedCreateWithoutUserInput> | TrustedDeviceCreateWithoutUserInput[] | TrustedDeviceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TrustedDeviceCreateOrConnectWithoutUserInput | TrustedDeviceCreateOrConnectWithoutUserInput[]
+    upsert?: TrustedDeviceUpsertWithWhereUniqueWithoutUserInput | TrustedDeviceUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: TrustedDeviceCreateManyUserInputEnvelope
+    set?: TrustedDeviceWhereUniqueInput | TrustedDeviceWhereUniqueInput[]
+    disconnect?: TrustedDeviceWhereUniqueInput | TrustedDeviceWhereUniqueInput[]
+    delete?: TrustedDeviceWhereUniqueInput | TrustedDeviceWhereUniqueInput[]
+    connect?: TrustedDeviceWhereUniqueInput | TrustedDeviceWhereUniqueInput[]
+    update?: TrustedDeviceUpdateWithWhereUniqueWithoutUserInput | TrustedDeviceUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: TrustedDeviceUpdateManyWithWhereWithoutUserInput | TrustedDeviceUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: TrustedDeviceScalarWhereInput | TrustedDeviceScalarWhereInput[]
   }
 
   export type AuditLogUpdateManyWithoutUserNestedInput = {
@@ -7113,6 +16939,62 @@ export namespace Prisma {
     deleteMany?: TokenScalarWhereInput | TokenScalarWhereInput[]
   }
 
+  export type SessionUpdateManyWithoutUserNestedInput = {
+    create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
+    upsert?: SessionUpsertWithWhereUniqueWithoutUserInput | SessionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: SessionCreateManyUserInputEnvelope
+    set?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    disconnect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    delete?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    update?: SessionUpdateWithWhereUniqueWithoutUserInput | SessionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: SessionUpdateManyWithWhereWithoutUserInput | SessionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: SessionScalarWhereInput | SessionScalarWhereInput[]
+  }
+
+  export type AccountLockUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AccountLockCreateWithoutUserInput, AccountLockUncheckedCreateWithoutUserInput> | AccountLockCreateWithoutUserInput[] | AccountLockUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AccountLockCreateOrConnectWithoutUserInput | AccountLockCreateOrConnectWithoutUserInput[]
+    upsert?: AccountLockUpsertWithWhereUniqueWithoutUserInput | AccountLockUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AccountLockCreateManyUserInputEnvelope
+    set?: AccountLockWhereUniqueInput | AccountLockWhereUniqueInput[]
+    disconnect?: AccountLockWhereUniqueInput | AccountLockWhereUniqueInput[]
+    delete?: AccountLockWhereUniqueInput | AccountLockWhereUniqueInput[]
+    connect?: AccountLockWhereUniqueInput | AccountLockWhereUniqueInput[]
+    update?: AccountLockUpdateWithWhereUniqueWithoutUserInput | AccountLockUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AccountLockUpdateManyWithWhereWithoutUserInput | AccountLockUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AccountLockScalarWhereInput | AccountLockScalarWhereInput[]
+  }
+
+  export type SecurityEventUpdateManyWithoutUserNestedInput = {
+    create?: XOR<SecurityEventCreateWithoutUserInput, SecurityEventUncheckedCreateWithoutUserInput> | SecurityEventCreateWithoutUserInput[] | SecurityEventUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SecurityEventCreateOrConnectWithoutUserInput | SecurityEventCreateOrConnectWithoutUserInput[]
+    upsert?: SecurityEventUpsertWithWhereUniqueWithoutUserInput | SecurityEventUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: SecurityEventCreateManyUserInputEnvelope
+    set?: SecurityEventWhereUniqueInput | SecurityEventWhereUniqueInput[]
+    disconnect?: SecurityEventWhereUniqueInput | SecurityEventWhereUniqueInput[]
+    delete?: SecurityEventWhereUniqueInput | SecurityEventWhereUniqueInput[]
+    connect?: SecurityEventWhereUniqueInput | SecurityEventWhereUniqueInput[]
+    update?: SecurityEventUpdateWithWhereUniqueWithoutUserInput | SecurityEventUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: SecurityEventUpdateManyWithWhereWithoutUserInput | SecurityEventUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: SecurityEventScalarWhereInput | SecurityEventScalarWhereInput[]
+  }
+
+  export type AuthenticationMethodUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AuthenticationMethodCreateWithoutUserInput, AuthenticationMethodUncheckedCreateWithoutUserInput> | AuthenticationMethodCreateWithoutUserInput[] | AuthenticationMethodUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AuthenticationMethodCreateOrConnectWithoutUserInput | AuthenticationMethodCreateOrConnectWithoutUserInput[]
+    upsert?: AuthenticationMethodUpsertWithWhereUniqueWithoutUserInput | AuthenticationMethodUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AuthenticationMethodCreateManyUserInputEnvelope
+    set?: AuthenticationMethodWhereUniqueInput | AuthenticationMethodWhereUniqueInput[]
+    disconnect?: AuthenticationMethodWhereUniqueInput | AuthenticationMethodWhereUniqueInput[]
+    delete?: AuthenticationMethodWhereUniqueInput | AuthenticationMethodWhereUniqueInput[]
+    connect?: AuthenticationMethodWhereUniqueInput | AuthenticationMethodWhereUniqueInput[]
+    update?: AuthenticationMethodUpdateWithWhereUniqueWithoutUserInput | AuthenticationMethodUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AuthenticationMethodUpdateManyWithWhereWithoutUserInput | AuthenticationMethodUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AuthenticationMethodScalarWhereInput | AuthenticationMethodScalarWhereInput[]
+  }
+
   export type BackupCodeUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<BackupCodeCreateWithoutUserInput, BackupCodeUncheckedCreateWithoutUserInput> | BackupCodeCreateWithoutUserInput[] | BackupCodeUncheckedCreateWithoutUserInput[]
     connectOrCreate?: BackupCodeCreateOrConnectWithoutUserInput | BackupCodeCreateOrConnectWithoutUserInput[]
@@ -7125,6 +17007,20 @@ export namespace Prisma {
     update?: BackupCodeUpdateWithWhereUniqueWithoutUserInput | BackupCodeUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: BackupCodeUpdateManyWithWhereWithoutUserInput | BackupCodeUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: BackupCodeScalarWhereInput | BackupCodeScalarWhereInput[]
+  }
+
+  export type TrustedDeviceUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<TrustedDeviceCreateWithoutUserInput, TrustedDeviceUncheckedCreateWithoutUserInput> | TrustedDeviceCreateWithoutUserInput[] | TrustedDeviceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TrustedDeviceCreateOrConnectWithoutUserInput | TrustedDeviceCreateOrConnectWithoutUserInput[]
+    upsert?: TrustedDeviceUpsertWithWhereUniqueWithoutUserInput | TrustedDeviceUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: TrustedDeviceCreateManyUserInputEnvelope
+    set?: TrustedDeviceWhereUniqueInput | TrustedDeviceWhereUniqueInput[]
+    disconnect?: TrustedDeviceWhereUniqueInput | TrustedDeviceWhereUniqueInput[]
+    delete?: TrustedDeviceWhereUniqueInput | TrustedDeviceWhereUniqueInput[]
+    connect?: TrustedDeviceWhereUniqueInput | TrustedDeviceWhereUniqueInput[]
+    update?: TrustedDeviceUpdateWithWhereUniqueWithoutUserInput | TrustedDeviceUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: TrustedDeviceUpdateManyWithWhereWithoutUserInput | TrustedDeviceUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: TrustedDeviceScalarWhereInput | TrustedDeviceScalarWhereInput[]
   }
 
   export type AuditLogUncheckedUpdateManyWithoutUserNestedInput = {
@@ -7155,6 +17051,146 @@ export namespace Prisma {
     deleteMany?: TokenScalarWhereInput | TokenScalarWhereInput[]
   }
 
+  export type SessionUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
+    upsert?: SessionUpsertWithWhereUniqueWithoutUserInput | SessionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: SessionCreateManyUserInputEnvelope
+    set?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    disconnect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    delete?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    connect?: SessionWhereUniqueInput | SessionWhereUniqueInput[]
+    update?: SessionUpdateWithWhereUniqueWithoutUserInput | SessionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: SessionUpdateManyWithWhereWithoutUserInput | SessionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: SessionScalarWhereInput | SessionScalarWhereInput[]
+  }
+
+  export type AccountLockUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AccountLockCreateWithoutUserInput, AccountLockUncheckedCreateWithoutUserInput> | AccountLockCreateWithoutUserInput[] | AccountLockUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AccountLockCreateOrConnectWithoutUserInput | AccountLockCreateOrConnectWithoutUserInput[]
+    upsert?: AccountLockUpsertWithWhereUniqueWithoutUserInput | AccountLockUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AccountLockCreateManyUserInputEnvelope
+    set?: AccountLockWhereUniqueInput | AccountLockWhereUniqueInput[]
+    disconnect?: AccountLockWhereUniqueInput | AccountLockWhereUniqueInput[]
+    delete?: AccountLockWhereUniqueInput | AccountLockWhereUniqueInput[]
+    connect?: AccountLockWhereUniqueInput | AccountLockWhereUniqueInput[]
+    update?: AccountLockUpdateWithWhereUniqueWithoutUserInput | AccountLockUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AccountLockUpdateManyWithWhereWithoutUserInput | AccountLockUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AccountLockScalarWhereInput | AccountLockScalarWhereInput[]
+  }
+
+  export type SecurityEventUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<SecurityEventCreateWithoutUserInput, SecurityEventUncheckedCreateWithoutUserInput> | SecurityEventCreateWithoutUserInput[] | SecurityEventUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SecurityEventCreateOrConnectWithoutUserInput | SecurityEventCreateOrConnectWithoutUserInput[]
+    upsert?: SecurityEventUpsertWithWhereUniqueWithoutUserInput | SecurityEventUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: SecurityEventCreateManyUserInputEnvelope
+    set?: SecurityEventWhereUniqueInput | SecurityEventWhereUniqueInput[]
+    disconnect?: SecurityEventWhereUniqueInput | SecurityEventWhereUniqueInput[]
+    delete?: SecurityEventWhereUniqueInput | SecurityEventWhereUniqueInput[]
+    connect?: SecurityEventWhereUniqueInput | SecurityEventWhereUniqueInput[]
+    update?: SecurityEventUpdateWithWhereUniqueWithoutUserInput | SecurityEventUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: SecurityEventUpdateManyWithWhereWithoutUserInput | SecurityEventUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: SecurityEventScalarWhereInput | SecurityEventScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutAuthenticationMethodsInput = {
+    create?: XOR<UserCreateWithoutAuthenticationMethodsInput, UserUncheckedCreateWithoutAuthenticationMethodsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAuthenticationMethodsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumE2FAMethodFieldUpdateOperationsInput = {
+    set?: $Enums.E2FAMethod
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type UserUpdateOneRequiredWithoutAuthenticationMethodsNestedInput = {
+    create?: XOR<UserCreateWithoutAuthenticationMethodsInput, UserUncheckedCreateWithoutAuthenticationMethodsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAuthenticationMethodsInput
+    upsert?: UserUpsertWithoutAuthenticationMethodsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAuthenticationMethodsInput, UserUpdateWithoutAuthenticationMethodsInput>, UserUncheckedUpdateWithoutAuthenticationMethodsInput>
+  }
+
+  export type UserCreateNestedOneWithoutTrustedDevicesInput = {
+    create?: XOR<UserCreateWithoutTrustedDevicesInput, UserUncheckedCreateWithoutTrustedDevicesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTrustedDevicesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type UserUpdateOneRequiredWithoutTrustedDevicesNestedInput = {
+    create?: XOR<UserCreateWithoutTrustedDevicesInput, UserUncheckedCreateWithoutTrustedDevicesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTrustedDevicesInput
+    upsert?: UserUpsertWithoutTrustedDevicesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTrustedDevicesInput, UserUpdateWithoutTrustedDevicesInput>, UserUncheckedUpdateWithoutTrustedDevicesInput>
+  }
+
+  export type UserCreateNestedOneWithoutSecurityEventsInput = {
+    create?: XOR<UserCreateWithoutSecurityEventsInput, UserUncheckedCreateWithoutSecurityEventsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSecurityEventsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumESecurityEventFieldUpdateOperationsInput = {
+    set?: $Enums.ESecurityEvent
+  }
+
+  export type EnumESecuritySeverityFieldUpdateOperationsInput = {
+    set?: $Enums.ESecuritySeverity
+  }
+
+  export type UserUpdateOneRequiredWithoutSecurityEventsNestedInput = {
+    create?: XOR<UserCreateWithoutSecurityEventsInput, UserUncheckedCreateWithoutSecurityEventsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSecurityEventsInput
+    upsert?: UserUpsertWithoutSecurityEventsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSecurityEventsInput, UserUpdateWithoutSecurityEventsInput>, UserUncheckedUpdateWithoutSecurityEventsInput>
+  }
+
+  export type UserCreateNestedOneWithoutSessionsInput = {
+    create?: XOR<UserCreateWithoutSessionsInput, UserUncheckedCreateWithoutSessionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSessionsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
+    create?: XOR<UserCreateWithoutSessionsInput, UserUncheckedCreateWithoutSessionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSessionsInput
+    upsert?: UserUpsertWithoutSessionsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSessionsInput, UserUpdateWithoutSessionsInput>, UserUncheckedUpdateWithoutSessionsInput>
+  }
+
+  export type UserCreateNestedOneWithoutAccountLocksInput = {
+    create?: XOR<UserCreateWithoutAccountLocksInput, UserUncheckedCreateWithoutAccountLocksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAccountLocksInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutAccountLocksNestedInput = {
+    create?: XOR<UserCreateWithoutAccountLocksInput, UserUncheckedCreateWithoutAccountLocksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAccountLocksInput
+    upsert?: UserUpsertWithoutAccountLocksInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAccountLocksInput, UserUpdateWithoutAccountLocksInput>, UserUncheckedUpdateWithoutAccountLocksInput>
+  }
+
   export type UserCreateNestedOneWithoutTokensInput = {
     create?: XOR<UserCreateWithoutTokensInput, UserUncheckedCreateWithoutTokensInput>
     connectOrCreate?: UserCreateOrConnectWithoutTokensInput
@@ -7181,14 +17217,6 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type EnumEBackupCodeTypeFieldUpdateOperationsInput = {
-    set?: $Enums.EBackupCodeType
-  }
-
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
-  }
-
   export type UserUpdateOneRequiredWithoutBackupCodesNestedInput = {
     create?: XOR<UserCreateWithoutBackupCodesInput, UserUncheckedCreateWithoutBackupCodesInput>
     connectOrCreate?: UserCreateOrConnectWithoutBackupCodesInput
@@ -7201,6 +17229,10 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutAuditLogsInput, UserUncheckedCreateWithoutAuditLogsInput>
     connectOrCreate?: UserCreateOrConnectWithoutAuditLogsInput
     connect?: UserWhereUniqueInput
+  }
+
+  export type EnumEAuditCategoryFieldUpdateOperationsInput = {
+    set?: $Enums.EAuditCategory
   }
 
   export type UserUpdateOneRequiredWithoutAuditLogsNestedInput = {
@@ -7242,6 +17274,40 @@ export namespace Prisma {
   export type NestedBoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedBoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type NestedEnumE2FAMethodNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.E2FAMethod | EnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    in?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumE2FAMethodNullableFilter<$PrismaModel> | $Enums.E2FAMethod | null
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -7319,6 +17385,54 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumE2FAMethodNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.E2FAMethod | EnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    in?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumE2FAMethodNullableWithAggregatesFilter<$PrismaModel> | $Enums.E2FAMethod | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumE2FAMethodNullableFilter<$PrismaModel>
+    _max?: NestedEnumE2FAMethodNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -7333,63 +17447,121 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type NestedEnumETokenTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.ETokenType | EnumETokenTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumETokenTypeFilter<$PrismaModel> | $Enums.ETokenType
+  export type NestedEnumE2FAMethodFilter<$PrismaModel = never> = {
+    equals?: $Enums.E2FAMethod | EnumE2FAMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumE2FAMethodFilter<$PrismaModel> | $Enums.E2FAMethod
   }
 
-  export type NestedEnumETokenTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.ETokenType | EnumETokenTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumETokenTypeWithAggregatesFilter<$PrismaModel> | $Enums.ETokenType
+  export type NestedEnumE2FAMethodWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.E2FAMethod | EnumE2FAMethodFieldRefInput<$PrismaModel>
+    in?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel>
+    notIn?: $Enums.E2FAMethod[] | ListEnumE2FAMethodFieldRefInput<$PrismaModel>
+    not?: NestedEnumE2FAMethodWithAggregatesFilter<$PrismaModel> | $Enums.E2FAMethod
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumETokenTypeFilter<$PrismaModel>
-    _max?: NestedEnumETokenTypeFilter<$PrismaModel>
+    _min?: NestedEnumE2FAMethodFilter<$PrismaModel>
+    _max?: NestedEnumE2FAMethodFilter<$PrismaModel>
+  }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type NestedEnumEBackupCodeTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.EBackupCodeType | EnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.EBackupCodeType[] | ListEnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.EBackupCodeType[] | ListEnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumEBackupCodeTypeFilter<$PrismaModel> | $Enums.EBackupCodeType
-  }
-
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type NestedEnumEBackupCodeTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.EBackupCodeType | EnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.EBackupCodeType[] | ListEnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.EBackupCodeType[] | ListEnumEBackupCodeTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumEBackupCodeTypeWithAggregatesFilter<$PrismaModel> | $Enums.EBackupCodeType
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumEBackupCodeTypeFilter<$PrismaModel>
-    _max?: NestedEnumEBackupCodeTypeFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedEnumESecurityEventFilter<$PrismaModel = never> = {
+    equals?: $Enums.ESecurityEvent | EnumESecurityEventFieldRefInput<$PrismaModel>
+    in?: $Enums.ESecurityEvent[] | ListEnumESecurityEventFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ESecurityEvent[] | ListEnumESecurityEventFieldRefInput<$PrismaModel>
+    not?: NestedEnumESecurityEventFilter<$PrismaModel> | $Enums.ESecurityEvent
+  }
+
+  export type NestedEnumESecuritySeverityFilter<$PrismaModel = never> = {
+    equals?: $Enums.ESecuritySeverity | EnumESecuritySeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.ESecuritySeverity[] | ListEnumESecuritySeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ESecuritySeverity[] | ListEnumESecuritySeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumESecuritySeverityFilter<$PrismaModel> | $Enums.ESecuritySeverity
+  }
+
+  export type NestedEnumESecurityEventWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ESecurityEvent | EnumESecurityEventFieldRefInput<$PrismaModel>
+    in?: $Enums.ESecurityEvent[] | ListEnumESecurityEventFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ESecurityEvent[] | ListEnumESecurityEventFieldRefInput<$PrismaModel>
+    not?: NestedEnumESecurityEventWithAggregatesFilter<$PrismaModel> | $Enums.ESecurityEvent
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumESecurityEventFilter<$PrismaModel>
+    _max?: NestedEnumESecurityEventFilter<$PrismaModel>
+  }
+
+  export type NestedEnumESecuritySeverityWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ESecuritySeverity | EnumESecuritySeverityFieldRefInput<$PrismaModel>
+    in?: $Enums.ESecuritySeverity[] | ListEnumESecuritySeverityFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ESecuritySeverity[] | ListEnumESecuritySeverityFieldRefInput<$PrismaModel>
+    not?: NestedEnumESecuritySeverityWithAggregatesFilter<$PrismaModel> | $Enums.ESecuritySeverity
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumESecuritySeverityFilter<$PrismaModel>
+    _max?: NestedEnumESecuritySeverityFilter<$PrismaModel>
   }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -7415,19 +17587,97 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type NestedEnumETokenTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ETokenType | EnumETokenTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumETokenTypeFilter<$PrismaModel> | $Enums.ETokenType
+  }
+
+  export type NestedEnumETokenTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ETokenType | EnumETokenTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ETokenType[] | ListEnumETokenTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumETokenTypeWithAggregatesFilter<$PrismaModel> | $Enums.ETokenType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumETokenTypeFilter<$PrismaModel>
+    _max?: NestedEnumETokenTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumEAuditCategoryFilter<$PrismaModel = never> = {
+    equals?: $Enums.EAuditCategory | EnumEAuditCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.EAuditCategory[] | ListEnumEAuditCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.EAuditCategory[] | ListEnumEAuditCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumEAuditCategoryFilter<$PrismaModel> | $Enums.EAuditCategory
+  }
+
+  export type NestedEnumEAuditCategoryWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.EAuditCategory | EnumEAuditCategoryFieldRefInput<$PrismaModel>
+    in?: $Enums.EAuditCategory[] | ListEnumEAuditCategoryFieldRefInput<$PrismaModel>
+    notIn?: $Enums.EAuditCategory[] | ListEnumEAuditCategoryFieldRefInput<$PrismaModel>
+    not?: NestedEnumEAuditCategoryWithAggregatesFilter<$PrismaModel> | $Enums.EAuditCategory
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumEAuditCategoryFilter<$PrismaModel>
+    _max?: NestedEnumEAuditCategoryFilter<$PrismaModel>
+  }
+
+  export type AuthenticationMethodCreateWithoutUserInput = {
+    id?: string
+    method: $Enums.E2FAMethod
+    data: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    isActive?: boolean
+    isPrimary?: boolean
+    lastUsedAt?: Date | string | null
+    useCount?: number
+    credentialId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AuthenticationMethodUncheckedCreateWithoutUserInput = {
+    id?: string
+    method: $Enums.E2FAMethod
+    data: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    isActive?: boolean
+    isPrimary?: boolean
+    lastUsedAt?: Date | string | null
+    useCount?: number
+    credentialId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AuthenticationMethodCreateOrConnectWithoutUserInput = {
+    where: AuthenticationMethodWhereUniqueInput
+    create: XOR<AuthenticationMethodCreateWithoutUserInput, AuthenticationMethodUncheckedCreateWithoutUserInput>
+  }
+
+  export type AuthenticationMethodCreateManyUserInputEnvelope = {
+    data: AuthenticationMethodCreateManyUserInput | AuthenticationMethodCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type BackupCodeCreateWithoutUserInput = {
     id?: string
-    type?: $Enums.EBackupCodeType
+    authMethodId?: string | null
+    type?: $Enums.E2FAMethod
     code: string
     usedAt?: Date | string | null
+    usedIp?: string | null
+    expiresAt?: Date | string | null
     createdAt?: Date | string
   }
 
   export type BackupCodeUncheckedCreateWithoutUserInput = {
     id?: string
-    type?: $Enums.EBackupCodeType
+    authMethodId?: string | null
+    type?: $Enums.E2FAMethod
     code: string
     usedAt?: Date | string | null
+    usedIp?: string | null
+    expiresAt?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -7441,21 +17691,81 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type TrustedDeviceCreateWithoutUserInput = {
+    id?: string
+    deviceId: string
+    fingerprint: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    userAgent: string
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    trustScore?: number
+    lastIp?: string | null
+    lastCountry?: string | null
+    lastCity?: string | null
+    isActive?: boolean
+    lastSeenAt?: Date | string
+    expiresAt?: Date | string | null
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TrustedDeviceUncheckedCreateWithoutUserInput = {
+    id?: string
+    deviceId: string
+    fingerprint: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    userAgent: string
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    trustScore?: number
+    lastIp?: string | null
+    lastCountry?: string | null
+    lastCity?: string | null
+    isActive?: boolean
+    lastSeenAt?: Date | string
+    expiresAt?: Date | string | null
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TrustedDeviceCreateOrConnectWithoutUserInput = {
+    where: TrustedDeviceWhereUniqueInput
+    create: XOR<TrustedDeviceCreateWithoutUserInput, TrustedDeviceUncheckedCreateWithoutUserInput>
+  }
+
+  export type TrustedDeviceCreateManyUserInputEnvelope = {
+    data: TrustedDeviceCreateManyUserInput | TrustedDeviceCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AuditLogCreateWithoutUserInput = {
     id?: string
     action: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: $Enums.EAuditCategory
+    success?: boolean
     ip?: string | null
     userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
   export type AuditLogUncheckedCreateWithoutUserInput = {
     id?: string
     action: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: $Enums.EAuditCategory
+    success?: boolean
     ip?: string | null
     userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -7474,6 +17784,11 @@ export namespace Prisma {
     token: string
     type: $Enums.ETokenType
     expiresIn: Date | string
+    usedAt?: Date | string | null
+    maxUses?: number
+    useCount?: number
+    createdIp?: string | null
+    usedIp?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7483,6 +17798,11 @@ export namespace Prisma {
     token: string
     type: $Enums.ETokenType
     expiresIn: Date | string
+    usedAt?: Date | string | null
+    maxUses?: number
+    useCount?: number
+    createdIp?: string | null
+    usedIp?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7495,6 +17815,176 @@ export namespace Prisma {
   export type TokenCreateManyUserInputEnvelope = {
     data: TokenCreateManyUserInput | TokenCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type SessionCreateWithoutUserInput = {
+    id?: string
+    token: string
+    refreshToken?: string | null
+    deviceId?: string | null
+    userAgent?: string | null
+    ip?: string | null
+    country?: string | null
+    city?: string | null
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    isTrusted?: boolean
+    riskScore?: number | null
+    is2FAVerified?: boolean
+    verified2FAAt?: Date | string | null
+    expiresAt: Date | string
+    lastUsedAt?: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionUncheckedCreateWithoutUserInput = {
+    id?: string
+    token: string
+    refreshToken?: string | null
+    deviceId?: string | null
+    userAgent?: string | null
+    ip?: string | null
+    country?: string | null
+    city?: string | null
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    isTrusted?: boolean
+    riskScore?: number | null
+    is2FAVerified?: boolean
+    verified2FAAt?: Date | string | null
+    expiresAt: Date | string
+    lastUsedAt?: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SessionCreateOrConnectWithoutUserInput = {
+    where: SessionWhereUniqueInput
+    create: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput>
+  }
+
+  export type SessionCreateManyUserInputEnvelope = {
+    data: SessionCreateManyUserInput | SessionCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AccountLockCreateWithoutUserInput = {
+    id?: string
+    reason: string
+    failedAttempts?: number
+    lockedAt?: Date | string
+    expiresAt?: Date | string | null
+    unlockedAt?: Date | string | null
+    ip?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AccountLockUncheckedCreateWithoutUserInput = {
+    id?: string
+    reason: string
+    failedAttempts?: number
+    lockedAt?: Date | string
+    expiresAt?: Date | string | null
+    unlockedAt?: Date | string | null
+    ip?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AccountLockCreateOrConnectWithoutUserInput = {
+    where: AccountLockWhereUniqueInput
+    create: XOR<AccountLockCreateWithoutUserInput, AccountLockUncheckedCreateWithoutUserInput>
+  }
+
+  export type AccountLockCreateManyUserInputEnvelope = {
+    data: AccountLockCreateManyUserInput | AccountLockCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SecurityEventCreateWithoutUserInput = {
+    id?: string
+    event: $Enums.ESecurityEvent
+    severity?: $Enums.ESecuritySeverity
+    ip?: string | null
+    userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    deviceId?: string | null
+    riskScore?: number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: boolean
+    resolvedAt?: Date | string | null
+    resolvedBy?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type SecurityEventUncheckedCreateWithoutUserInput = {
+    id?: string
+    event: $Enums.ESecurityEvent
+    severity?: $Enums.ESecuritySeverity
+    ip?: string | null
+    userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    deviceId?: string | null
+    riskScore?: number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: boolean
+    resolvedAt?: Date | string | null
+    resolvedBy?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type SecurityEventCreateOrConnectWithoutUserInput = {
+    where: SecurityEventWhereUniqueInput
+    create: XOR<SecurityEventCreateWithoutUserInput, SecurityEventUncheckedCreateWithoutUserInput>
+  }
+
+  export type SecurityEventCreateManyUserInputEnvelope = {
+    data: SecurityEventCreateManyUserInput | SecurityEventCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AuthenticationMethodUpsertWithWhereUniqueWithoutUserInput = {
+    where: AuthenticationMethodWhereUniqueInput
+    update: XOR<AuthenticationMethodUpdateWithoutUserInput, AuthenticationMethodUncheckedUpdateWithoutUserInput>
+    create: XOR<AuthenticationMethodCreateWithoutUserInput, AuthenticationMethodUncheckedCreateWithoutUserInput>
+  }
+
+  export type AuthenticationMethodUpdateWithWhereUniqueWithoutUserInput = {
+    where: AuthenticationMethodWhereUniqueInput
+    data: XOR<AuthenticationMethodUpdateWithoutUserInput, AuthenticationMethodUncheckedUpdateWithoutUserInput>
+  }
+
+  export type AuthenticationMethodUpdateManyWithWhereWithoutUserInput = {
+    where: AuthenticationMethodScalarWhereInput
+    data: XOR<AuthenticationMethodUpdateManyMutationInput, AuthenticationMethodUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type AuthenticationMethodScalarWhereInput = {
+    AND?: AuthenticationMethodScalarWhereInput | AuthenticationMethodScalarWhereInput[]
+    OR?: AuthenticationMethodScalarWhereInput[]
+    NOT?: AuthenticationMethodScalarWhereInput | AuthenticationMethodScalarWhereInput[]
+    id?: StringFilter<"AuthenticationMethod"> | string
+    userId?: StringFilter<"AuthenticationMethod"> | string
+    method?: EnumE2FAMethodFilter<"AuthenticationMethod"> | $Enums.E2FAMethod
+    data?: JsonFilter<"AuthenticationMethod">
+    name?: StringNullableFilter<"AuthenticationMethod"> | string | null
+    isActive?: BoolFilter<"AuthenticationMethod"> | boolean
+    isPrimary?: BoolFilter<"AuthenticationMethod"> | boolean
+    lastUsedAt?: DateTimeNullableFilter<"AuthenticationMethod"> | Date | string | null
+    useCount?: IntFilter<"AuthenticationMethod"> | number
+    credentialId?: StringNullableFilter<"AuthenticationMethod"> | string | null
+    createdAt?: DateTimeFilter<"AuthenticationMethod"> | Date | string
+    updatedAt?: DateTimeFilter<"AuthenticationMethod"> | Date | string
   }
 
   export type BackupCodeUpsertWithWhereUniqueWithoutUserInput = {
@@ -7519,10 +18009,54 @@ export namespace Prisma {
     NOT?: BackupCodeScalarWhereInput | BackupCodeScalarWhereInput[]
     id?: StringFilter<"BackupCode"> | string
     userId?: StringFilter<"BackupCode"> | string
-    type?: EnumEBackupCodeTypeFilter<"BackupCode"> | $Enums.EBackupCodeType
+    authMethodId?: StringNullableFilter<"BackupCode"> | string | null
+    type?: EnumE2FAMethodFilter<"BackupCode"> | $Enums.E2FAMethod
     code?: StringFilter<"BackupCode"> | string
     usedAt?: DateTimeNullableFilter<"BackupCode"> | Date | string | null
+    usedIp?: StringNullableFilter<"BackupCode"> | string | null
+    expiresAt?: DateTimeNullableFilter<"BackupCode"> | Date | string | null
     createdAt?: DateTimeFilter<"BackupCode"> | Date | string
+  }
+
+  export type TrustedDeviceUpsertWithWhereUniqueWithoutUserInput = {
+    where: TrustedDeviceWhereUniqueInput
+    update: XOR<TrustedDeviceUpdateWithoutUserInput, TrustedDeviceUncheckedUpdateWithoutUserInput>
+    create: XOR<TrustedDeviceCreateWithoutUserInput, TrustedDeviceUncheckedCreateWithoutUserInput>
+  }
+
+  export type TrustedDeviceUpdateWithWhereUniqueWithoutUserInput = {
+    where: TrustedDeviceWhereUniqueInput
+    data: XOR<TrustedDeviceUpdateWithoutUserInput, TrustedDeviceUncheckedUpdateWithoutUserInput>
+  }
+
+  export type TrustedDeviceUpdateManyWithWhereWithoutUserInput = {
+    where: TrustedDeviceScalarWhereInput
+    data: XOR<TrustedDeviceUpdateManyMutationInput, TrustedDeviceUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type TrustedDeviceScalarWhereInput = {
+    AND?: TrustedDeviceScalarWhereInput | TrustedDeviceScalarWhereInput[]
+    OR?: TrustedDeviceScalarWhereInput[]
+    NOT?: TrustedDeviceScalarWhereInput | TrustedDeviceScalarWhereInput[]
+    id?: StringFilter<"TrustedDevice"> | string
+    userId?: StringFilter<"TrustedDevice"> | string
+    deviceId?: StringFilter<"TrustedDevice"> | string
+    fingerprint?: JsonFilter<"TrustedDevice">
+    name?: StringNullableFilter<"TrustedDevice"> | string | null
+    userAgent?: StringFilter<"TrustedDevice"> | string
+    browser?: StringNullableFilter<"TrustedDevice"> | string | null
+    os?: StringNullableFilter<"TrustedDevice"> | string | null
+    device?: StringNullableFilter<"TrustedDevice"> | string | null
+    trustScore?: FloatFilter<"TrustedDevice"> | number
+    lastIp?: StringNullableFilter<"TrustedDevice"> | string | null
+    lastCountry?: StringNullableFilter<"TrustedDevice"> | string | null
+    lastCity?: StringNullableFilter<"TrustedDevice"> | string | null
+    isActive?: BoolFilter<"TrustedDevice"> | boolean
+    lastSeenAt?: DateTimeFilter<"TrustedDevice"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"TrustedDevice"> | Date | string | null
+    revokedAt?: DateTimeNullableFilter<"TrustedDevice"> | Date | string | null
+    createdAt?: DateTimeFilter<"TrustedDevice"> | Date | string
+    updatedAt?: DateTimeFilter<"TrustedDevice"> | Date | string
   }
 
   export type AuditLogUpsertWithWhereUniqueWithoutUserInput = {
@@ -7548,9 +18082,13 @@ export namespace Prisma {
     id?: StringFilter<"AuditLog"> | string
     userId?: StringFilter<"AuditLog"> | string
     action?: StringFilter<"AuditLog"> | string
-    metadata?: JsonNullableFilter<"AuditLog">
+    category?: EnumEAuditCategoryFilter<"AuditLog"> | $Enums.EAuditCategory
+    success?: BoolFilter<"AuditLog"> | boolean
     ip?: StringNullableFilter<"AuditLog"> | string | null
     userAgent?: StringNullableFilter<"AuditLog"> | string | null
+    country?: StringNullableFilter<"AuditLog"> | string | null
+    city?: StringNullableFilter<"AuditLog"> | string | null
+    metadata?: JsonNullableFilter<"AuditLog">
     createdAt?: DateTimeFilter<"AuditLog"> | Date | string
   }
 
@@ -7578,9 +18116,947 @@ export namespace Prisma {
     token?: StringFilter<"Token"> | string
     type?: EnumETokenTypeFilter<"Token"> | $Enums.ETokenType
     expiresIn?: DateTimeFilter<"Token"> | Date | string
+    usedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
+    maxUses?: IntFilter<"Token"> | number
+    useCount?: IntFilter<"Token"> | number
     userId?: StringNullableFilter<"Token"> | string | null
+    createdIp?: StringNullableFilter<"Token"> | string | null
+    usedIp?: StringNullableFilter<"Token"> | string | null
     createdAt?: DateTimeFilter<"Token"> | Date | string
     updatedAt?: DateTimeFilter<"Token"> | Date | string
+  }
+
+  export type SessionUpsertWithWhereUniqueWithoutUserInput = {
+    where: SessionWhereUniqueInput
+    update: XOR<SessionUpdateWithoutUserInput, SessionUncheckedUpdateWithoutUserInput>
+    create: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput>
+  }
+
+  export type SessionUpdateWithWhereUniqueWithoutUserInput = {
+    where: SessionWhereUniqueInput
+    data: XOR<SessionUpdateWithoutUserInput, SessionUncheckedUpdateWithoutUserInput>
+  }
+
+  export type SessionUpdateManyWithWhereWithoutUserInput = {
+    where: SessionScalarWhereInput
+    data: XOR<SessionUpdateManyMutationInput, SessionUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type SessionScalarWhereInput = {
+    AND?: SessionScalarWhereInput | SessionScalarWhereInput[]
+    OR?: SessionScalarWhereInput[]
+    NOT?: SessionScalarWhereInput | SessionScalarWhereInput[]
+    id?: StringFilter<"Session"> | string
+    userId?: StringFilter<"Session"> | string
+    token?: StringFilter<"Session"> | string
+    refreshToken?: StringNullableFilter<"Session"> | string | null
+    deviceId?: StringNullableFilter<"Session"> | string | null
+    userAgent?: StringNullableFilter<"Session"> | string | null
+    ip?: StringNullableFilter<"Session"> | string | null
+    country?: StringNullableFilter<"Session"> | string | null
+    city?: StringNullableFilter<"Session"> | string | null
+    browser?: StringNullableFilter<"Session"> | string | null
+    os?: StringNullableFilter<"Session"> | string | null
+    device?: StringNullableFilter<"Session"> | string | null
+    isTrusted?: BoolFilter<"Session"> | boolean
+    riskScore?: FloatNullableFilter<"Session"> | number | null
+    is2FAVerified?: BoolFilter<"Session"> | boolean
+    verified2FAAt?: DateTimeNullableFilter<"Session"> | Date | string | null
+    expiresAt?: DateTimeFilter<"Session"> | Date | string
+    lastUsedAt?: DateTimeFilter<"Session"> | Date | string
+    revokedAt?: DateTimeNullableFilter<"Session"> | Date | string | null
+    createdAt?: DateTimeFilter<"Session"> | Date | string
+    updatedAt?: DateTimeFilter<"Session"> | Date | string
+  }
+
+  export type AccountLockUpsertWithWhereUniqueWithoutUserInput = {
+    where: AccountLockWhereUniqueInput
+    update: XOR<AccountLockUpdateWithoutUserInput, AccountLockUncheckedUpdateWithoutUserInput>
+    create: XOR<AccountLockCreateWithoutUserInput, AccountLockUncheckedCreateWithoutUserInput>
+  }
+
+  export type AccountLockUpdateWithWhereUniqueWithoutUserInput = {
+    where: AccountLockWhereUniqueInput
+    data: XOR<AccountLockUpdateWithoutUserInput, AccountLockUncheckedUpdateWithoutUserInput>
+  }
+
+  export type AccountLockUpdateManyWithWhereWithoutUserInput = {
+    where: AccountLockScalarWhereInput
+    data: XOR<AccountLockUpdateManyMutationInput, AccountLockUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type AccountLockScalarWhereInput = {
+    AND?: AccountLockScalarWhereInput | AccountLockScalarWhereInput[]
+    OR?: AccountLockScalarWhereInput[]
+    NOT?: AccountLockScalarWhereInput | AccountLockScalarWhereInput[]
+    id?: StringFilter<"AccountLock"> | string
+    userId?: StringFilter<"AccountLock"> | string
+    reason?: StringFilter<"AccountLock"> | string
+    failedAttempts?: IntFilter<"AccountLock"> | number
+    lockedAt?: DateTimeFilter<"AccountLock"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"AccountLock"> | Date | string | null
+    unlockedAt?: DateTimeNullableFilter<"AccountLock"> | Date | string | null
+    ip?: StringNullableFilter<"AccountLock"> | string | null
+    userAgent?: StringNullableFilter<"AccountLock"> | string | null
+    createdAt?: DateTimeFilter<"AccountLock"> | Date | string
+  }
+
+  export type SecurityEventUpsertWithWhereUniqueWithoutUserInput = {
+    where: SecurityEventWhereUniqueInput
+    update: XOR<SecurityEventUpdateWithoutUserInput, SecurityEventUncheckedUpdateWithoutUserInput>
+    create: XOR<SecurityEventCreateWithoutUserInput, SecurityEventUncheckedCreateWithoutUserInput>
+  }
+
+  export type SecurityEventUpdateWithWhereUniqueWithoutUserInput = {
+    where: SecurityEventWhereUniqueInput
+    data: XOR<SecurityEventUpdateWithoutUserInput, SecurityEventUncheckedUpdateWithoutUserInput>
+  }
+
+  export type SecurityEventUpdateManyWithWhereWithoutUserInput = {
+    where: SecurityEventScalarWhereInput
+    data: XOR<SecurityEventUpdateManyMutationInput, SecurityEventUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type SecurityEventScalarWhereInput = {
+    AND?: SecurityEventScalarWhereInput | SecurityEventScalarWhereInput[]
+    OR?: SecurityEventScalarWhereInput[]
+    NOT?: SecurityEventScalarWhereInput | SecurityEventScalarWhereInput[]
+    id?: StringFilter<"SecurityEvent"> | string
+    userId?: StringFilter<"SecurityEvent"> | string
+    event?: EnumESecurityEventFilter<"SecurityEvent"> | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityFilter<"SecurityEvent"> | $Enums.ESecuritySeverity
+    ip?: StringNullableFilter<"SecurityEvent"> | string | null
+    userAgent?: StringNullableFilter<"SecurityEvent"> | string | null
+    country?: StringNullableFilter<"SecurityEvent"> | string | null
+    city?: StringNullableFilter<"SecurityEvent"> | string | null
+    deviceId?: StringNullableFilter<"SecurityEvent"> | string | null
+    riskScore?: FloatNullableFilter<"SecurityEvent"> | number | null
+    riskFactors?: JsonNullableFilter<"SecurityEvent">
+    resolved?: BoolFilter<"SecurityEvent"> | boolean
+    resolvedAt?: DateTimeNullableFilter<"SecurityEvent"> | Date | string | null
+    resolvedBy?: StringNullableFilter<"SecurityEvent"> | string | null
+    metadata?: JsonNullableFilter<"SecurityEvent">
+    createdAt?: DateTimeFilter<"SecurityEvent"> | Date | string
+  }
+
+  export type UserCreateWithoutAuthenticationMethodsInput = {
+    id?: string
+    fullName: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    email: string
+    avatar?: string | null
+    bio?: string | null
+    password: string
+    isEmailVerified?: boolean
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    tokens?: TokenCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutAuthenticationMethodsInput = {
+    id?: string
+    fullName: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    email: string
+    avatar?: string | null
+    bio?: string | null
+    password: string
+    isEmailVerified?: boolean
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockUncheckedCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutAuthenticationMethodsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutAuthenticationMethodsInput, UserUncheckedCreateWithoutAuthenticationMethodsInput>
+  }
+
+  export type UserUpsertWithoutAuthenticationMethodsInput = {
+    update: XOR<UserUpdateWithoutAuthenticationMethodsInput, UserUncheckedUpdateWithoutAuthenticationMethodsInput>
+    create: XOR<UserCreateWithoutAuthenticationMethodsInput, UserUncheckedCreateWithoutAuthenticationMethodsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutAuthenticationMethodsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutAuthenticationMethodsInput, UserUncheckedUpdateWithoutAuthenticationMethodsInput>
+  }
+
+  export type UserUpdateWithoutAuthenticationMethodsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    tokens?: TokenUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutAuthenticationMethodsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUncheckedUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutTrustedDevicesInput = {
+    id?: string
+    fullName: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    email: string
+    avatar?: string | null
+    bio?: string | null
+    password: string
+    isEmailVerified?: boolean
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    tokens?: TokenCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutTrustedDevicesInput = {
+    id?: string
+    fullName: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    email: string
+    avatar?: string | null
+    bio?: string | null
+    password: string
+    isEmailVerified?: boolean
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockUncheckedCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutTrustedDevicesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutTrustedDevicesInput, UserUncheckedCreateWithoutTrustedDevicesInput>
+  }
+
+  export type UserUpsertWithoutTrustedDevicesInput = {
+    update: XOR<UserUpdateWithoutTrustedDevicesInput, UserUncheckedUpdateWithoutTrustedDevicesInput>
+    create: XOR<UserCreateWithoutTrustedDevicesInput, UserUncheckedCreateWithoutTrustedDevicesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutTrustedDevicesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutTrustedDevicesInput, UserUncheckedUpdateWithoutTrustedDevicesInput>
+  }
+
+  export type UserUpdateWithoutTrustedDevicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    tokens?: TokenUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutTrustedDevicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUncheckedUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutSecurityEventsInput = {
+    id?: string
+    fullName: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    email: string
+    avatar?: string | null
+    bio?: string | null
+    password: string
+    isEmailVerified?: boolean
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    tokens?: TokenCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutSecurityEventsInput = {
+    id?: string
+    fullName: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    email: string
+    avatar?: string | null
+    bio?: string | null
+    password: string
+    isEmailVerified?: boolean
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutSecurityEventsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutSecurityEventsInput, UserUncheckedCreateWithoutSecurityEventsInput>
+  }
+
+  export type UserUpsertWithoutSecurityEventsInput = {
+    update: XOR<UserUpdateWithoutSecurityEventsInput, UserUncheckedUpdateWithoutSecurityEventsInput>
+    create: XOR<UserCreateWithoutSecurityEventsInput, UserUncheckedCreateWithoutSecurityEventsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutSecurityEventsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutSecurityEventsInput, UserUncheckedUpdateWithoutSecurityEventsInput>
+  }
+
+  export type UserUpdateWithoutSecurityEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    tokens?: TokenUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutSecurityEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutSessionsInput = {
+    id?: string
+    fullName: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    email: string
+    avatar?: string | null
+    bio?: string | null
+    password: string
+    isEmailVerified?: boolean
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    tokens?: TokenCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutSessionsInput = {
+    id?: string
+    fullName: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    email: string
+    avatar?: string | null
+    bio?: string | null
+    password: string
+    isEmailVerified?: boolean
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockUncheckedCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutSessionsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutSessionsInput, UserUncheckedCreateWithoutSessionsInput>
+  }
+
+  export type UserUpsertWithoutSessionsInput = {
+    update: XOR<UserUpdateWithoutSessionsInput, UserUncheckedUpdateWithoutSessionsInput>
+    create: XOR<UserCreateWithoutSessionsInput, UserUncheckedCreateWithoutSessionsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutSessionsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutSessionsInput, UserUncheckedUpdateWithoutSessionsInput>
+  }
+
+  export type UserUpdateWithoutSessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    tokens?: TokenUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutSessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUncheckedUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutAccountLocksInput = {
+    id?: string
+    fullName: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    email: string
+    avatar?: string | null
+    bio?: string | null
+    password: string
+    isEmailVerified?: boolean
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    tokens?: TokenCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutAccountLocksInput = {
+    id?: string
+    fullName: string
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    email: string
+    avatar?: string | null
+    bio?: string | null
+    password: string
+    isEmailVerified?: boolean
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedCreateNestedManyWithoutUserInput
+    backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutAccountLocksInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutAccountLocksInput, UserUncheckedCreateWithoutAccountLocksInput>
+  }
+
+  export type UserUpsertWithoutAccountLocksInput = {
+    update: XOR<UserUpdateWithoutAccountLocksInput, UserUncheckedUpdateWithoutAccountLocksInput>
+    create: XOR<UserCreateWithoutAccountLocksInput, UserUncheckedCreateWithoutAccountLocksInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutAccountLocksInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutAccountLocksInput, UserUncheckedUpdateWithoutAccountLocksInput>
+  }
+
+  export type UserUpdateWithoutAccountLocksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    tokens?: TokenUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutAccountLocksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedUpdateManyWithoutUserNestedInput
+    backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutTokensInput = {
@@ -7594,14 +19070,30 @@ export namespace Prisma {
     bio?: string | null
     password: string
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: string | null
-    isOtpEnabled?: boolean
-    otpSecret?: string | null
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodCreateNestedManyWithoutUserInput
     backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTokensInput = {
@@ -7615,14 +19107,30 @@ export namespace Prisma {
     bio?: string | null
     password: string
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: string | null
-    isOtpEnabled?: boolean
-    otpSecret?: string | null
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedCreateNestedManyWithoutUserInput
     backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockUncheckedCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTokensInput = {
@@ -7652,14 +19160,30 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
-    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUpdateManyWithoutUserNestedInput
     backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTokensInput = {
@@ -7673,14 +19197,30 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
-    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedUpdateManyWithoutUserNestedInput
     backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUncheckedUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutBackupCodesInput = {
@@ -7694,14 +19234,30 @@ export namespace Prisma {
     bio?: string | null
     password: string
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: string | null
-    isOtpEnabled?: boolean
-    otpSecret?: string | null
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutBackupCodesInput = {
@@ -7715,14 +19271,30 @@ export namespace Prisma {
     bio?: string | null
     password: string
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: string | null
-    isOtpEnabled?: boolean
-    otpSecret?: string | null
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockUncheckedCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutBackupCodesInput = {
@@ -7752,14 +19324,30 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
-    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutBackupCodesInput = {
@@ -7773,14 +19361,30 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
-    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUncheckedUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAuditLogsInput = {
@@ -7794,14 +19398,30 @@ export namespace Prisma {
     bio?: string | null
     password: string
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: string | null
-    isOtpEnabled?: boolean
-    otpSecret?: string | null
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodCreateNestedManyWithoutUserInput
     backupCodes?: BackupCodeCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -7815,14 +19435,30 @@ export namespace Prisma {
     bio?: string | null
     password: string
     isEmailVerified?: boolean
-    isTotpEnabled?: boolean
-    totpSecret?: string | null
-    isOtpEnabled?: boolean
-    otpSecret?: string | null
+    emailVerifiedAt?: Date | string | null
+    isUnsubscribed?: boolean | null
+    emailBouncedAt?: Date | string | null
+    isPhoneVerified?: boolean
+    phoneVerifiedAt?: Date | string | null
+    phoneBouncedAt?: Date | string | null
+    is2FAEnabled?: boolean
+    preferred2FAMethod?: $Enums.E2FAMethod | null
+    require2FA?: boolean
+    lastLoginAt?: Date | string | null
+    lastLoginIp?: string | null
+    passwordChangedAt?: Date | string | null
+    riskScore?: number | null
+    lastRiskAssessAt?: Date | string | null
+    deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedCreateNestedManyWithoutUserInput
     backupCodes?: BackupCodeUncheckedCreateNestedManyWithoutUserInput
+    trustedDevices?: TrustedDeviceUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accountLocks?: AccountLockUncheckedCreateNestedManyWithoutUserInput
+    securityEvents?: SecurityEventUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -7852,14 +19488,30 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
-    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUpdateManyWithoutUserNestedInput
     backupCodes?: BackupCodeUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -7873,30 +19525,88 @@ export namespace Prisma {
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
-    isTotpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    totpSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    isOtpEnabled?: BoolFieldUpdateOperationsInput | boolean
-    otpSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    emailBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPhoneVerified?: BoolFieldUpdateOperationsInput | boolean
+    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phoneBouncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    is2FAEnabled?: BoolFieldUpdateOperationsInput | boolean
+    preferred2FAMethod?: NullableEnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod | null
+    require2FA?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastLoginIp?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    lastRiskAssessAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authenticationMethods?: AuthenticationMethodUncheckedUpdateManyWithoutUserNestedInput
     backupCodes?: BackupCodeUncheckedUpdateManyWithoutUserNestedInput
+    trustedDevices?: TrustedDeviceUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accountLocks?: AccountLockUncheckedUpdateManyWithoutUserNestedInput
+    securityEvents?: SecurityEventUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type AuthenticationMethodCreateManyUserInput = {
+    id?: string
+    method: $Enums.E2FAMethod
+    data: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    isActive?: boolean
+    isPrimary?: boolean
+    lastUsedAt?: Date | string | null
+    useCount?: number
+    credentialId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type BackupCodeCreateManyUserInput = {
     id?: string
-    type?: $Enums.EBackupCodeType
+    authMethodId?: string | null
+    type?: $Enums.E2FAMethod
     code: string
     usedAt?: Date | string | null
+    usedIp?: string | null
+    expiresAt?: Date | string | null
     createdAt?: Date | string
+  }
+
+  export type TrustedDeviceCreateManyUserInput = {
+    id?: string
+    deviceId: string
+    fingerprint: JsonNullValueInput | InputJsonValue
+    name?: string | null
+    userAgent: string
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    trustScore?: number
+    lastIp?: string | null
+    lastCountry?: string | null
+    lastCity?: string | null
+    isActive?: boolean
+    lastSeenAt?: Date | string
+    expiresAt?: Date | string | null
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type AuditLogCreateManyUserInput = {
     id?: string
     action: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: $Enums.EAuditCategory
+    success?: boolean
     ip?: string | null
     userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -7905,58 +19615,242 @@ export namespace Prisma {
     token: string
     type: $Enums.ETokenType
     expiresIn: Date | string
+    usedAt?: Date | string | null
+    maxUses?: number
+    useCount?: number
+    createdIp?: string | null
+    usedIp?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
+  export type SessionCreateManyUserInput = {
+    id?: string
+    token: string
+    refreshToken?: string | null
+    deviceId?: string | null
+    userAgent?: string | null
+    ip?: string | null
+    country?: string | null
+    city?: string | null
+    browser?: string | null
+    os?: string | null
+    device?: string | null
+    isTrusted?: boolean
+    riskScore?: number | null
+    is2FAVerified?: boolean
+    verified2FAAt?: Date | string | null
+    expiresAt: Date | string
+    lastUsedAt?: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AccountLockCreateManyUserInput = {
+    id?: string
+    reason: string
+    failedAttempts?: number
+    lockedAt?: Date | string
+    expiresAt?: Date | string | null
+    unlockedAt?: Date | string | null
+    ip?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type SecurityEventCreateManyUserInput = {
+    id?: string
+    event: $Enums.ESecurityEvent
+    severity?: $Enums.ESecuritySeverity
+    ip?: string | null
+    userAgent?: string | null
+    country?: string | null
+    city?: string | null
+    deviceId?: string | null
+    riskScore?: number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: boolean
+    resolvedAt?: Date | string | null
+    resolvedBy?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type AuthenticationMethodUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    method?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
+    data?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    useCount?: IntFieldUpdateOperationsInput | number
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuthenticationMethodUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    method?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
+    data?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    useCount?: IntFieldUpdateOperationsInput | number
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AuthenticationMethodUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    method?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
+    data?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isPrimary?: BoolFieldUpdateOperationsInput | boolean
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    useCount?: IntFieldUpdateOperationsInput | number
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type BackupCodeUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumEBackupCodeTypeFieldUpdateOperationsInput | $Enums.EBackupCodeType
+    authMethodId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
     code?: StringFieldUpdateOperationsInput | string
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BackupCodeUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumEBackupCodeTypeFieldUpdateOperationsInput | $Enums.EBackupCodeType
+    authMethodId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
     code?: StringFieldUpdateOperationsInput | string
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BackupCodeUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumEBackupCodeTypeFieldUpdateOperationsInput | $Enums.EBackupCodeType
+    authMethodId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumE2FAMethodFieldUpdateOperationsInput | $Enums.E2FAMethod
     code?: StringFieldUpdateOperationsInput | string
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TrustedDeviceUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    deviceId?: StringFieldUpdateOperationsInput | string
+    fingerprint?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: StringFieldUpdateOperationsInput | string
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    trustScore?: FloatFieldUpdateOperationsInput | number
+    lastIp?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCity?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TrustedDeviceUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    deviceId?: StringFieldUpdateOperationsInput | string
+    fingerprint?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: StringFieldUpdateOperationsInput | string
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    trustScore?: FloatFieldUpdateOperationsInput | number
+    lastIp?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCity?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TrustedDeviceUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    deviceId?: StringFieldUpdateOperationsInput | string
+    fingerprint?: JsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: StringFieldUpdateOperationsInput | string
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    trustScore?: FloatFieldUpdateOperationsInput | number
+    lastIp?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCountry?: NullableStringFieldUpdateOperationsInput | string | null
+    lastCity?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AuditLogUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: EnumEAuditCategoryFieldUpdateOperationsInput | $Enums.EAuditCategory
+    success?: BoolFieldUpdateOperationsInput | boolean
     ip?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AuditLogUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: EnumEAuditCategoryFieldUpdateOperationsInput | $Enums.EAuditCategory
+    success?: BoolFieldUpdateOperationsInput | boolean
     ip?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AuditLogUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
+    category?: EnumEAuditCategoryFieldUpdateOperationsInput | $Enums.EAuditCategory
+    success?: BoolFieldUpdateOperationsInput | boolean
     ip?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -7965,6 +19859,11 @@ export namespace Prisma {
     token?: StringFieldUpdateOperationsInput | string
     type?: EnumETokenTypeFieldUpdateOperationsInput | $Enums.ETokenType
     expiresIn?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxUses?: IntFieldUpdateOperationsInput | number
+    useCount?: IntFieldUpdateOperationsInput | number
+    createdIp?: NullableStringFieldUpdateOperationsInput | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7974,6 +19873,11 @@ export namespace Prisma {
     token?: StringFieldUpdateOperationsInput | string
     type?: EnumETokenTypeFieldUpdateOperationsInput | $Enums.ETokenType
     expiresIn?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxUses?: IntFieldUpdateOperationsInput | number
+    useCount?: IntFieldUpdateOperationsInput | number
+    createdIp?: NullableStringFieldUpdateOperationsInput | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7983,8 +19887,172 @@ export namespace Prisma {
     token?: StringFieldUpdateOperationsInput | string
     type?: EnumETokenTypeFieldUpdateOperationsInput | $Enums.ETokenType
     expiresIn?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    maxUses?: IntFieldUpdateOperationsInput | number
+    useCount?: IntFieldUpdateOperationsInput | number
+    createdIp?: NullableStringFieldUpdateOperationsInput | string | null
+    usedIp?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrusted?: BoolFieldUpdateOperationsInput | boolean
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    is2FAVerified?: BoolFieldUpdateOperationsInput | boolean
+    verified2FAAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrusted?: BoolFieldUpdateOperationsInput | boolean
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    is2FAVerified?: BoolFieldUpdateOperationsInput | boolean
+    verified2FAAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessionUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    browser?: NullableStringFieldUpdateOperationsInput | string | null
+    os?: NullableStringFieldUpdateOperationsInput | string | null
+    device?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrusted?: BoolFieldUpdateOperationsInput | boolean
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    is2FAVerified?: BoolFieldUpdateOperationsInput | boolean
+    verified2FAAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AccountLockUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    failedAttempts?: IntFieldUpdateOperationsInput | number
+    lockedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AccountLockUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    failedAttempts?: IntFieldUpdateOperationsInput | number
+    lockedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AccountLockUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    failedAttempts?: IntFieldUpdateOperationsInput | number
+    lockedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    unlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityEventUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    event?: EnumESecurityEventFieldUpdateOperationsInput | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityFieldUpdateOperationsInput | $Enums.ESecuritySeverity
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: BoolFieldUpdateOperationsInput | boolean
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityEventUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    event?: EnumESecurityEventFieldUpdateOperationsInput | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityFieldUpdateOperationsInput | $Enums.ESecuritySeverity
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: BoolFieldUpdateOperationsInput | boolean
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SecurityEventUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    event?: EnumESecurityEventFieldUpdateOperationsInput | $Enums.ESecurityEvent
+    severity?: EnumESecuritySeverityFieldUpdateOperationsInput | $Enums.ESecuritySeverity
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceId?: NullableStringFieldUpdateOperationsInput | string | null
+    riskScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    riskFactors?: NullableJsonNullValueInput | InputJsonValue
+    resolved?: BoolFieldUpdateOperationsInput | boolean
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

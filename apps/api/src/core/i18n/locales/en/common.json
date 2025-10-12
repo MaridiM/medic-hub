@@ -1,9 +1,10 @@
 {
 	"errors": {
+		"unexpected": "Unexpected error",
 		"auth": {
 			"user_not_authorized": "User not authorized"
 		},
-		
+
 		"request": {
 			"invalid_data": "Invalid data from request",
 			"error_getting_raw_body": "Error getting raw body"
@@ -15,6 +16,7 @@
 		},
 		"session": {
 			"save_error": "Error saving session",
+			"not_found": "Session not found",
 			"destroy_error": "Error destroying session"
 		}
 	}

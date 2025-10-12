@@ -48,7 +48,7 @@ const metadataSample: ISessionMetadata = {
 	location: {
 		country: 'United States',
 		city: 'New York',
-		latidute: 0,
+		latitude: 0,
 		longitude: 0,
 	},
 	device: {

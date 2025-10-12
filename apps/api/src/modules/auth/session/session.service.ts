@@ -65,23 +65,26 @@ export class SessionService extends CoreService {
 	async login(req: Request, userAgent: string, data: LoginInput, lng: Language): Promise<LoginResponse> {
 		const user = await this.prisma.user.findUnique({ where: { email: data.email } })
 		if (!user) {
-			throw new NotFoundException(this.msg('auth.errors.user.not_found', 'User not found', { lng }))
+			throw new NotFoundException(
+				this.i18n.t('auth.errors.user.not_found', { lng, defaultValue: 'User not found' }),
+			)
 		}
 
 		const ok = await verify(user.password, data.password)
 		if (!ok) {
-			throw new NotFoundException(this.msg('auth.errors.password.invalid', 'Invalid password', { lng }))
+			throw new NotFoundException(
+				this.i18n.t('auth.errors.password.invalid', { lng, defaultValue: 'Invalid password' }),
+			)
 		}
 
 		if (!user.isEmailVerified) {
 			// fire-and-forget повторная верификация (не блокируем логин)
 			await this.verification.sendEmailVerificationToken(user, lng).catch(() => {})
 			throw new BadRequestException(
-				this.msg(
-					'auth.errors.account.not_verified',
-					'Account not verified. Please check your email for verification',
-					{ lng },
-				),
+				this.i18n.t('auth.errors.account.not_verified', {
+					lng,
+					defaultValue: 'Account not verified. Please check your email for verification',
+				}),
 			)
 		}
 
@@ -117,7 +120,9 @@ export class SessionService extends CoreService {
 	async findByUser(req: Request, lng: Language) {
 		const userId = req.session.userId
 		if (!userId) {
-			throw new NotFoundException(this.msg('auth.errors.user.not_found', 'User not found', { lng }))
+			throw new NotFoundException(
+				this.i18n.t('auth.errors.user.not_found', { lng, defaultValue: 'User not found' }),
+			)
 		}
 
 		// 1) Keys by prefix (SCAN/KEYS implementation hidden by your RedisService)
@@ -173,7 +178,10 @@ export class SessionService extends CoreService {
 
 		if (currentId && currentId === id) {
 			throw new ConflictException(
-				this.msg('auth.errors.session.cannot_delete_current', 'You can’t delete the current session', { lng }),
+				this.i18n.t('auth.errors.session.cannot_delete_current', {
+					lng,
+					defaultValue: 'You can’t delete the current session',
+				}),
 			)
 		}
 
@@ -181,7 +189,9 @@ export class SessionService extends CoreService {
 			await this.redis.del(this.key(id))
 			return true
 		} catch {
-			throw new InternalServerErrorException(this.msg('common.errors.unexpected', 'Unexpected error', { lng }))
+			throw new InternalServerErrorException(
+				this.i18n.t('common.errors.unexpected', { lng, defaultValue: 'Unexpected error' }),
+			)
 		}
 	}
 }

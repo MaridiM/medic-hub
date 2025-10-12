@@ -1,6 +1,5 @@
+export * from './2fa'
 export * from './account'
-export * from './otp'
 export * from './recovery'
 export * from './session'
-export * from './totp'
 export * from './verification'

@@ -18,7 +18,7 @@ import { User } from './models'
  * - Email change
  * - Password change
  *
- * All user-facing messages MUST go through `this.msg(key, lng, fallback)`.
+ * All user-facing messages MUST go through `this.i18n.t(key, lng, fallback)`.
  */
 @Injectable()
 export class AccountService extends CoreService {
@@ -50,19 +50,6 @@ export class AccountService extends CoreService {
 	async me(id: string): Promise<User | null> {
 		const user = await this.prisma.user.findUnique({
 			where: { id },
-			select: {
-				id: true,
-				fullName: true,
-				firstName: true,
-				lastName: true,
-				phone: true,
-				email: true,
-				isEmailVerified: true,
-				isTotpEnabled: true,
-				isOtpEnabled: true,
-				createdAt: true,
-				updatedAt: true,
-			},
 		})
 
 		return user as unknown as User | null
@@ -87,30 +74,26 @@ export class AccountService extends CoreService {
 		try {
 			const user = await this.prisma.user.create({
 				data: { ...input, email, password: hashedPassword },
-				select: {
-					id: true,
-					email: true,
-					fullName: true,
-					firstName: true,
-					lastName: true,
-					isEmailVerified: true,
-					createdAt: true,
-					updatedAt: true,
-				},
 			})
 
 			// Optional: do not fail account creation if mailing fails
-			await this.verification.sendEmailVerificationToken(user as unknown as User, lng)
+			await this.verification.sendEmailVerificationToken(user as any, lng)
+			// await this.verification.sendEmailVerificationToken(user as unknown as User, lng)
 
 			return user as unknown as User
 		} catch (e) {
 			if (isPrismaError(e, 'P2002')) {
 				// Unique constraint violation: email already exists
 				throw new ConflictException(
-					this.msg('auth.errors.user.already_exists', 'This email is already in use', { lng }),
+					this.i18n.t('auth.errors.user.already_exists', {
+						lng,
+						defaultValue: 'This email is already in use',
+					}),
 				)
 			}
-			throw new InternalServerErrorException(this.msg('common.errors.unexpected', 'Unexpected error', { lng }))
+			throw new InternalServerErrorException(
+				this.i18n.t('common.errors.unexpected', { lng, defaultValue: 'Unexpected error' }),
+			)
 		}
 	}
 
@@ -135,7 +118,10 @@ export class AccountService extends CoreService {
 
 		if (email === this.normalizeEmail(user.email)) {
 			throw new BadRequestException(
-				this.msg('auth.errors.user.same_email', 'This email is already your current email', { lng }),
+				this.i18n.t('auth.errors.user.same_email', {
+					lng,
+					defaultValue: 'This email is already your current email',
+				}),
 			)
 		}
 
@@ -146,15 +132,21 @@ export class AccountService extends CoreService {
 				select: { id: true, email: true, isEmailVerified: true },
 			})
 
-			await this.verification.sendEmailVerificationToken(updated as unknown as User, lng)
+			await this.verification.sendEmailVerificationToken(updated as any, lng)
+			// await this.verification.sendEmailVerificationToken(updated as unknown as User, lng)
 			return true
 		} catch (e) {
 			if (isPrismaError(e, 'P2002')) {
 				throw new ConflictException(
-					this.msg('auth.errors.user.already_exists', 'This email is already in use', { lng }),
+					this.i18n.t('auth.errors.user.already_exists', {
+						lng,
+						defaultValue: 'This email is already in use',
+					}),
 				)
 			}
-			throw new InternalServerErrorException(this.msg('common.errors.unexpected', 'Unexpected error', { lng }))
+			throw new InternalServerErrorException(
+				this.i18n.t('common.errors.unexpected', { lng, defaultValue: 'Unexpected error' }),
+			)
 		}
 	}
 
@@ -177,13 +169,18 @@ export class AccountService extends CoreService {
 		// Verify old password
 		const isValidOld = await verify(user.password, oldPassword)
 		if (!isValidOld) {
-			throw new BadRequestException(this.msg('auth.errors.password.invalid', 'Invalid password', { lng }))
+			throw new BadRequestException(
+				this.i18n.t('auth.errors.password.invalid', { lng, defaultValue: 'Invalid password' }),
+			)
 		}
 
 		// Forbid setting the same password
 		if (oldPassword === newPassword) {
 			throw new BadRequestException(
-				this.msg('auth.errors.password.same', 'New password must differ from the old one', { lng }),
+				this.i18n.t('auth.errors.password.same', {
+					lng,
+					defaultValue: 'New password must differ from the old one',
+				}),
 			)
 		}
 
@@ -198,7 +195,7 @@ export class AccountService extends CoreService {
 			return true
 		} catch {
 			throw new InternalServerErrorException(
-				this.msg('auth.errors.password.change_failed', 'Failed to change password', { lng }),
+				this.i18n.t('auth.errors.password.change_failed', { lng, defaultValue: 'Failed to change password' }),
 			)
 		}
 	}

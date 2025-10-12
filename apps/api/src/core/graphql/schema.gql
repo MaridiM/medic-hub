@@ -2,14 +2,31 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type BackupCodesRegenerated {
+  """New backup codes"""
+  backupCodes: [String!]!
+
+  """Warning message"""
+  message: String!
+
+  """Success status"""
+  success: Boolean!
+}
+
 type BackupCodesStatus {
+  """Expired codes"""
+  expired: Int!
+
+  """Whether running low on codes"""
+  isLow: Boolean!
+
   """Remaining unused codes"""
   remaining: Int!
 
-  """Total backup codes"""
+  """Total backup codes generated"""
   total: Int!
 
-  """Used backup codes"""
+  """Codes already used"""
   used: Int!
 }
 
@@ -20,6 +37,17 @@ input ChangeEmailInput {
 input ChangePasswordInput {
   newPassword: String!
   oldPassword: String!
+}
+
+input CompleteTotpSetupInput {
+  """6-digit TOTP code for verification"""
+  code: String!
+
+  """Optional custom name"""
+  name: String
+
+  """TOTP secret from generation step"""
+  secret: String!
 }
 
 input CreateAccountInput {
@@ -40,42 +68,25 @@ type Device {
   type: String!
 }
 
-input DisableOtpInput {
-  """Current OTP code"""
-  code: String!
-
-  """User password for verification"""
-  password: String!
+"""2FA method type"""
+enum E2FAMethod {
+  BACKUP_CODE
+  OTP_EMAIL
+  OTP_SMS
+  PASSKEY
+  TOTP
+  WEBAUTHN
 }
 
-input DisableTotpInput {
-  """Current TOTP code"""
-  code: String!
-
-  """User password for verification"""
-  password: String!
-}
-
-input EnableOtpInput {
-  """Preferred delivery channel"""
-  channel: String!
-
-  """Phone number (required for SMS)"""
-  phone: String
-}
-
-input EnableTotpInput {
-  """6-digit TOTP code"""
-  code: String!
-
-  """TOTP secret from generation step"""
-  secret: String!
+input GenerateTotpSetupInput {
+  """Optional custom name for this method"""
+  name: String
 }
 
 type Location {
   city: String!
   country: String!
-  latidute: Float!
+  latitude: Float!
   longitude: Float!
 }
 
@@ -103,22 +114,13 @@ type Mutation {
   """Clear the session cookie from the response."""
   clearSessionCookie: Boolean!
 
+  """Complete TOTP setup by verifying code and receive backup codes"""
+  completeTotpSetup(data: CompleteTotpSetupInput!): TwoFactorSetupComplete!
+
   """
   Create a new user account. Normalizes email, hashes password, and sends a verification email token.
   """
   createAccount(data: CreateAccountInput!): User!
-
-  """Disable OTP two-factor authentication"""
-  disableOtp(data: DisableOtpInput!): Boolean!
-
-  """Disable TOTP two-factor authentication"""
-  disableTotp(data: DisableTotpInput!): Boolean!
-
-  """Enable OTP two-factor authentication"""
-  enableOtp(data: EnableOtpInput!): OtpEnabled!
-
-  """Enable TOTP two-factor authentication"""
-  enableTotp(data: EnableTotpInput!): TotpEnabled!
 
   """
   Authenticate the user and create a session (cookie-based). Returns session metadata.
@@ -136,11 +138,11 @@ type Mutation {
     data: NewPasswordInput!
   ): Boolean!
 
-  """Regenerate OTP backup codes"""
-  regenerateOtpBackupCodes(password: String!): OtpEnabled!
+  """Regenerate backup codes (requires password)"""
+  regenerateBackupCodes(data: RegenerateBackupCodesInput!): BackupCodesRegenerated!
 
-  """Regenerate backup codes"""
-  regenerateTotpBackupCodes(password: String!): TotpEnabled!
+  """Remove 2FA method (requires password confirmation)"""
+  remove2FAMethod(data: Remove2FAMethodInput!): TwoFactorSuccess!
 
   """
   Remove a specific session by id (fails if the id belongs to the current session).
@@ -155,22 +157,31 @@ type Mutation {
     data: ResetPasswordInput!
   ): Boolean!
 
-  """Send OTP code via email or SMS"""
-  sendOtp(data: SendOtpInput!): OtpSent!
+  """Revoke trust for a device"""
+  revokeDeviceTrust(deviceId: String!): TwoFactorSuccess!
+
+  """Send OTP verification code"""
+  sendOtpCode(data: SendOtpCodeInput): TwoFactorSuccess!
+
+  """Setup OTP method (Email or SMS)"""
+  setupOtp(data: SetupOtpInput!): OtpSetup!
+
+  """Update 2FA method (name, primary status, etc.)"""
+  update2FAMethod(data: Update2FAMethodInput!): TwoFactorSuccess!
 
   """
   Send a verification email with a one-time token and return delivery/meta info.
   """
   verificationEmail(data: VerificationInput!): VerificationResponse!
 
-  """Verify OTP code"""
-  verifyOtp(data: VerifyOtpInput!): Boolean!
+  """Verify 2FA code (TOTP/OTP/backup code)"""
+  verify2FA(data: Verify2FAInput!): TwoFactorSuccess!
 
-  """Verify OTP backup code"""
-  verifyOtpBackupCode(data: VerifyBackupCodeInput!): Boolean!
+  """Verify backup recovery code"""
+  verifyBackupCode(data: VerifyBackupCodeInput!): TwoFactorSuccess!
 
-  """Verify TOTP code"""
-  verifyTotp(data: VerifyTotpInput!): Boolean!
+  """Verify OTP code during setup and receive backup codes"""
+  verifyOtpSetup(data: VerifyOtpSetupInput!): TwoFactorSetupComplete!
 }
 
 input NewPasswordInput {
@@ -178,43 +189,21 @@ input NewPasswordInput {
   token: String!
 }
 
-type OtpBackupCodesStatus {
-  """Remaining unused codes"""
-  remaining: Int!
-
-  """Total backup codes"""
-  total: Int!
-
-  """Used backup codes"""
-  used: Int!
-}
-
-type OtpEnabled {
-  """Backup recovery codes (store securely!)"""
-  backupCodes: [String!]!
-
-  """Warning message about backup codes"""
-  message: String!
-
-  """Success status"""
-  success: Boolean!
-}
-
-type OtpSent {
-  """Delivery channel used"""
-  channel: String!
-
-  """Code expires in (seconds)"""
-  expiresIn: Int!
+type OtpSetup {
+  """Where codes will be sent"""
+  destination: String!
 
   """Success message"""
   message: String!
 
-  """Success status"""
-  success: Boolean!
+  """Method ID"""
+  methodId: String!
 }
 
 type Query {
+  """Get status of backup codes"""
+  backupCodesStatus(methodId: String): BackupCodesStatus!
+
   """Get the current session by the request session id."""
   findCurrentSession: Session!
 
@@ -223,28 +212,53 @@ type Query {
   """
   findSessionsByUser: [Session!]!
 
-  """Generate TOTP secret and QR code"""
-  generateTotpSecret: Totp!
+  """Generate TOTP QR code and secret for setup"""
+  generateTotpSetup(data: GenerateTotpSetupInput): TotpSetup!
 
-  """Get OTP backup codes status"""
-  otpBackupCodesStatus: OtpBackupCodesStatus!
+  """Check if user has 2FA enabled"""
+  is2FAEnabled: Boolean!
+
+  """Check if current session is 2FA verified"""
+  isSession2FAVerified: Boolean!
+
+  """Get user's 2FA methods"""
+  my2FAMethods: TwoFactorMethodsList!
+
+  """Get user's trusted devices"""
+  myTrustedDevices: [TwoFactorMethod!]!
 
   """
   Get the currently authenticated user profile. Requires auth. Returns a safe projection (no password).
   """
   profile: User!
+}
 
-  """Get backup codes status"""
-  totpBackupCodesStatus: BackupCodesStatus!
+input RegenerateBackupCodesInput {
+  """Specific method ID (regenerates for all if not specified)"""
+  methodId: String
+
+  """Password for confirmation"""
+  password: String!
+}
+
+input Remove2FAMethodInput {
+  """2FA code for additional security"""
+  code: String
+
+  """Method ID to remove"""
+  methodId: String!
+
+  """Password for confirmation"""
+  password: String!
 }
 
 input ResetPasswordInput {
   email: String!
 }
 
-input SendOtpInput {
-  """Delivery channel for OTP code"""
-  channel: String!
+input SendOtpCodeInput {
+  """Method ID to send code to (uses primary if not specified)"""
+  methodId: String
 }
 
 type Session {
@@ -260,7 +274,21 @@ type SessionMetadata {
   location: Location!
 }
 
-type Totp {
+input SetupOtpInput {
+  """Email destination (required for OTP_EMAIL)"""
+  email: String
+
+  """OTP method: OTP_EMAIL or OTP_SMS"""
+  method: E2FAMethod! = OTP_EMAIL
+
+  """Optional display name for the method"""
+  name: String
+
+  """Phone in E.164, required for OTP_SMS"""
+  phone: String
+}
+
+type TotpSetup {
   """Account name (user email)"""
   accountName: String!
 
@@ -270,19 +298,87 @@ type Totp {
   """Manual entry key (same as in QR code)"""
   manualEntryKey: String!
 
+  """Method ID (temporary until verified)"""
+  methodId: String!
+
   """QR code as data URL"""
   qrCodeUrl: String!
 }
 
-type TotpEnabled {
-  """Backup recovery codes (store securely!)"""
+type TwoFactorMethod {
+  """When method was created"""
+  createdAt: DateTime!
+
+  """Method ID"""
+  id: String!
+
+  """Whether method is active"""
+  isActive: Boolean!
+
+  """Whether this is the primary method"""
+  isPrimary: Boolean!
+
+  """Last time this method was used"""
+  lastUsedAt: DateTime
+
+  """Method type"""
+  method: E2FAMethod!
+
+  """User-provided name"""
+  name: String
+
+  """Number of times used"""
+  useCount: Int!
+}
+
+type TwoFactorMethodsList {
+  """Whether user has 2FA enabled"""
+  is2FAEnabled: Boolean!
+
+  """Available 2FA methods"""
+  methods: [TwoFactorMethod!]!
+
+  """Primary method"""
+  primary: TwoFactorMethod
+
+  """Total number of active methods"""
+  totalActive: Int!
+}
+
+type TwoFactorSetupComplete {
+  """Backup recovery codes (show only once!)"""
   backupCodes: [String!]!
 
   """Warning message about backup codes"""
   message: String!
 
+  """Method ID"""
+  methodId: String!
+
   """Success status"""
   success: Boolean!
+}
+
+type TwoFactorSuccess {
+  """Success message"""
+  message: String
+
+  """Success status"""
+  success: Boolean!
+}
+
+input Update2FAMethodInput {
+  """Activate/deactivate method"""
+  isActive: Boolean
+
+  """Set as primary method"""
+  isPrimary: Boolean
+
+  """Method ID to update"""
+  methodId: String!
+
+  """New name for the method"""
+  name: String
 }
 
 type User {
@@ -311,17 +407,29 @@ type VerificationResponse {
   user: User
 }
 
-input VerifyBackupCodeInput {
-  """Backup recovery code"""
-  backupCode: String!
+input Verify2FAInput {
+  """6-digit code or 8-character backup code"""
+  code: String!
+
+  """Specific method ID to verify (uses primary if not specified)"""
+  methodId: String
+
+  """Remember this device for future logins"""
+  trustDevice: Boolean
 }
 
-input VerifyOtpInput {
+input VerifyBackupCodeInput {
+  """8-character backup code"""
+  backupCode: String!
+
+  """Method ID this code is for"""
+  methodId: String
+}
+
+input VerifyOtpSetupInput {
   """6-digit OTP code"""
   code: String!
-}
 
-input VerifyTotpInput {
-  """6-digit TOTP code or backup code"""
-  code: String!
+  """Method ID from setup"""
+  methodId: String!
 }

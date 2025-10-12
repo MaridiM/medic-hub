@@ -35,6 +35,6 @@ const emailProviderFactory: Provider = {
 		}),
 	],
 	providers: [MailService, SmtpService, emailProviderFactory, BrevoService, SendgridService],
-	exports: [MailService],
+	exports: [MailService, emailProviderFactory],
 })
 export class MailModule {}

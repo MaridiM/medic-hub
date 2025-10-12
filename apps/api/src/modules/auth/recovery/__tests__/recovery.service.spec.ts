@@ -33,7 +33,7 @@ describe('RecoveryService', () => {
 	let service: RecoveryService
 	let request: Request
 	const metadata = {
-		location: { country: 'United States', city: 'New York', latidute: 0, longitude: 0 },
+		location: { country: 'United States', city: 'New York', latitude: 0, longitude: 0 },
 		device: { browser: 'Chrome', os: 'macOS', type: 'desktop' },
 		ip: '127.0.0.1',
 	} as ISessionMetadata

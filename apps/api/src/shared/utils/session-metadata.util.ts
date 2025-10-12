@@ -33,7 +33,7 @@ export function getSessionMetadata(req: Request, userAgent: string): ISessionMet
 		location: {
 			country: countries.getName(location.country, 'en') || 'Unknown',
 			city: location.city,
-			latidute: location.ll[0] || 0,
+			latitude: location.ll[0] || 0,
 			longitude: location.ll[1] || 0,
 		},
 		device: {

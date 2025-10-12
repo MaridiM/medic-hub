@@ -51,7 +51,9 @@ export class RecoveryService extends CoreService {
 		})
 
 		if (!user) {
-			throw new NotFoundException(this.msg('auth.errors.user.not_found', 'User not found', { lng }))
+			throw new NotFoundException(
+				this.i18n.t('auth.errors.user.not_found', { lng, defaultValue: 'User not found' }),
+			)
 		}
 
 		try {
@@ -66,7 +68,10 @@ export class RecoveryService extends CoreService {
 				// Optional: log mailer error; we don't block the flow for transient mail issues
 				// this.logger?.warn('sendPasswordResetToken failed', err);
 				throw new InternalServerErrorException(
-					this.msg('auth.errors.mail.reset_send_failed', 'Could not send password reset email', { lng }),
+					this.i18n.t('auth.errors.mail.reset_send_failed', {
+						lng,
+						defaultValue: 'Could not send password reset email',
+					}),
 				)
 			}
 
@@ -74,7 +79,9 @@ export class RecoveryService extends CoreService {
 			return true
 		} catch {
 			// Wrap any unexpected persistence errors
-			throw new InternalServerErrorException(this.msg('common.errors.unexpected', 'Unexpected error', { lng }))
+			throw new InternalServerErrorException(
+				this.i18n.t('common.errors.unexpected', { lng, defaultValue: 'Unexpected error' }),
+			)
 		}
 	}
 
@@ -101,11 +108,15 @@ export class RecoveryService extends CoreService {
 		})
 
 		if (!t || t.type !== ETokenType.PASSWORD_RESET) {
-			throw new NotFoundException(this.msg('auth.errors.token.not_found', 'Token not found', { lng }))
+			throw new NotFoundException(
+				this.i18n.t('auth.errors.token.not_found', { lng, defaultValue: 'Token not found' }),
+			)
 		}
 
 		if (new Date(t.expiresIn) < new Date()) {
-			throw new BadRequestException(this.msg('auth.errors.token.expired', 'Token expired', { lng }))
+			throw new BadRequestException(
+				this.i18n.t('auth.errors.token.expired', { lng, defaultValue: 'Token expired' }),
+			)
 		}
 
 		try {
@@ -124,7 +135,7 @@ export class RecoveryService extends CoreService {
 			return true
 		} catch {
 			throw new InternalServerErrorException(
-				this.msg('auth.errors.password.change_failed', 'Failed to change password', { lng }),
+				this.i18n.t('auth.errors.password.change_failed', { lng, defaultValue: 'Failed to change password' }),
 			)
 		}
 	}

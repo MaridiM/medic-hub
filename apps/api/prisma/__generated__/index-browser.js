@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.12.0
- * Query Engine version: 8047c96bbd92db98a2abc7c9323ce77c02c89dbc
+ * Prisma Client JS version: 6.17.1
+ * Query Engine version: 272a37d34178c2894197e17273bf937f25acdeac
  */
 Prisma.prismaVersion = {
-  client: "6.12.0",
-  engine: "8047c96bbd92db98a2abc7c9323ce77c02c89dbc"
+  client: "6.17.1",
+  engine: "272a37d34178c2894197e17273bf937f25acdeac"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -131,12 +131,116 @@ exports.Prisma.UserScalarFieldEnum = {
   bio: 'bio',
   password: 'password',
   isEmailVerified: 'isEmailVerified',
-  isTotpEnabled: 'isTotpEnabled',
-  totpSecret: 'totpSecret',
-  isOtpEnabled: 'isOtpEnabled',
-  otpSecret: 'otpSecret',
+  emailVerifiedAt: 'emailVerifiedAt',
+  isUnsubscribed: 'isUnsubscribed',
+  emailBouncedAt: 'emailBouncedAt',
+  isPhoneVerified: 'isPhoneVerified',
+  phoneVerifiedAt: 'phoneVerifiedAt',
+  phoneBouncedAt: 'phoneBouncedAt',
+  is2FAEnabled: 'is2FAEnabled',
+  preferred2FAMethod: 'preferred2FAMethod',
+  require2FA: 'require2FA',
+  lastLoginAt: 'lastLoginAt',
+  lastLoginIp: 'lastLoginIp',
+  passwordChangedAt: 'passwordChangedAt',
+  riskScore: 'riskScore',
+  lastRiskAssessAt: 'lastRiskAssessAt',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AuthenticationMethodScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  method: 'method',
+  data: 'data',
+  name: 'name',
+  isActive: 'isActive',
+  isPrimary: 'isPrimary',
+  lastUsedAt: 'lastUsedAt',
+  useCount: 'useCount',
+  credentialId: 'credentialId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TrustedDeviceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  deviceId: 'deviceId',
+  fingerprint: 'fingerprint',
+  name: 'name',
+  userAgent: 'userAgent',
+  browser: 'browser',
+  os: 'os',
+  device: 'device',
+  trustScore: 'trustScore',
+  lastIp: 'lastIp',
+  lastCountry: 'lastCountry',
+  lastCity: 'lastCity',
+  isActive: 'isActive',
+  lastSeenAt: 'lastSeenAt',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SecurityEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  event: 'event',
+  severity: 'severity',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  country: 'country',
+  city: 'city',
+  deviceId: 'deviceId',
+  riskScore: 'riskScore',
+  riskFactors: 'riskFactors',
+  resolved: 'resolved',
+  resolvedAt: 'resolvedAt',
+  resolvedBy: 'resolvedBy',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.SessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  refreshToken: 'refreshToken',
+  deviceId: 'deviceId',
+  userAgent: 'userAgent',
+  ip: 'ip',
+  country: 'country',
+  city: 'city',
+  browser: 'browser',
+  os: 'os',
+  device: 'device',
+  isTrusted: 'isTrusted',
+  riskScore: 'riskScore',
+  is2FAVerified: 'is2FAVerified',
+  verified2FAAt: 'verified2FAAt',
+  expiresAt: 'expiresAt',
+  lastUsedAt: 'lastUsedAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AccountLockScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  reason: 'reason',
+  failedAttempts: 'failedAttempts',
+  lockedAt: 'lockedAt',
+  expiresAt: 'expiresAt',
+  unlockedAt: 'unlockedAt',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.TokenScalarFieldEnum = {
@@ -144,7 +248,12 @@ exports.Prisma.TokenScalarFieldEnum = {
   token: 'token',
   type: 'type',
   expiresIn: 'expiresIn',
+  usedAt: 'usedAt',
+  maxUses: 'maxUses',
+  useCount: 'useCount',
   userId: 'userId',
+  createdIp: 'createdIp',
+  usedIp: 'usedIp',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -152,9 +261,12 @@ exports.Prisma.TokenScalarFieldEnum = {
 exports.Prisma.BackupCodeScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  authMethodId: 'authMethodId',
   type: 'type',
   code: 'code',
   usedAt: 'usedAt',
+  usedIp: 'usedIp',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt'
 };
 
@@ -162,15 +274,23 @@ exports.Prisma.AuditLogScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   action: 'action',
-  metadata: 'metadata',
+  category: 'category',
+  success: 'success',
   ip: 'ip',
   userAgent: 'userAgent',
+  country: 'country',
+  city: 'city',
+  metadata: 'metadata',
   createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.NullableJsonNullValueInput = {
@@ -193,19 +313,89 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
-exports.ETokenType = exports.$Enums.ETokenType = {
-  SMS_VERIFY: 'SMS_VERIFY',
-  EMAIL_VERIFY: 'EMAIL_VERIFY',
-  PASSWORD_RESET: 'PASSWORD_RESET'
+exports.E2FAMethod = exports.$Enums.E2FAMethod = {
+  TOTP: 'TOTP',
+  OTP_EMAIL: 'OTP_EMAIL',
+  OTP_SMS: 'OTP_SMS',
+  WEBAUTHN: 'WEBAUTHN',
+  PASSKEY: 'PASSKEY',
+  BACKUP_CODE: 'BACKUP_CODE'
 };
 
-exports.EBackupCodeType = exports.$Enums.EBackupCodeType = {
-  TOTP: 'TOTP',
-  OTP: 'OTP'
+exports.ESecurityEvent = exports.$Enums.ESecurityEvent = {
+  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
+  LOGIN_FAILED: 'LOGIN_FAILED',
+  LOGOUT: 'LOGOUT',
+  SESSION_EXPIRED: 'SESSION_EXPIRED',
+  TWO_FA_ENABLED: 'TWO_FA_ENABLED',
+  TWO_FA_DISABLED: 'TWO_FA_DISABLED',
+  TWO_FA_VERIFIED: 'TWO_FA_VERIFIED',
+  TWO_FA_FAILED: 'TWO_FA_FAILED',
+  TWO_FA_BACKUP_CODE_USED: 'TWO_FA_BACKUP_CODE_USED',
+  TWO_FA_BACKUP_CODES_REGENERATED: 'TWO_FA_BACKUP_CODES_REGENERATED',
+  TWO_FA_METHOD_ADDED: 'TWO_FA_METHOD_ADDED',
+  TWO_FA_METHOD_REMOVED: 'TWO_FA_METHOD_REMOVED',
+  PASSWORD_CHANGED: 'PASSWORD_CHANGED',
+  PASSWORD_RESET_REQUESTED: 'PASSWORD_RESET_REQUESTED',
+  PASSWORD_RESET_COMPLETED: 'PASSWORD_RESET_COMPLETED',
+  PASSWORD_RESET_FAILED: 'PASSWORD_RESET_FAILED',
+  ACCOUNT_CREATED: 'ACCOUNT_CREATED',
+  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
+  ACCOUNT_UNLOCKED: 'ACCOUNT_UNLOCKED',
+  ACCOUNT_DELETED: 'ACCOUNT_DELETED',
+  EMAIL_VERIFIED: 'EMAIL_VERIFIED',
+  PHONE_VERIFIED: 'PHONE_VERIFIED',
+  EMAIL_CHANGED: 'EMAIL_CHANGED',
+  PHONE_CHANGED: 'PHONE_CHANGED',
+  NEW_DEVICE_DETECTED: 'NEW_DEVICE_DETECTED',
+  DEVICE_TRUSTED: 'DEVICE_TRUSTED',
+  DEVICE_UNTRUSTED: 'DEVICE_UNTRUSTED',
+  DEVICE_REVOKED: 'DEVICE_REVOKED',
+  SUSPICIOUS_LOGIN: 'SUSPICIOUS_LOGIN',
+  UNUSUAL_LOCATION: 'UNUSUAL_LOCATION',
+  BRUTE_FORCE_DETECTED: 'BRUTE_FORCE_DETECTED',
+  ACCOUNT_TAKEOVER_ATTEMPT: 'ACCOUNT_TAKEOVER_ATTEMPT',
+  IMPOSSIBLE_TRAVEL: 'IMPOSSIBLE_TRAVEL',
+  WEBAUTHN_REGISTERED: 'WEBAUTHN_REGISTERED',
+  WEBAUTHN_VERIFIED: 'WEBAUTHN_VERIFIED',
+  WEBAUTHN_REMOVED: 'WEBAUTHN_REMOVED',
+  PASSKEY_CREATED: 'PASSKEY_CREATED',
+  PASSKEY_USED: 'PASSKEY_USED',
+  PASSKEY_DELETED: 'PASSKEY_DELETED'
+};
+
+exports.ESecuritySeverity = exports.$Enums.ESecuritySeverity = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
+};
+
+exports.ETokenType = exports.$Enums.ETokenType = {
+  EMAIL_VERIFY: 'EMAIL_VERIFY',
+  PHONE_VERIFY: 'PHONE_VERIFY',
+  PASSWORD_RESET: 'PASSWORD_RESET',
+  TWO_FA_SETUP: 'TWO_FA_SETUP'
+};
+
+exports.EAuditCategory = exports.$Enums.EAuditCategory = {
+  SECURITY: 'SECURITY',
+  PROFILE: 'PROFILE',
+  ADMIN: 'ADMIN',
+  SYSTEM: 'SYSTEM',
+  ACCOUNT: 'ACCOUNT',
+  AUTHENTICATION: 'AUTHENTICATION',
+  AUTHORIZATION: 'AUTHORIZATION',
+  DATA: 'DATA'
 };
 
 exports.Prisma.ModelName = {
   User: 'User',
+  AuthenticationMethod: 'AuthenticationMethod',
+  TrustedDevice: 'TrustedDevice',
+  SecurityEvent: 'SecurityEvent',
+  Session: 'Session',
+  AccountLock: 'AccountLock',
   Token: 'Token',
   BackupCode: 'BackupCode',
   AuditLog: 'AuditLog'

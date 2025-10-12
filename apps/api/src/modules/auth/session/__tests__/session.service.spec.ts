@@ -38,7 +38,7 @@ describe('SessionService', () => {
 	let request: Request
 	const response = { clearCookie: jest.fn() } as unknown as Response
 	const sessionMetadataSample = {
-		location: { country: 'United States', city: 'New York', latidute: 0, longitude: 0 },
+		location: { country: 'United States', city: 'New York', latitude: 0, longitude: 0 },
 		device: { browser: 'Chrome', os: 'macOS', type: 'desktop' },
 		ip: '127.0.0.1',
 	}

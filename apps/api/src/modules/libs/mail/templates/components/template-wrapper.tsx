@@ -14,7 +14,7 @@ import {
 } from "@react-email/components";
 import { PropsWithChildren } from "react";
 
-type TTemplateName = 'verification_email' | 'reset_password'
+type TTemplateName = 'verification_email' | 'reset_password' | 'otp_code'
 
 export interface IProps {
   template: TTemplateName;
@@ -29,7 +29,7 @@ export function TemplateWrapper({ template, children, i18n, lng='en' }: PropsWit
 
     return (
         <Html lang={lng}>
-            <Preview>{t('preview') || "Confirm your email to finish signing up."}</Preview>
+            <Preview>{t('preview')}</Preview>
             <Tailwind>
                 <Head />
                 <Body className="bg-[#efefef] max-w-[600px] m-auto py-3 px-3">

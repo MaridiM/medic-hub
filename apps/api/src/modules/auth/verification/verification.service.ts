@@ -53,11 +53,15 @@ export class VerificationService extends CoreService {
 		})
 
 		if (!t || t.type !== ETokenType.EMAIL_VERIFY) {
-			throw new NotFoundException(this.msg('auth.errors.token.not_found', 'Token not found', { lng }))
+			throw new NotFoundException(
+				this.i18n.t('auth.errors.token.not_found', { lng, defaultValue: 'Token not found' }),
+			)
 		}
 
 		if (new Date(t.expiresIn) < new Date()) {
-			throw new BadRequestException(this.msg('auth.errors.token.expired', 'Token expired', { lng }))
+			throw new BadRequestException(
+				this.i18n.t('auth.errors.token.expired', { lng, defaultValue: 'Token expired' }),
+			)
 		}
 
 		// 2) Atomically verify and consume the token
@@ -102,7 +106,10 @@ export class VerificationService extends CoreService {
 		} catch {
 			// If mailer fails — surface a clear error (you may log internally as well)
 			throw new InternalServerErrorException(
-				this.msg('mail.errors.message_send_failed', 'Failed to send the message.', { lng }),
+				this.i18n.t('mail.errors.message_send_failed', {
+					lng,
+					defaultValue: 'Failed to send the message.',
+				}),
 			)
 		}
 	}
@@ -119,12 +126,15 @@ export class VerificationService extends CoreService {
 		const verificationOtpToken = await generateToken(this.prisma, user, ETokenType.EMAIL_VERIFY, false)
 
 		try {
-			await this.mail.sendVerificationEmailOtpToken(user.email, verificationOtpToken.token, lng)
+			await this.mail.sendOtpCodeEmail(user.email, verificationOtpToken.token, lng)
 			return true
 		} catch {
 			// If mailer fails — surface a clear error (you may log internally as well)
 			throw new InternalServerErrorException(
-				this.msg('mail.errors.message_send_failed', 'Failed to send the message.', { lng }),
+				this.i18n.t('mail.errors.message_send_failed', {
+					lng,
+					defaultValue: 'Failed to send the message.',
+				}),
 			)
 		}
 	}
@@ -146,7 +156,10 @@ export class VerificationService extends CoreService {
 		} catch {
 			// If mailer fails — surface a clear error (you may log internally as well)
 			throw new InternalServerErrorException(
-				this.msg('sms.errors.message_send_failed', 'Failed to send the message.', { lng }),
+				this.i18n.t('sms.errors.message_send_failed', {
+					lng,
+					defaultValue: 'Failed to send the message.',
+				}),
 			)
 		}
 	}

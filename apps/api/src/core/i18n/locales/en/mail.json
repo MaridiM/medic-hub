@@ -35,8 +35,15 @@
 		"preview": "The password for your {{app}} account has been updated.",
 		"title": "Password changed successfully",
 		"intro": "This is to let you know that the password for your {{app}} account was changed successfully.",
-		"securityNote": "If you didn’t make this change, please reset your password immediately and contact support.",
+		"legalNote": "If you didn’t make this change, please reset your password immediately and contact support.",
 		"cta": "Go to sign in"
+	},
+	"otp_code": {
+		"subject": "Your Verification Code",
+		"preview": "Your verification code for OTP.",
+		"title": "Your Verification Code",
+		"intro": "Use the following code to complete your verification. This code is valid for 5 minutes.",
+		"legalNote": "If you didn’t make this change, please reset your password immediately and contact support."
 	},
 	"errors": {
 		"api_key_missing": "API key is missing.",

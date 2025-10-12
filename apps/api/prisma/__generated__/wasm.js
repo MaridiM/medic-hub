@@ -5,13 +5,28 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 
 const {
+  PrismaClientKnownRequestError,
+  PrismaClientUnknownRequestError,
+  PrismaClientRustPanicError,
+  PrismaClientInitializationError,
+  PrismaClientValidationError,
+  getPrismaClient,
+  sqltag,
+  empty,
+  join,
+  raw,
+  skip,
   Decimal,
+  Debug,
   objectEnumValues,
   makeStrictEnum,
+  Extensions,
+  warnOnce,
+  defineDmmfProperty,
   Public,
   getRuntime,
-  skip
-} = require('./runtime/index-browser.js')
+  createParam,
+} = require('./runtime/wasm-engine-edge.js')
 
 
 const Prisma = {}
@@ -20,79 +35,35 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.12.0
- * Query Engine version: 8047c96bbd92db98a2abc7c9323ce77c02c89dbc
+ * Prisma Client JS version: 6.17.1
+ * Query Engine version: 272a37d34178c2894197e17273bf937f25acdeac
  */
 Prisma.prismaVersion = {
-  client: "6.12.0",
-  engine: "8047c96bbd92db98a2abc7c9323ce77c02c89dbc"
+  client: "6.17.1",
+  engine: "272a37d34178c2894197e17273bf937f25acdeac"
 }
 
-Prisma.PrismaClientKnownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientKnownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)};
-Prisma.PrismaClientUnknownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientUnknownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientRustPanicError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientRustPanicError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientInitializationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientInitializationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientValidationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientValidationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
+Prisma.PrismaClientUnknownRequestError = PrismaClientUnknownRequestError
+Prisma.PrismaClientRustPanicError = PrismaClientRustPanicError
+Prisma.PrismaClientInitializationError = PrismaClientInitializationError
+Prisma.PrismaClientValidationError = PrismaClientValidationError
 Prisma.Decimal = Decimal
 
 /**
  * Re-export of sql-template-tag
  */
-Prisma.sql = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`sqltag is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.empty = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`empty is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.join = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`join is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.raw = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`raw is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.sql = sqltag
+Prisma.empty = empty
+Prisma.join = join
+Prisma.raw = raw
 Prisma.validator = Public.validator
 
 /**
 * Extensions
 */
-Prisma.getExtensionContext = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.getExtensionContext is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.defineExtension = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.defineExtension is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.getExtensionContext = Extensions.getExtensionContext
+Prisma.defineExtension = Extensions.defineExtension
 
 /**
  * Shorthand utilities for JSON filtering
@@ -109,10 +80,11 @@ Prisma.NullTypes = {
 
 
 
+
+
 /**
  * Enums
  */
-
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   ReadUncommitted: 'ReadUncommitted',
   ReadCommitted: 'ReadCommitted',
@@ -131,12 +103,116 @@ exports.Prisma.UserScalarFieldEnum = {
   bio: 'bio',
   password: 'password',
   isEmailVerified: 'isEmailVerified',
-  isTotpEnabled: 'isTotpEnabled',
-  totpSecret: 'totpSecret',
-  isOtpEnabled: 'isOtpEnabled',
-  otpSecret: 'otpSecret',
+  emailVerifiedAt: 'emailVerifiedAt',
+  isUnsubscribed: 'isUnsubscribed',
+  emailBouncedAt: 'emailBouncedAt',
+  isPhoneVerified: 'isPhoneVerified',
+  phoneVerifiedAt: 'phoneVerifiedAt',
+  phoneBouncedAt: 'phoneBouncedAt',
+  is2FAEnabled: 'is2FAEnabled',
+  preferred2FAMethod: 'preferred2FAMethod',
+  require2FA: 'require2FA',
+  lastLoginAt: 'lastLoginAt',
+  lastLoginIp: 'lastLoginIp',
+  passwordChangedAt: 'passwordChangedAt',
+  riskScore: 'riskScore',
+  lastRiskAssessAt: 'lastRiskAssessAt',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AuthenticationMethodScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  method: 'method',
+  data: 'data',
+  name: 'name',
+  isActive: 'isActive',
+  isPrimary: 'isPrimary',
+  lastUsedAt: 'lastUsedAt',
+  useCount: 'useCount',
+  credentialId: 'credentialId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TrustedDeviceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  deviceId: 'deviceId',
+  fingerprint: 'fingerprint',
+  name: 'name',
+  userAgent: 'userAgent',
+  browser: 'browser',
+  os: 'os',
+  device: 'device',
+  trustScore: 'trustScore',
+  lastIp: 'lastIp',
+  lastCountry: 'lastCountry',
+  lastCity: 'lastCity',
+  isActive: 'isActive',
+  lastSeenAt: 'lastSeenAt',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SecurityEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  event: 'event',
+  severity: 'severity',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  country: 'country',
+  city: 'city',
+  deviceId: 'deviceId',
+  riskScore: 'riskScore',
+  riskFactors: 'riskFactors',
+  resolved: 'resolved',
+  resolvedAt: 'resolvedAt',
+  resolvedBy: 'resolvedBy',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.SessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  refreshToken: 'refreshToken',
+  deviceId: 'deviceId',
+  userAgent: 'userAgent',
+  ip: 'ip',
+  country: 'country',
+  city: 'city',
+  browser: 'browser',
+  os: 'os',
+  device: 'device',
+  isTrusted: 'isTrusted',
+  riskScore: 'riskScore',
+  is2FAVerified: 'is2FAVerified',
+  verified2FAAt: 'verified2FAAt',
+  expiresAt: 'expiresAt',
+  lastUsedAt: 'lastUsedAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AccountLockScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  reason: 'reason',
+  failedAttempts: 'failedAttempts',
+  lockedAt: 'lockedAt',
+  expiresAt: 'expiresAt',
+  unlockedAt: 'unlockedAt',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.TokenScalarFieldEnum = {
@@ -144,7 +220,12 @@ exports.Prisma.TokenScalarFieldEnum = {
   token: 'token',
   type: 'type',
   expiresIn: 'expiresIn',
+  usedAt: 'usedAt',
+  maxUses: 'maxUses',
+  useCount: 'useCount',
   userId: 'userId',
+  createdIp: 'createdIp',
+  usedIp: 'usedIp',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -152,9 +233,12 @@ exports.Prisma.TokenScalarFieldEnum = {
 exports.Prisma.BackupCodeScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  authMethodId: 'authMethodId',
   type: 'type',
   code: 'code',
   usedAt: 'usedAt',
+  usedIp: 'usedIp',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt'
 };
 
@@ -162,15 +246,23 @@ exports.Prisma.AuditLogScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   action: 'action',
-  metadata: 'metadata',
+  category: 'category',
+  success: 'success',
   ip: 'ip',
   userAgent: 'userAgent',
+  country: 'country',
+  city: 'city',
+  metadata: 'metadata',
   createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.NullableJsonNullValueInput = {
@@ -193,51 +285,178 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
-exports.ETokenType = exports.$Enums.ETokenType = {
-  SMS_VERIFY: 'SMS_VERIFY',
-  EMAIL_VERIFY: 'EMAIL_VERIFY',
-  PASSWORD_RESET: 'PASSWORD_RESET'
+exports.E2FAMethod = exports.$Enums.E2FAMethod = {
+  TOTP: 'TOTP',
+  OTP_EMAIL: 'OTP_EMAIL',
+  OTP_SMS: 'OTP_SMS',
+  WEBAUTHN: 'WEBAUTHN',
+  PASSKEY: 'PASSKEY',
+  BACKUP_CODE: 'BACKUP_CODE'
 };
 
-exports.EBackupCodeType = exports.$Enums.EBackupCodeType = {
-  TOTP: 'TOTP',
-  OTP: 'OTP'
+exports.ETokenType = exports.$Enums.ETokenType = {
+  EMAIL_VERIFY: 'EMAIL_VERIFY',
+  PHONE_VERIFY: 'PHONE_VERIFY',
+  PASSWORD_RESET: 'PASSWORD_RESET',
+  TWO_FA_SETUP: 'TWO_FA_SETUP'
+};
+
+exports.EAuditCategory = exports.$Enums.EAuditCategory = {
+  SECURITY: 'SECURITY',
+  PROFILE: 'PROFILE',
+  ADMIN: 'ADMIN',
+  SYSTEM: 'SYSTEM',
+  ACCOUNT: 'ACCOUNT',
+  AUTHENTICATION: 'AUTHENTICATION',
+  AUTHORIZATION: 'AUTHORIZATION',
+  DATA: 'DATA'
+};
+
+exports.ESecurityEvent = exports.$Enums.ESecurityEvent = {
+  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
+  LOGIN_FAILED: 'LOGIN_FAILED',
+  LOGOUT: 'LOGOUT',
+  SESSION_EXPIRED: 'SESSION_EXPIRED',
+  TWO_FA_ENABLED: 'TWO_FA_ENABLED',
+  TWO_FA_DISABLED: 'TWO_FA_DISABLED',
+  TWO_FA_VERIFIED: 'TWO_FA_VERIFIED',
+  TWO_FA_FAILED: 'TWO_FA_FAILED',
+  TWO_FA_BACKUP_CODE_USED: 'TWO_FA_BACKUP_CODE_USED',
+  TWO_FA_BACKUP_CODES_REGENERATED: 'TWO_FA_BACKUP_CODES_REGENERATED',
+  TWO_FA_METHOD_ADDED: 'TWO_FA_METHOD_ADDED',
+  TWO_FA_METHOD_REMOVED: 'TWO_FA_METHOD_REMOVED',
+  PASSWORD_CHANGED: 'PASSWORD_CHANGED',
+  PASSWORD_RESET_REQUESTED: 'PASSWORD_RESET_REQUESTED',
+  PASSWORD_RESET_COMPLETED: 'PASSWORD_RESET_COMPLETED',
+  PASSWORD_RESET_FAILED: 'PASSWORD_RESET_FAILED',
+  ACCOUNT_CREATED: 'ACCOUNT_CREATED',
+  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
+  ACCOUNT_UNLOCKED: 'ACCOUNT_UNLOCKED',
+  ACCOUNT_DELETED: 'ACCOUNT_DELETED',
+  EMAIL_VERIFIED: 'EMAIL_VERIFIED',
+  PHONE_VERIFIED: 'PHONE_VERIFIED',
+  EMAIL_CHANGED: 'EMAIL_CHANGED',
+  PHONE_CHANGED: 'PHONE_CHANGED',
+  NEW_DEVICE_DETECTED: 'NEW_DEVICE_DETECTED',
+  DEVICE_TRUSTED: 'DEVICE_TRUSTED',
+  DEVICE_UNTRUSTED: 'DEVICE_UNTRUSTED',
+  DEVICE_REVOKED: 'DEVICE_REVOKED',
+  SUSPICIOUS_LOGIN: 'SUSPICIOUS_LOGIN',
+  UNUSUAL_LOCATION: 'UNUSUAL_LOCATION',
+  BRUTE_FORCE_DETECTED: 'BRUTE_FORCE_DETECTED',
+  ACCOUNT_TAKEOVER_ATTEMPT: 'ACCOUNT_TAKEOVER_ATTEMPT',
+  IMPOSSIBLE_TRAVEL: 'IMPOSSIBLE_TRAVEL',
+  WEBAUTHN_REGISTERED: 'WEBAUTHN_REGISTERED',
+  WEBAUTHN_VERIFIED: 'WEBAUTHN_VERIFIED',
+  WEBAUTHN_REMOVED: 'WEBAUTHN_REMOVED',
+  PASSKEY_CREATED: 'PASSKEY_CREATED',
+  PASSKEY_USED: 'PASSKEY_USED',
+  PASSKEY_DELETED: 'PASSKEY_DELETED'
+};
+
+exports.ESecuritySeverity = exports.$Enums.ESecuritySeverity = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
 };
 
 exports.Prisma.ModelName = {
   User: 'User',
+  AuthenticationMethod: 'AuthenticationMethod',
+  TrustedDevice: 'TrustedDevice',
+  SecurityEvent: 'SecurityEvent',
+  Session: 'Session',
+  AccountLock: 'AccountLock',
   Token: 'Token',
   BackupCode: 'BackupCode',
   AuditLog: 'AuditLog'
 };
-
 /**
- * This is a stub Prisma Client that will error at runtime if called.
+ * Create the Client
  */
-class PrismaClient {
-  constructor() {
-    return new Proxy(this, {
-      get(target, prop) {
-        let message
-        const runtime = getRuntime()
-        if (runtime.isEdge) {
-          message = `PrismaClient is not configured to run in ${runtime.prettyName}. In order to run Prisma Client on edge runtime, either:
-- Use Prisma Accelerate: https://pris.ly/d/accelerate
-- Use Driver Adapters: https://pris.ly/d/driver-adapters
-`;
-        } else {
-          message = 'PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in `' + runtime.prettyName + '`).'
-        }
-
-        message += `
-If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report`
-
-        throw new Error(message)
+const config = {
+  "generator": {
+    "name": "client",
+    "provider": {
+      "fromEnvVar": null,
+      "value": "prisma-client-js"
+    },
+    "output": {
+      "value": "G:\\Projects\\doctor_lab\\medic_hub_gemini\\apps\\api\\prisma\\__generated__",
+      "fromEnvVar": null
+    },
+    "config": {
+      "engineType": "library"
+    },
+    "binaryTargets": [
+      {
+        "fromEnvVar": null,
+        "value": "windows",
+        "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-3.0.x"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "windows"
       }
-    })
+    ],
+    "previewFeatures": [],
+    "sourceFilePath": "G:\\Projects\\doctor_lab\\medic_hub_gemini\\apps\\api\\prisma\\schema.prisma",
+    "isCustomOutput": true
+  },
+  "relativeEnvPaths": {
+    "rootEnvPath": "../../.env",
+    "schemaEnvPath": "../../.env"
+  },
+  "relativePath": "..",
+  "clientVersion": "6.17.1",
+  "engineVersion": "272a37d34178c2894197e17273bf937f25acdeac",
+  "datasourceNames": [
+    "db"
+  ],
+  "activeProvider": "postgresql",
+  "postinstall": false,
+  "inlineDatasources": {
+    "db": {
+      "url": {
+        "fromEnvVar": "POSTGRES_URL",
+        "value": null
+      }
+    }
+  },
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./__generated__\"\n  binaryTargets = [\"native\", \"debian-openssl-3.0.x\", \"windows\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"POSTGRES_URL\")\n}\n\n// ============================================================================\n// USER MODEL\n// ============================================================================\n\nmodel User {\n  id String @id @default(uuid())\n\n  // Profile fields\n  fullName  String  @map(\"full_name\")\n  firstName String? @map(\"first_name\")\n  lastName  String? @map(\"last_name\")\n  phone     String? @unique\n  email     String  @unique\n\n  avatar String?\n  bio    String?\n\n  password String\n\n  // Email verification\n  isEmailVerified Boolean   @default(false) @map(\"is_email_verified\")\n  emailVerifiedAt DateTime? @map(\"email_verified_at\")\n\n  // Email reputation fields\n  isUnsubscribed Boolean?  @default(false) @map(\"is_unsubscribed\")\n  emailBouncedAt DateTime? @map(\"email_bounced_at\")\n\n  // Phone verification\n  isPhoneVerified Boolean   @default(false) @map(\"is_phone_verified\")\n  phoneVerifiedAt DateTime? @map(\"phone_verified_at\")\n\n  // ✅ SMS reputation field\n  phoneBouncedAt DateTime? @map(\"phone_bounced_at\")\n\n  // ========== NEW: Unified 2FA System ==========\n\n  /// Global 2FA status - true if user has any active 2FA method\n  is2FAEnabled Boolean @default(false) @map(\"is_2fa_enabled\")\n\n  /// User's preferred 2FA method for login\n  preferred2FAMethod E2FAMethod? @map(\"preferred_2fa_method\")\n\n  /// Force 2FA for this user (admin-enforced, compliance)\n  require2FA Boolean @default(false) @map(\"require_2fa\")\n\n  // Account security\n  lastLoginAt       DateTime? @map(\"last_login_at\")\n  lastLoginIp       String?   @map(\"last_login_ip\")\n  passwordChangedAt DateTime? @map(\"password_changed_at\")\n\n  // ========== NEW: Risk Assessment ==========\n\n  /// User risk score (0-100): 0=trusted, 100=high risk\n  /// Calculated based on login patterns, location changes, failed attempts\n  riskScore Float? @default(0) @map(\"risk_score\")\n\n  /// Last time risk score was calculated\n  lastRiskAssessAt DateTime? @map(\"last_risk_assess_at\")\n\n  // Soft delete\n  deletedAt DateTime? @map(\"deleted_at\")\n\n  // Relations\n  authenticationMethods AuthenticationMethod[]\n  backupCodes           BackupCode[]\n  trustedDevices        TrustedDevice[]\n  auditLogs             AuditLog[]\n  tokens                Token[]\n  sessions              Session[]\n  accountLocks          AccountLock[]\n  securityEvents        SecurityEvent[]\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@index([email])\n  @@index([phone])\n  @@index([is2FAEnabled])\n  @@index([preferred2FAMethod])\n  @@index([deletedAt])\n  @@index([lastLoginAt])\n  @@index([riskScore])\n  @@map(\"users\")\n}\n\n// ============================================================================\n// AUTHENTICATION METHOD MODEL - Unified 2FA Storage\n// ============================================================================\n\n/// Stores all 2FA methods for a user in a unified way\n/// Supports TOTP, OTP, WebAuthn, Passkeys, and future methods\nmodel AuthenticationMethod {\n  id String @id @default(uuid())\n\n  userId String @map(\"user_id\")\n  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  /// Type of 2FA method (TOTP, OTP_EMAIL, OTP_SMS, WEBAUTHN, PASSKEY)\n  method E2FAMethod\n\n  /// Method-specific encrypted data as JSON\n  data Json\n\n  /// Display name for this method (e.g., \"iPhone 15 Pro\", \"YubiKey 5\")\n  name String?\n\n  /// Whether this method is currently active\n  isActive Boolean @default(true) @map(\"is_active\")\n\n  /// Primary method used by default for 2FA challenges\n  isPrimary Boolean @default(false) @map(\"is_primary\")\n\n  /// Last time this method was used for authentication\n  lastUsedAt DateTime? @map(\"last_used_at\")\n\n  /// Total number of successful authentications with this method\n  useCount Int @default(0) @map(\"use_count\")\n\n  /// WebAuthn credential ID (base64url encoded)\n  credentialId String? @unique @map(\"credential_id\")\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@unique([userId, method, credentialId])\n  @@index([userId, method])\n  @@index([userId, isPrimary])\n  @@index([credentialId])\n  @@map(\"authentication_methods\")\n}\n\n// ============================================================================\n// TRUSTED DEVICE MODEL\n// ============================================================================\n\n/// Manages trusted devices for reduced 2FA friction\nmodel TrustedDevice {\n  id String @id @default(uuid())\n\n  userId String @map(\"user_id\")\n  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  /// Hashed device fingerprint for identification\n  deviceId String @unique @map(\"device_id\")\n\n  /// Full device fingerprint data (for verification)\n  fingerprint Json\n\n  /// User-provided device name (e.g., \"Home Laptop\", \"Work iPhone\")\n  name String?\n\n  userAgent String  @map(\"user_agent\")\n  browser   String?\n  os        String?\n  device    String?\n\n  /// Trust level (0-100): higher = more trusted\n  trustScore Float @default(50) @map(\"trust_score\")\n\n  lastIp      String? @map(\"last_ip\")\n  lastCountry String? @map(\"last_country\")\n  lastCity    String? @map(\"last_city\")\n\n  /// Device is currently trusted and active\n  isActive Boolean @default(true) @map(\"is_active\")\n\n  /// Last time device was seen/used\n  lastSeenAt DateTime @default(now()) @map(\"last_seen_at\")\n\n  /// Optional expiration (e.g., trust for 30 days)\n  expiresAt DateTime? @map(\"expires_at\")\n\n  /// Manual revocation timestamp\n  revokedAt DateTime? @map(\"revoked_at\")\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@index([userId])\n  @@index([deviceId])\n  @@index([userId, isActive])\n  @@index([expiresAt])\n  @@map(\"trusted_devices\")\n}\n\n// ============================================================================\n// SECURITY EVENT MODEL - Enhanced Audit for Security\n// ============================================================================\n\n/// Detailed security event logging with severity and risk scoring\nmodel SecurityEvent {\n  id String @id @default(uuid())\n\n  userId String @map(\"user_id\")\n  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  /// Type of security event (LOGIN_SUCCESS, TWO_FA_FAILED, etc.)\n  event ESecurityEvent\n\n  /// Event severity level\n  severity ESecuritySeverity @default(LOW)\n\n  ip        String?\n  userAgent String? @map(\"user_agent\")\n  country   String?\n  city      String?\n\n  /// Associated device fingerprint\n  deviceId String? @map(\"device_id\")\n\n  /// Calculated risk score for this specific event (0-100)\n  riskScore Float? @map(\"risk_score\")\n\n  /// Risk factors that contributed to the score\n  riskFactors Json? @map(\"risk_factors\")\n\n  /// Whether this event has been reviewed and resolved\n  resolved Boolean @default(false)\n\n  /// When the event was marked as resolved\n  resolvedAt DateTime? @map(\"resolved_at\")\n\n  /// Admin user who resolved the event\n  resolvedBy String? @map(\"resolved_by\")\n\n  /// Additional context data\n  metadata Json?\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  @@index([userId])\n  @@index([event])\n  @@index([severity])\n  @@index([resolved])\n  @@index([createdAt])\n  @@index([userId, createdAt])\n  @@map(\"security_events\")\n}\n\n// ============================================================================\n// SESSION MODEL - Enhanced with Trust and Risk\n// ============================================================================\n\nmodel Session {\n  id String @id @default(uuid())\n\n  userId String @map(\"user_id\")\n  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  token        String  @unique\n  refreshToken String? @unique @map(\"refresh_token\")\n\n  deviceId  String? @map(\"device_id\")\n  userAgent String? @map(\"user_agent\")\n  ip        String?\n  country   String?\n  city      String?\n  browser   String?\n  os        String?\n  device    String?\n\n  /// Whether this session is from a trusted device\n  isTrusted Boolean @default(false) @map(\"is_trusted\")\n\n  /// Risk score for this session (0-100)\n  riskScore Float? @default(0) @map(\"risk_score\")\n\n  /// Whether 2FA has been verified for this session\n  is2FAVerified Boolean @default(false) @map(\"is_2fa_verified\")\n\n  /// When 2FA was successfully verified\n  verified2FAAt DateTime? @map(\"verified_2fa_at\")\n\n  expiresAt  DateTime  @map(\"expires_at\")\n  lastUsedAt DateTime  @default(now()) @map(\"last_used_at\")\n  revokedAt  DateTime? @map(\"revoked_at\")\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@index([userId])\n  @@index([token])\n  @@index([userId, revokedAt])\n  @@index([expiresAt])\n  @@index([deviceId])\n  @@index([is2FAVerified])\n  @@map(\"sessions\")\n}\n\n// ============================================================================\n// ACCOUNT LOCK MODEL\n// ============================================================================\n\nmodel AccountLock {\n  id String @id @default(uuid())\n\n  userId String @map(\"user_id\")\n  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  reason         String\n  failedAttempts Int    @default(0) @map(\"failed_attempts\")\n\n  lockedAt   DateTime  @default(now()) @map(\"locked_at\")\n  expiresAt  DateTime? @map(\"expires_at\")\n  unlockedAt DateTime? @map(\"unlocked_at\")\n\n  ip        String?\n  userAgent String? @map(\"user_agent\")\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  @@index([userId])\n  @@index([userId, expiresAt, unlockedAt])\n  @@index([expiresAt])\n  @@map(\"account_locks\")\n}\n\n// ============================================================================\n// TOKEN MODEL\n// ============================================================================\n\nmodel Token {\n  id String @id @default(uuid())\n\n  token     String     @unique\n  type      ETokenType\n  expiresIn DateTime   @map(\"expires_in\")\n\n  usedAt   DateTime? @map(\"used_at\")\n  maxUses  Int       @default(1) @map(\"max_uses\")\n  useCount Int       @default(0) @map(\"use_count\")\n\n  userId String? @map(\"user_id\")\n  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  createdIp String? @map(\"created_ip\")\n  usedIp    String? @map(\"used_ip\")\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@unique([userId, type])\n  @@index([token])\n  @@index([expiresIn])\n  @@index([userId, type, expiresIn])\n  @@map(\"tokens\")\n}\n\n// ============================================================================\n// BACKUP CODE MODEL - Unified for All 2FA Methods\n// ============================================================================\n\nmodel BackupCode {\n  id String @id @default(cuid())\n\n  userId String @map(\"user_id\")\n  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  /// Link to specific authentication method (optional)\n  authMethodId String? @map(\"auth_method_id\")\n\n  /// Which 2FA method this backup code is for\n  type E2FAMethod @default(TOTP)\n\n  /// Hashed backup code (Argon2id)\n  code String\n\n  usedAt DateTime? @map(\"used_at\")\n  usedIp String?   @map(\"used_ip\")\n\n  /// Optional expiration for compliance\n  expiresAt DateTime? @map(\"expires_at\")\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  @@index([userId])\n  @@index([userId, type])\n  @@index([userId, usedAt])\n  @@index([userId, type, usedAt])\n  @@index([expiresAt])\n  @@map(\"backup_codes\")\n}\n\n// ============================================================================\n// AUDIT LOG MODEL\n// ============================================================================\n\nmodel AuditLog {\n  id String @id @default(cuid())\n\n  userId String @map(\"user_id\")\n  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  action   String\n  category EAuditCategory @default(SECURITY)\n\n  success Boolean @default(true)\n\n  ip        String?\n  userAgent String? @map(\"user_agent\")\n  country   String?\n  city      String?\n\n  metadata Json?\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  @@index([userId])\n  @@index([userId, createdAt])\n  @@index([action])\n  @@index([category])\n  @@index([createdAt])\n  @@index([success])\n  @@map(\"audit_logs\")\n}\n\n// ============================================================================\n// ENUMS\n// ============================================================================\n\n/// Modern 2FA authentication methods\nenum E2FAMethod {\n  TOTP /// Time-based OTP (Google Authenticator, Authy, 1Password)\n  OTP_EMAIL /// One-time password sent via email\n  OTP_SMS /// One-time password sent via SMS\n  WEBAUTHN /// WebAuthn/FIDO2 hardware keys (YubiKey, Titan Key)\n  PASSKEY /// Passkeys (TouchID, FaceID, Windows Hello)\n  BACKUP_CODE /// Backup/recovery codes (last resort)\n\n  @@map(\"2fa_method_types\")\n}\n\nenum ETokenType {\n  EMAIL_VERIFY\n  PHONE_VERIFY\n  PASSWORD_RESET\n  TWO_FA_SETUP\n\n  @@map(\"token_types\")\n}\n\nenum EAuditCategory {\n  SECURITY\n  PROFILE\n  ADMIN\n  SYSTEM\n  ACCOUNT\n  AUTHENTICATION\n  AUTHORIZATION\n  DATA\n\n  @@map(\"audit_categories\")\n}\n\n/// Comprehensive security event types for audit and monitoring\nenum ESecurityEvent {\n  // ===== Authentication Events =====\n  LOGIN_SUCCESS\n  LOGIN_FAILED\n  LOGOUT\n  SESSION_EXPIRED\n\n  // ===== 2FA Events =====\n  TWO_FA_ENABLED\n  TWO_FA_DISABLED\n  TWO_FA_VERIFIED\n  TWO_FA_FAILED\n  TWO_FA_BACKUP_CODE_USED\n  TWO_FA_BACKUP_CODES_REGENERATED\n  TWO_FA_METHOD_ADDED\n  TWO_FA_METHOD_REMOVED\n\n  // ===== Password Events =====\n  PASSWORD_CHANGED\n  PASSWORD_RESET_REQUESTED\n  PASSWORD_RESET_COMPLETED\n  PASSWORD_RESET_FAILED\n\n  // ===== Account Events =====\n  ACCOUNT_CREATED\n  ACCOUNT_LOCKED\n  ACCOUNT_UNLOCKED\n  ACCOUNT_DELETED\n  EMAIL_VERIFIED\n  PHONE_VERIFIED\n  EMAIL_CHANGED\n  PHONE_CHANGED\n\n  // ===== Device Events =====\n  NEW_DEVICE_DETECTED\n  DEVICE_TRUSTED\n  DEVICE_UNTRUSTED\n  DEVICE_REVOKED\n\n  // ===== Suspicious Activity =====\n  SUSPICIOUS_LOGIN\n  UNUSUAL_LOCATION\n  BRUTE_FORCE_DETECTED\n  ACCOUNT_TAKEOVER_ATTEMPT\n  IMPOSSIBLE_TRAVEL\n\n  // ===== WebAuthn/Passkey Events =====\n  WEBAUTHN_REGISTERED\n  WEBAUTHN_VERIFIED\n  WEBAUTHN_REMOVED\n  PASSKEY_CREATED\n  PASSKEY_USED\n  PASSKEY_DELETED\n\n  @@map(\"security_event_types\")\n}\n\n/// Security event severity levels for prioritization\nenum ESecuritySeverity {\n  LOW /// Normal activity, informational\n  MEDIUM /// Unusual activity, monitor\n  HIGH /// Suspicious activity, alert\n  CRITICAL /// Attack detected, immediate action required\n\n  @@map(\"security_severity_levels\")\n}\n",
+  "inlineSchemaHash": "d335cddf6d9c4bfd02d8ea3b8e772ffea08705840303289fd8b2bf5f53a2cd54",
+  "copyEngine": true
+}
+config.dirname = '/'
+
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"fullName\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"full_name\"},{\"name\":\"firstName\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"first_name\"},{\"name\":\"lastName\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"last_name\"},{\"name\":\"phone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"avatar\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"bio\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isEmailVerified\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_email_verified\"},{\"name\":\"emailVerifiedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"email_verified_at\"},{\"name\":\"isUnsubscribed\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_unsubscribed\"},{\"name\":\"emailBouncedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"email_bounced_at\"},{\"name\":\"isPhoneVerified\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_phone_verified\"},{\"name\":\"phoneVerifiedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"phone_verified_at\"},{\"name\":\"phoneBouncedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"phone_bounced_at\"},{\"name\":\"is2FAEnabled\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_2fa_enabled\"},{\"name\":\"preferred2FAMethod\",\"kind\":\"enum\",\"type\":\"E2FAMethod\",\"dbName\":\"preferred_2fa_method\"},{\"name\":\"require2FA\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"require_2fa\"},{\"name\":\"lastLoginAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"last_login_at\"},{\"name\":\"lastLoginIp\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"last_login_ip\"},{\"name\":\"passwordChangedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"password_changed_at\"},{\"name\":\"riskScore\",\"kind\":\"scalar\",\"type\":\"Float\",\"dbName\":\"risk_score\"},{\"name\":\"lastRiskAssessAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"last_risk_assess_at\"},{\"name\":\"deletedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"deleted_at\"},{\"name\":\"authenticationMethods\",\"kind\":\"object\",\"type\":\"AuthenticationMethod\",\"relationName\":\"AuthenticationMethodToUser\"},{\"name\":\"backupCodes\",\"kind\":\"object\",\"type\":\"BackupCode\",\"relationName\":\"BackupCodeToUser\"},{\"name\":\"trustedDevices\",\"kind\":\"object\",\"type\":\"TrustedDevice\",\"relationName\":\"TrustedDeviceToUser\"},{\"name\":\"auditLogs\",\"kind\":\"object\",\"type\":\"AuditLog\",\"relationName\":\"AuditLogToUser\"},{\"name\":\"tokens\",\"kind\":\"object\",\"type\":\"Token\",\"relationName\":\"TokenToUser\"},{\"name\":\"sessions\",\"kind\":\"object\",\"type\":\"Session\",\"relationName\":\"SessionToUser\"},{\"name\":\"accountLocks\",\"kind\":\"object\",\"type\":\"AccountLock\",\"relationName\":\"AccountLockToUser\"},{\"name\":\"securityEvents\",\"kind\":\"object\",\"type\":\"SecurityEvent\",\"relationName\":\"SecurityEventToUser\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"users\"},\"AuthenticationMethod\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"AuthenticationMethodToUser\"},{\"name\":\"method\",\"kind\":\"enum\",\"type\":\"E2FAMethod\"},{\"name\":\"data\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_active\"},{\"name\":\"isPrimary\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_primary\"},{\"name\":\"lastUsedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"last_used_at\"},{\"name\":\"useCount\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"use_count\"},{\"name\":\"credentialId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"credential_id\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"authentication_methods\"},\"TrustedDevice\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"TrustedDeviceToUser\"},{\"name\":\"deviceId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"device_id\"},{\"name\":\"fingerprint\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userAgent\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_agent\"},{\"name\":\"browser\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"os\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"device\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"trustScore\",\"kind\":\"scalar\",\"type\":\"Float\",\"dbName\":\"trust_score\"},{\"name\":\"lastIp\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"last_ip\"},{\"name\":\"lastCountry\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"last_country\"},{\"name\":\"lastCity\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"last_city\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_active\"},{\"name\":\"lastSeenAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"last_seen_at\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"expires_at\"},{\"name\":\"revokedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"revoked_at\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"trusted_devices\"},\"SecurityEvent\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"SecurityEventToUser\"},{\"name\":\"event\",\"kind\":\"enum\",\"type\":\"ESecurityEvent\"},{\"name\":\"severity\",\"kind\":\"enum\",\"type\":\"ESecuritySeverity\"},{\"name\":\"ip\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userAgent\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_agent\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"city\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"deviceId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"device_id\"},{\"name\":\"riskScore\",\"kind\":\"scalar\",\"type\":\"Float\",\"dbName\":\"risk_score\"},{\"name\":\"riskFactors\",\"kind\":\"scalar\",\"type\":\"Json\",\"dbName\":\"risk_factors\"},{\"name\":\"resolved\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"resolvedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"resolved_at\"},{\"name\":\"resolvedBy\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"resolved_by\"},{\"name\":\"metadata\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"}],\"dbName\":\"security_events\"},\"Session\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"SessionToUser\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"refreshToken\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"refresh_token\"},{\"name\":\"deviceId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"device_id\"},{\"name\":\"userAgent\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_agent\"},{\"name\":\"ip\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"city\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"browser\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"os\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"device\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isTrusted\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_trusted\"},{\"name\":\"riskScore\",\"kind\":\"scalar\",\"type\":\"Float\",\"dbName\":\"risk_score\"},{\"name\":\"is2FAVerified\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_2fa_verified\"},{\"name\":\"verified2FAAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"verified_2fa_at\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"expires_at\"},{\"name\":\"lastUsedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"last_used_at\"},{\"name\":\"revokedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"revoked_at\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"sessions\"},\"AccountLock\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"AccountLockToUser\"},{\"name\":\"reason\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"failedAttempts\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"failed_attempts\"},{\"name\":\"lockedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"locked_at\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"expires_at\"},{\"name\":\"unlockedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"unlocked_at\"},{\"name\":\"ip\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userAgent\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_agent\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"}],\"dbName\":\"account_locks\"},\"Token\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"enum\",\"type\":\"ETokenType\"},{\"name\":\"expiresIn\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"expires_in\"},{\"name\":\"usedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"used_at\"},{\"name\":\"maxUses\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"max_uses\"},{\"name\":\"useCount\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"use_count\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"TokenToUser\"},{\"name\":\"createdIp\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"created_ip\"},{\"name\":\"usedIp\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"used_ip\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"tokens\"},\"BackupCode\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"BackupCodeToUser\"},{\"name\":\"authMethodId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"auth_method_id\"},{\"name\":\"type\",\"kind\":\"enum\",\"type\":\"E2FAMethod\"},{\"name\":\"code\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"usedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"used_at\"},{\"name\":\"usedIp\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"used_ip\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"expires_at\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"}],\"dbName\":\"backup_codes\"},\"AuditLog\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"AuditLogToUser\"},{\"name\":\"action\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"category\",\"kind\":\"enum\",\"type\":\"EAuditCategory\"},{\"name\":\"success\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"ip\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userAgent\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_agent\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"city\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"metadata\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"}],\"dbName\":\"audit_logs\"}},\"enums\":{},\"types\":{}}")
+defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
+config.engineWasm = {
+  getRuntime: async () => require('./query_engine_bg.js'),
+  getQueryEngineWasmModule: async () => {
+    const loader = (await import('#wasm-engine-loader')).default
+    const engine = (await loader).default
+    return engine
   }
 }
+config.compilerWasm = undefined
 
+config.injectableEdgeEnv = () => ({
+  parsed: {
+    POSTGRES_URL: typeof globalThis !== 'undefined' && globalThis['POSTGRES_URL'] || typeof process !== 'undefined' && process.env && process.env.POSTGRES_URL || undefined
+  }
+})
+
+if (typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined) {
+  Debug.enable(typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined)
+}
+
+const PrismaClient = getPrismaClient(config)
 exports.PrismaClient = PrismaClient
-
 Object.assign(exports, Prisma)
+
