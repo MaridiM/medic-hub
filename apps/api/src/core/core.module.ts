@@ -6,9 +6,11 @@ import { IS_DEV_ENV } from '@/shared/utils'
 import { ApolloDriver } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { APP_PIPE } from '@nestjs/core'
 import { GraphQLModule } from '@nestjs/graphql'
 
 import { getGraphQLConfig } from './config'
+import { I18nValidationPipe } from './i18n'
 import { I18nModule } from './i18n/i18n.module'
 import { PrismaModule } from './prisma'
 import { RedisModule } from './redis'
@@ -41,6 +43,12 @@ import { RedisModule } from './redis'
 		RecoveryModule,
 		SessionModule,
 		VerificationModule,
+	],
+	providers: [
+		{
+			provide: APP_PIPE,
+			useClass: I18nValidationPipe,
+		},
 	],
 })
 export class CoreModule {}

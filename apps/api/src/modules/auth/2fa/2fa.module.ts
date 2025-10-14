@@ -41,13 +41,5 @@ import { BackupCodeService, DeviceTrustService, SecurityEventService, TwoFactorM
 		MailService,
 		SmsService,
 	],
-	// exports: [
-	// 	// Export services for use in other modules
-	// 	TwoFactorMethodService,
-	// 	BackupCodeService,
-	// 	DeviceTrustService,
-	// 	SecurityEventService,
-	// 	TwoFactorVerifiedGuard,
-	// ],
 })
 export class TwoFactorModule {}

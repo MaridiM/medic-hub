@@ -7,7 +7,13 @@ import { VALIDATION_PATTERNS } from '../constants'
 
 registerEnumType(E2FAMethod, {
 	name: 'E2FAMethod', // имя enum в схеме GraphQL
-	description: '2FA method type',
+	description: 'Allowed OTP methods for setup (email or SMS).',
+	valuesMap: {
+		TOTP: { deprecationReason: 'Not allowed in SetupOtpInput' },
+		WEBAUTHN: { deprecationReason: 'Not allowed in SetupOtpInput' },
+		PASSKEY: { deprecationReason: 'Not allowed in SetupOtpInput' },
+		BACKUP_CODE: { deprecationReason: 'Not allowed in SetupOtpInput' },
+	},
 })
 
 /**
@@ -15,7 +21,10 @@ registerEnumType(E2FAMethod, {
  */
 @InputType('SetupOtpInput')
 export class SetupOtpInput {
-	@Field(() => E2FAMethod, { description: 'OTP method: OTP_EMAIL or OTP_SMS', defaultValue: E2FAMethod.OTP_EMAIL })
+	@Field(() => E2FAMethod, {
+		description: 'OTP method: OTP_EMAIL or OTP_SMS',
+		defaultValue: E2FAMethod.OTP_EMAIL,
+	})
 	@IsOptional()
 	@IsEnum(E2FAMethod)
 	@IsIn([E2FAMethod.OTP_EMAIL, E2FAMethod.OTP_SMS], {

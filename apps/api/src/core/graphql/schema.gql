@@ -68,14 +68,14 @@ type Device {
   type: String!
 }
 
-"""2FA method type"""
+"""Allowed OTP methods for setup (email or SMS)."""
 enum E2FAMethod {
-  BACKUP_CODE
+  BACKUP_CODE @deprecated(reason: "Not allowed in SetupOtpInput")
   OTP_EMAIL
   OTP_SMS
-  PASSKEY
-  TOTP
-  WEBAUTHN
+  PASSKEY @deprecated(reason: "Not allowed in SetupOtpInput")
+  TOTP @deprecated(reason: "Not allowed in SetupOtpInput")
+  WEBAUTHN @deprecated(reason: "Not allowed in SetupOtpInput")
 }
 
 input GenerateTotpSetupInput {

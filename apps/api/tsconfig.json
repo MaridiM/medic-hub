@@ -36,6 +36,6 @@
 		"watchDirectory": "dynamicprioritypolling",
 		"excludeDirectories": ["**/node_modules", "dist"]
 	},
-	"include": ["src", "prisma", "graphql.schema.ts", "types", "jest.config.mjs"],
+	"include": ["src/**/*", "src", "prisma", "graphql.schema.ts", "types", "jest.config.mjs"],
 	"exclude": ["node_modules", "prisma/__generated__"]
 }

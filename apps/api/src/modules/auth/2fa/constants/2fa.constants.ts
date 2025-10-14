@@ -210,6 +210,6 @@ export const VALIDATION_PATTERNS = {
 	TOTP_CODE: /^\d{6}$/,
 	OTP_CODE: /^\d{6}$/,
 	BACKUP_CODE: /^[A-F0-9]{8}$/,
-	PHONE_E164: /^\+[1-9]\d{1,14}$/,
+	PHONE_E164: /^\+[1-9]\d{7,14}$/,
 	DEVICE_ID: /^[a-f0-9]{64}$/,
 } as const

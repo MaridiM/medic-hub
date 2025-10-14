@@ -13,7 +13,8 @@
 
 * ✅ - Задача полностью выполнена.
 * 🟡 - Задача выполнена частично или заложена основа.
-* ⬜ - Задача еще не начата.
+* [ ] - Задача еще не начата.
+<!-- * ⬜ - Задача еще не начата. -->
 
 ---
 
@@ -21,98 +22,100 @@
 
 **✅ Архитектура и основа модуля**
 
-* ✅ **[Schema]** Модернизация Prisma Schema: `AuthenticationMethod`, `TrustedDevice`, `SecurityEvent`.
-* ✅ **[Core]** Создание базовых типов, констант и утилит (`EncryptionUtil`, `FingerprintUtil`, `RiskCalculatorUtil`).
-* ✅ **[Core]** Создание всех основных сервисов (`TwoFactorMethodService`, `DeviceTrustService`, `BackupCodeService`, `SecurityEventService`).
-* ✅ **[API]** Реализация полного GraphQL API (`TwoFactorResolver`) со всеми DTO и моделями.
-* ✅ **[Module]** Финализация `TwoFactorModule` с корректными зависимостями.
+- ✅ **[Schema]** Модернизация Prisma Schema: `AuthenticationMethod`, `TrustedDevice`, `SecurityEvent`.
+- ✅ **[Core]** Создание базовых типов, констант и утилит (`EncryptionUtil`, `FingerprintUtil`, `RiskCalculatorUtil`).
+- ✅ **[Core]** Создание всех основных сервисов (`TwoFactorMethodService`, `DeviceTrustService`, `BackupCodeService`, `SecurityEventService`).
+- ✅ **[API]** Реализация полного GraphQL API (`TwoFactorResolver`) со всеми DTO и моделями.
+- ✅ **[Module]** Финализация `TwoFactorModule` с корректными зависимостями.
 
 **✅ Интеграция `SecurityEventService`**
 
-* ✅ Интеграция логирования событий при добавлении/удалении методов 2FA.
-* ✅ Исправление логической ошибки при регенерации резервных кодов (использовался неверный `enum`).
+- ✅ Интеграция логирования событий при добавлении/удалении методов 2FA.
+- ✅ Исправление логической ошибки при регенерации резервных кодов (использовался неверный `enum`).
 
 **✅ Исправление ошибок типизации**
 
-* ✅ Устранены все ошибки `TypeScript` и `ESLint` (unsafe arguments, `Prisma.JsonValue`, декораторы).
+- ✅ Устранены все ошибки `TypeScript` и `ESLint` (unsafe arguments, `Prisma.JsonValue`, декораторы).
 
 **✅ Интеграция с провайдерами уведомлений**
 
-* ✅ **[Refactor]** Добавлен специализированный метод `sendOtpCodeEmail` в `MailService`.
-* ✅ **[Feature]** Реализован метод `canSendEmail` для защиты репутации отправителя (валидация, DNS, bounce).
-* ✅ **[Feature]** Реализован метод `canSendSms` для валидации номеров и отслеживания bounce.
-* ✅ Подключен **MailService** в `TwoFactorMethodService` для отправки OTP по email.
-* ✅ Подключен **SmsService (Twilio)** в `TwoFactorMethodService` для отправки OTP по SMS.
-* ✅ Созданы/адаптированы шаблоны писем и SMS с кодами.
+- ✅ **[Refactor]** Добавлен специализированный метод `sendOtpCodeEmail` в `MailService`.
+- ✅ **[Feature]** Реализован метод `canSendEmail` для защиты репутации отправителя (валидация, DNS, bounce).
+- ✅ **[Feature]** Реализован метод `canSendSms` для валидации номеров и отслеживания bounce.
+- ✅ Подключен **MailService** в `TwoFactorMethodService` для отправки OTP по email.
+- ✅ Подключен **SmsService (Twilio)** в `TwoFactorMethodService` для отправки OTP по SMS.
+- ✅ Созданы/адаптированы шаблоны писем и SMS с кодами.
 
 **🟡 Тестирование** *(Основа заложена, требуется наполнение)*
 
-* 🟡 **Unit (Jest):** `mail.service`, `2fa-method.service`, `device-trust.service`, `backup-code.service`, `security-event.service` *(Файлы `.spec.ts` созданы, но тесты не написаны)*.
-* ⬜ **Integration:** Написать тесты на критические сценарии (транзакция создания метода + генерация backup-кодов, работа с БД/Redis).
-* ⬜ **E2E (Supertest/Playwright):** Написать тесты на полный пользовательский цикл: `TOTP setup → login → verify → remove method` и другие GraphQL-эндпоинты.
+- 🟡 **Unit (Jest):** `mail.service`, `2fa-method.service`, `device-trust.service`, `backup-code.service`, `security-event.service` *(Файлы `.spec.ts` созданы, но тесты не написаны)*.
+- [ ] **Integration:** Написать тесты на критические сценарии (транзакция создания метода + генерация backup-кодов, работа с БД/Redis).
+- [ ] **E2E (Supertest/Playwright):** Написать тесты на полный пользовательский цикл: `TOTP setup → login → verify → remove method` и другие GraphQL-эндпоинты.
 
-**⬜ Функционал для администраторов**
-* ⬜ Создать `AdminTwoFactorResolver` с защитой по ролям (`@Roles('ADMIN')`).
-* ⬜ Реализовать мутацию `disableUser2FA(userId: string)` для экстренного сброса 2FA.
-* ⬜ Обеспечить строгий аудит всех административных действий через `SecurityEventService`.
+**[ ] Функционал для администраторов**
 
-**⬜ Задачи по расписанию (Cron Jobs)**
-* ⬜ Создать `TwoFactorCronService` на базе `@nestjs/schedule`.
-* ⬜ Реализовать периодический вызов `deviceTrustService.cleanupDevices()` (например, раз в сутки).
-* ⬜ Реализовать периодический вызов `backupCodeService.cleanupExpiredCodes()`.
+- [ ] Создать `AdminTwoFactorResolver` с защитой по ролям (`@Roles('ADMIN')`).
+- [ ] Реализовать мутацию `disableUser2FA(userId: string)` для экстренного сброса 2FA.
+- [ ] Обеспечить строгий аудит всех административных действий через `SecurityEventService`.
+
+**[ ] Задачи по расписанию (Cron Jobs)**
+
+- [ ] Создать `TwoFactorCronService` на базе `@nestjs/schedule`.
+- [ ] Реализовать периодический вызов `deviceTrustService.cleanupDevices()` (например, раз в сутки).
+- [ ] Реализовать периодический вызов `backupCodeService.cleanupExpiredCodes()`.
 
 ---
 
 ### 🟠 MEDIUM: Важные улучшения (Enterprise)
 
-**⬜ Поддержка WebAuthn / Passkeys**
+**[ ] Поддержка WebAuthn / Passkeys**
 
-* ⬜ Создать `WebAuthnService` для инкапсуляции логики работы с протоколом.
-* ⬜ Интегрировать библиотеку `@simplewebauthn/server`.
-* ⬜ Реализовать GraphQL-мутации: `generateRegistrationOptions` и `verifyRegistration`.
-* ⬜ Реализовать GraphQL-мутации: `generateAuthenticationOptions` и `verifyAuthentication`.
-* ⬜ Подготовить документацию для frontend-команды по интеграции.
+- [ ] Создать `WebAuthnService` для инкапсуляции логики работы с протоколом.
+- [ ] Интегрировать библиотеку `@simplewebauthn/server`.
+- [ ] Реализовать GraphQL-мутации: `generateRegistrationOptions` и `verifyRegistration`.
+- [ ] Реализовать GraphQL-мутации: `generateAuthenticationOptions` и `verifyAuthentication`.
+- [ ] Подготовить документацию для frontend-команды по интеграции.
 
-**⬜ Уведомления о событиях безопасности**
+**[ ] Уведомления о событиях безопасности**
 
-* ⬜ **[NEW]** Создать `NotificationService` для абстракции над `MailService` и `SmsService`.
-* ⬜ Интегрировать `NotificationService` в `SecurityEventService` для отправки email-уведомлений пользователю при критических событиях:
-    * ⬜ Добавление/удаление 2FA-метода.
-    * ⬜ Сброс пароля.
-    * ⬜ Вход с нового устройства / из новой страны.
-* ⬜ Интегрировать `NotificationService` в `BackupCodeService` для отправки предупреждения о малом количестве кодов.
+- [ ] **[NEW]** Создать `NotificationService` для абстракции над `MailService` и `SmsService`.
+- [ ] Интегрировать `NotificationService` в `SecurityEventService` для отправки email-уведомлений пользователю при критических событиях:
+    - [ ] Добавление/удаление 2FA-метода.
+    - [ ] Сброс пароля.
+    - [ ] Вход с нового устройства / из новой страны.
+- [ ] Интегрировать `NotificationService` в `BackupCodeService` для отправки предупреждения о малом количестве кодов.
 
-**⬜ “Step-up” аутентификация**
+**[ ] “Step-up” аутентификация**
 
-* ⬜ Реализовать GraphQL-мутацию `requestStepUpVerification` для запроса повторной 2FA-проверки.
-* ⬜ Доработать `TwoFactorVerifiedGuard` для проверки "свежести" верификации (например, не старше 5 минут).
-* ⬜ Подготовить UI-требования для модального окна запроса 2FA перед чувствительными действиями (смена email, удаление аккаунта).
+- [ ] Реализовать GraphQL-мутацию `requestStepUpVerification` для запроса повторной 2FA-проверки.
+- [ ] Доработать `TwoFactorVerifiedGuard` для проверки "свежести" верификации (например, не старше 5 минут).
+- [ ] Подготовить UI-требования для модального окна запроса 2FA перед чувствительными действиями (смена email, удаление аккаунта).
 
 ---
 
 ### 🟢 LOW: Продвинутые возможности и развитие
 
-**⬜ Дашборд администратора**
+**[ ] Дашборд администратора**
 
-* ⬜ Разработать API для раздела "Безопасность" в админ-панели.
-* ⬜ Реализовать эндпоинт для отображения ленты `SecurityEvent` с фильтрами и поиском.
-* ⬜ Реализовать эндпоинт для "закрытия" (resolve) инцидентов.
+- [ ] Разработать API для раздела "Безопасность" в админ-панели.
+- [ ] Реализовать эндпоинт для отображения ленты `SecurityEvent` с фильтрами и поиском.
+- [ ] Реализовать эндпоинт для "закрытия" (resolve) инцидентов.
 
-**⬜ Улучшение системы оценки рисков**
+**[ ] Улучшение системы оценки рисков**
 
-* ⬜ Реализовать сбор и анализ "типичного" времени/дней входа для каждого пользователя.
-* ⬜ Интегрировать внешний сервис для проверки репутации IP-адресов (например, AbuseIPDB/MaxMind).
-* ⬜ Исследовать возможность применения ML-подходов для более точного обнаружения аномалий.
+- [ ] Реализовать сбор и анализ "типичного" времени/дней входа для каждого пользователя.
+- [ ] Интегрировать внешний сервис для проверки репутации IP-адресов (например, AbuseIPDB/MaxMind).
+- [ ] Исследовать возможность применения ML-подходов для более точного обнаружения аномалий.
 
-**⬜ Дополнительные методы аутентификации**
+**[ ] Дополнительные методы аутентификации**
 
-* ⬜ Исследовать возможность интеграции Push-уведомлений (как в Duo или Authy).
-* ⬜ Исследовать "магические ссылки" (Magic Links) как дополнительный фактор или метод входа.
+- [ ] Исследовать возможность интеграции Push-уведомлений (как в Duo или Authy).
+- [ ] Исследовать "магические ссылки" (Magic Links) как дополнительный фактор или метод входа.
 
-**⬜ Геофенсинг (Geofencing)**
+**[ ] Геофенсинг (Geofencing)**
 
-* ⬜ Добавить в `schema.prisma` и настройки пользователя/компании политики разрешенных/запрещенных стран.
-* ⬜ Интегрировать проверку страны в `RiskCalculatorUtil`.
+- [ ] Добавить в `schema.prisma` и настройки пользователя/компании политики разрешенных/запрещенных стран.
+- [ ] Интегрировать проверку страны в `RiskCalculatorUtil`.
 
 ---
 
