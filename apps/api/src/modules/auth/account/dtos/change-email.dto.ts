@@ -2,9 +2,16 @@ import { IsEmail, IsNotEmpty, IsString } from 'class-validator'
 
 import { Field, InputType } from '@nestjs/graphql'
 
-@InputType()
+/**
+ * Email change input
+ */
+@InputType('ChangeEmailInput', {
+	description: 'Input data for changing user email address',
+})
 export class ChangeEmailInput {
-	@Field(() => String)
+	@Field({
+		description: 'New email address (must be unique and different from current)',
+	})
 	@IsString()
 	@IsNotEmpty()
 	@IsEmail()

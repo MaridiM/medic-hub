@@ -11,12 +11,6 @@ export interface ISecurityEventMetadata {
 	city?: string
 	deviceId?: string
 }
-export type TSecurityEventMetadata =
-	| ISecurityEventMetadata
-	| IAuthEventMetadata
-	| I2FAEventMetadata
-	| IDeviceEventMetadata
-	| ISuspiciousActivityMetadata
 
 /**
  * Authentication event metadata
@@ -63,6 +57,36 @@ export interface ISuspiciousActivityMetadata extends ISecurityEventMetadata {
 	riskScore: number
 	blocked: boolean
 }
+
+/**
+ * Administrative action metadata
+ * Used when admins perform actions on user accounts
+ */
+export interface IAdminActionMetadata extends ISecurityEventMetadata {
+	/** Admin who performed the action */
+	adminId: string
+	/** Admin's email for quick identification */
+	adminEmail?: string
+	/** Reason provided by admin */
+	reason: string
+	/** Target user affected by action */
+	targetUserId?: string
+	/** Target user's email */
+	targetEmail?: string
+	/** Additional action-specific fields */
+	[key: string]: any
+}
+
+/**
+ * Union type for all security event metadata types
+ */
+export type TSecurityEventMetadata =
+	| ISecurityEventMetadata
+	| IAuthEventMetadata
+	| I2FAEventMetadata
+	| IDeviceEventMetadata
+	| ISuspiciousActivityMetadata
+	| IAdminActionMetadata // ✅ Added admin action type
 
 /**
  * Security event creation input

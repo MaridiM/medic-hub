@@ -64,7 +64,15 @@ export type AuditLog = $Result.DefaultSelection<Prisma.$AuditLogPayload>
  * Enums
  */
 export namespace $Enums {
-  export const E2FAMethod: {
+  export const EUserRole: {
+  USER: 'USER',
+  SUPER_ADMIN: 'SUPER_ADMIN'
+};
+
+export type EUserRole = (typeof EUserRole)[keyof typeof EUserRole]
+
+
+export const E2FAMethod: {
   TOTP: 'TOTP',
   OTP_EMAIL: 'OTP_EMAIL',
   OTP_SMS: 'OTP_SMS',
@@ -155,6 +163,10 @@ export const ESecuritySeverity: {
 export type ESecuritySeverity = (typeof ESecuritySeverity)[keyof typeof ESecuritySeverity]
 
 }
+
+export type EUserRole = $Enums.EUserRole
+
+export const EUserRole: typeof $Enums.EUserRole
 
 export type E2FAMethod = $Enums.E2FAMethod
 
@@ -1888,6 +1900,7 @@ export namespace Prisma {
     avatar: number
     bio: number
     password: number
+    roles: number
     isEmailVerified: number
     emailVerifiedAt: number
     isUnsubscribed: number
@@ -1988,6 +2001,7 @@ export namespace Prisma {
     avatar?: true
     bio?: true
     password?: true
+    roles?: true
     isEmailVerified?: true
     emailVerifiedAt?: true
     isUnsubscribed?: true
@@ -2105,6 +2119,7 @@ export namespace Prisma {
     avatar: string | null
     bio: string | null
     password: string
+    roles: $Enums.EUserRole[]
     isEmailVerified: boolean
     emailVerifiedAt: Date | null
     isUnsubscribed: boolean | null
@@ -2154,6 +2169,7 @@ export namespace Prisma {
     avatar?: boolean
     bio?: boolean
     password?: boolean
+    roles?: boolean
     isEmailVerified?: boolean
     emailVerifiedAt?: boolean
     isUnsubscribed?: boolean
@@ -2193,6 +2209,7 @@ export namespace Prisma {
     avatar?: boolean
     bio?: boolean
     password?: boolean
+    roles?: boolean
     isEmailVerified?: boolean
     emailVerifiedAt?: boolean
     isUnsubscribed?: boolean
@@ -2223,6 +2240,7 @@ export namespace Prisma {
     avatar?: boolean
     bio?: boolean
     password?: boolean
+    roles?: boolean
     isEmailVerified?: boolean
     emailVerifiedAt?: boolean
     isUnsubscribed?: boolean
@@ -2253,6 +2271,7 @@ export namespace Prisma {
     avatar?: boolean
     bio?: boolean
     password?: boolean
+    roles?: boolean
     isEmailVerified?: boolean
     emailVerifiedAt?: boolean
     isUnsubscribed?: boolean
@@ -2273,7 +2292,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "firstName" | "lastName" | "phone" | "email" | "avatar" | "bio" | "password" | "isEmailVerified" | "emailVerifiedAt" | "isUnsubscribed" | "emailBouncedAt" | "isPhoneVerified" | "phoneVerifiedAt" | "phoneBouncedAt" | "is2FAEnabled" | "preferred2FAMethod" | "require2FA" | "lastLoginAt" | "lastLoginIp" | "passwordChangedAt" | "riskScore" | "lastRiskAssessAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "fullName" | "firstName" | "lastName" | "phone" | "email" | "avatar" | "bio" | "password" | "roles" | "isEmailVerified" | "emailVerifiedAt" | "isUnsubscribed" | "emailBouncedAt" | "isPhoneVerified" | "phoneVerifiedAt" | "phoneBouncedAt" | "is2FAEnabled" | "preferred2FAMethod" | "require2FA" | "lastLoginAt" | "lastLoginIp" | "passwordChangedAt" | "riskScore" | "lastRiskAssessAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     authenticationMethods?: boolean | User$authenticationMethodsArgs<ExtArgs>
     backupCodes?: boolean | User$backupCodesArgs<ExtArgs>
@@ -2310,6 +2329,7 @@ export namespace Prisma {
       avatar: string | null
       bio: string | null
       password: string
+      roles: $Enums.EUserRole[]
       isEmailVerified: boolean
       emailVerifiedAt: Date | null
       isUnsubscribed: boolean | null
@@ -2784,6 +2804,7 @@ export namespace Prisma {
     readonly avatar: FieldRef<"User", 'String'>
     readonly bio: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
+    readonly roles: FieldRef<"User", 'EUserRole[]'>
     readonly isEmailVerified: FieldRef<"User", 'Boolean'>
     readonly emailVerifiedAt: FieldRef<"User", 'DateTime'>
     readonly isUnsubscribed: FieldRef<"User", 'Boolean'>
@@ -13104,6 +13125,7 @@ export namespace Prisma {
     avatar: 'avatar',
     bio: 'bio',
     password: 'password',
+    roles: 'roles',
     isEmailVerified: 'isEmailVerified',
     emailVerifiedAt: 'emailVerifiedAt',
     isUnsubscribed: 'isUnsubscribed',
@@ -13353,6 +13375,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'EUserRole[]'
+   */
+  export type ListEnumEUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EUserRole[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'EUserRole'
+   */
+  export type EnumEUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EUserRole'>
+    
+
+
+  /**
    * Reference to a field of type 'Boolean'
    */
   export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
@@ -13501,6 +13537,7 @@ export namespace Prisma {
     avatar?: StringNullableFilter<"User"> | string | null
     bio?: StringNullableFilter<"User"> | string | null
     password?: StringFilter<"User"> | string
+    roles?: EnumEUserRoleNullableListFilter<"User">
     isEmailVerified?: BoolFilter<"User"> | boolean
     emailVerifiedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     isUnsubscribed?: BoolNullableFilter<"User"> | boolean | null
@@ -13539,6 +13576,7 @@ export namespace Prisma {
     avatar?: SortOrderInput | SortOrder
     bio?: SortOrderInput | SortOrder
     password?: SortOrder
+    roles?: SortOrder
     isEmailVerified?: SortOrder
     emailVerifiedAt?: SortOrderInput | SortOrder
     isUnsubscribed?: SortOrderInput | SortOrder
@@ -13580,6 +13618,7 @@ export namespace Prisma {
     avatar?: StringNullableFilter<"User"> | string | null
     bio?: StringNullableFilter<"User"> | string | null
     password?: StringFilter<"User"> | string
+    roles?: EnumEUserRoleNullableListFilter<"User">
     isEmailVerified?: BoolFilter<"User"> | boolean
     emailVerifiedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     isUnsubscribed?: BoolNullableFilter<"User"> | boolean | null
@@ -13618,6 +13657,7 @@ export namespace Prisma {
     avatar?: SortOrderInput | SortOrder
     bio?: SortOrderInput | SortOrder
     password?: SortOrder
+    roles?: SortOrder
     isEmailVerified?: SortOrder
     emailVerifiedAt?: SortOrderInput | SortOrder
     isUnsubscribed?: SortOrderInput | SortOrder
@@ -13656,6 +13696,7 @@ export namespace Prisma {
     avatar?: StringNullableWithAggregatesFilter<"User"> | string | null
     bio?: StringNullableWithAggregatesFilter<"User"> | string | null
     password?: StringWithAggregatesFilter<"User"> | string
+    roles?: EnumEUserRoleNullableListFilter<"User">
     isEmailVerified?: BoolWithAggregatesFilter<"User"> | boolean
     emailVerifiedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     isUnsubscribed?: BoolNullableWithAggregatesFilter<"User"> | boolean | null
@@ -14490,6 +14531,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -14528,6 +14570,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -14566,6 +14609,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -14604,6 +14648,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -14642,6 +14687,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -14672,6 +14718,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -14702,6 +14749,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -15682,6 +15730,14 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type EnumEUserRoleNullableListFilter<$PrismaModel = never> = {
+    equals?: $Enums.EUserRole[] | ListEnumEUserRoleFieldRefInput<$PrismaModel> | null
+    has?: $Enums.EUserRole | EnumEUserRoleFieldRefInput<$PrismaModel> | null
+    hasEvery?: $Enums.EUserRole[] | ListEnumEUserRoleFieldRefInput<$PrismaModel>
+    hasSome?: $Enums.EUserRole[] | ListEnumEUserRoleFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
   export type BoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
@@ -15827,6 +15883,7 @@ export namespace Prisma {
     avatar?: SortOrder
     bio?: SortOrder
     password?: SortOrder
+    roles?: SortOrder
     isEmailVerified?: SortOrder
     emailVerifiedAt?: SortOrder
     isUnsubscribed?: SortOrder
@@ -16721,6 +16778,10 @@ export namespace Prisma {
     _max?: NestedEnumEAuditCategoryFilter<$PrismaModel>
   }
 
+  export type UserCreaterolesInput = {
+    set: $Enums.EUserRole[]
+  }
+
   export type AuthenticationMethodCreateNestedManyWithoutUserInput = {
     create?: XOR<AuthenticationMethodCreateWithoutUserInput, AuthenticationMethodUncheckedCreateWithoutUserInput> | AuthenticationMethodCreateWithoutUserInput[] | AuthenticationMethodUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AuthenticationMethodCreateOrConnectWithoutUserInput | AuthenticationMethodCreateOrConnectWithoutUserInput[]
@@ -16839,6 +16900,11 @@ export namespace Prisma {
 
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+  }
+
+  export type UserUpdaterolesInput = {
+    set?: $Enums.EUserRole[]
+    push?: $Enums.EUserRole | $Enums.EUserRole[]
   }
 
   export type BoolFieldUpdateOperationsInput = {
@@ -18249,6 +18315,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -18286,6 +18353,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -18339,6 +18407,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -18376,6 +18445,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -18413,6 +18483,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -18450,6 +18521,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -18503,6 +18575,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -18540,6 +18613,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -18577,6 +18651,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -18614,6 +18689,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -18667,6 +18743,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -18704,6 +18781,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -18741,6 +18819,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -18778,6 +18857,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -18831,6 +18911,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -18868,6 +18949,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -18905,6 +18987,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -18942,6 +19025,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -18995,6 +19079,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -19032,6 +19117,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -19069,6 +19155,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -19106,6 +19193,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -19159,6 +19247,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -19196,6 +19285,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -19233,6 +19323,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -19270,6 +19361,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -19323,6 +19415,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -19360,6 +19453,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -19397,6 +19491,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -19434,6 +19529,7 @@ export namespace Prisma {
     avatar?: string | null
     bio?: string | null
     password: string
+    roles?: UserCreaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: boolean
     emailVerifiedAt?: Date | string | null
     isUnsubscribed?: boolean | null
@@ -19487,6 +19583,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -19524,6 +19621,7 @@ export namespace Prisma {
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
+    roles?: UserUpdaterolesInput | $Enums.EUserRole[]
     isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isUnsubscribed?: NullableBoolFieldUpdateOperationsInput | boolean | null

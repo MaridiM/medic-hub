@@ -237,15 +237,35 @@ export class BackupCodeService extends CoreService {
 
 	/**
 	 * Cleanup expired backup codes (cron job)
+	 * Returns metrics about the cleanup operation
 	 */
-	async cleanupExpiredCodes(): Promise<number> {
-		const result = await this.prisma.backupCode.deleteMany({
+	async cleanupExpiredCodes(): Promise<{ deleted: number; affected: number }> {
+		// First, get count for metrics
+		const expiredCodes = await this.prisma.backupCode.findMany({
 			where: {
 				expiresAt: { lt: new Date() },
+				usedAt: null, // Don't delete already used codes for audit trail
+			},
+			select: {
+				userId: true,
 			},
 		})
 
-		this.logger.log(`Cleaned up ${result.count} expired backup codes`)
-		return result.count
+		const affectedUserIds = new Set(expiredCodes.map(c => c.userId))
+
+		// Delete expired codes
+		const result = await this.prisma.backupCode.deleteMany({
+			where: {
+				expiresAt: { lt: new Date() },
+				usedAt: null,
+			},
+		})
+
+		this.logger.log(`Cleaned up ${result.count} expired backup codes affecting ${affectedUserIds.size} users`)
+
+		return {
+			deleted: result.count,
+			affected: affectedUserIds.size,
+		}
 	}
 }

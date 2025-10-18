@@ -1,9 +1,18 @@
 import { MailService, SmsService } from '@/modules/libs'
 import { Module } from '@nestjs/common'
+import { ScheduleModule } from '@nestjs/schedule'
 
-import { TwoFactorResolver } from './2fa.resolver'
 import { TwoFactorVerifiedGuard } from './guards'
-import { BackupCodeService, DeviceTrustService, SecurityEventService, TwoFactorMethodService } from './services'
+import { AdminTwoFactorResolver, TwoFactorResolver } from './resolvers'
+import {
+	AdminTwoFactorService,
+	BackupCodeService,
+	DeviceTrustService,
+	SecurityEventService,
+	TwoFactorCronService,
+	TwoFactorMethodService,
+	WebAuthnService,
+} from './services'
 
 /**
  * Two-Factor Authentication Module
@@ -14,6 +23,7 @@ import { BackupCodeService, DeviceTrustService, SecurityEventService, TwoFactorM
  * - Device trust scoring
  * - Security event logging
  * - Risk-based authentication
+ * - Administrative management (NEW)
  *
  * @example
  * ```typescript
@@ -24,20 +34,25 @@ import { BackupCodeService, DeviceTrustService, SecurityEventService, TwoFactorM
  * ```
  */
 @Module({
+	imports: [ScheduleModule.forRoot()],
 	providers: [
-		// GraphQL Resolver
+		// GraphQL Resolvers
 		TwoFactorResolver,
+		AdminTwoFactorResolver,
 
 		// Core Services
 		TwoFactorMethodService,
 		BackupCodeService,
 		DeviceTrustService,
 		SecurityEventService,
+		AdminTwoFactorService,
+		TwoFactorCronService,
+		WebAuthnService,
 
 		// Guards
 		TwoFactorVerifiedGuard,
 
-		// Providers
+		// External Providers
 		MailService,
 		SmsService,
 	],

@@ -17,47 +17,59 @@
 Ты **ДОЛЖЕН** неукоснительно следовать этим стандартам и использовать примеры как образец для твоего вывода.
 
 **1. Стандарт "Enterprise-Grade":**
+
 * **Безопасность (Security First):** Всегда думай как злоумышленник. Используй шифрование (AES-256-GCM), хеширование (Argon2id), rate limiting, валидацию и транзакции.
 * **Масштабируемость (Scalability):** Оптимизируй запросы к БД, используй кэширование (Redis), избегай блокирующих операций.
 * **Поддерживаемость (Maintainability):** Чистый, модульный код (принципы SOLID).
 
 **2. Управление Changelog (НОВЫЙ СТИЛЬ):**
+
 * **Каждое** изменение должно быть отражено в `CHANGELOG.md` как новый **Шаг (Step)**.
 * Используй **строго** следующий формат.
 
   **Пример записи в `CHANGELOG.md` (СТИЛЬ, КОТОРОМУ НУЖНО СЛЕДОВАТЬ):**
   ```markdown
-  # Changelog: [Название модуля, например: 2FA System Modernization]
+  ## Module: [Название модуля, например: 2FA System Modernization]
   
-  ## Step X: [Название шага, например: Service Integration & Testing Foundation]
-  Date: [YYYY-MM-DD]
+  ### Step X: [Название шага, например: Service Integration & Testing Foundation]
 
-  ### Added
+  :calendar: `YYYY-MM-DD`
+
+  **Added**
+
   - ✅ Unit test foundation for all 2FA services (`.spec.ts` files created).
   - ✅ `try...catch` blocks for robust error handling during email/SMS sending.
   - ✅ Added a `sendOtpCodeEmail` method to `MailService` for sending simple codes.
 
-  ### Changed
+  **Changed**
+
   - ✅ **Integrated `MailService` and `SmsService` into `TwoFactorMethodService`.**
   - ✅ `sendOtpCode` method now sends **real emails and SMS messages** instead of logging to console.
   - ✅ `TwoFactorModule` now correctly imports and provides dependencies for mail and SMS services.
 
-  ### Fixed
+  **Fixed**
+
   - ✅ Corrected a type mismatch for `Prisma.JsonValue` in `2fa-method.service.ts`.
 
-  ### Removed
+  **Removed**
+
   - ❌ Removed console log fallbacks for OTP sending.
 
-  ### Files Modified
+  **Files Modified**
+
   - `src/modules/auth/2fa/services/2fa-method.service.ts`
   - `src/modules/auth/2fa/2fa.module.ts`
   - `src/modules/libs/mail/mail.service.ts`
 
-  ### Files Created
+  **Files Created**
+
   - `src/modules/auth/2fa/services/2fa-method.service.spec.ts`
   - `src/modules/auth/2fa/services/backup-code.service.spec.ts`
   - `src/modules/auth/2fa/services/device-trust.service.spec.ts`
   - `src/modules/auth/2fa/services/security-event.service.spec.ts`
+
+  ---
+  
   ```
 
 **3. Стандарт документирования:**

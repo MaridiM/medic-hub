@@ -1,9 +1,8 @@
-import { hash, verify } from 'argon2'
-
 import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { isPrismaError } from '@/shared/utils'
+import { HashUtil } from '@/shared/utils/hash.util'
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common'
 
 import { VerificationService } from '../verification'
@@ -13,12 +12,13 @@ import { User } from './models'
 
 /**
  * AccountService
- * - User profile reading
- * - Account creation (email verification token delivery)
- * - Email change
- * - Password change
+ * Handles user profile operations:
+ * - Profile reading
+ * - Account creation with email verification
+ * - Email change with re-verification
+ * - Password change with passwordChangedAt tracking
  *
- * All user-facing messages MUST go through `this.i18n.t(key, lng, fallback)`.
+ * All user-facing messages are internationalized via I18nService.
  */
 @Injectable()
 export class AccountService extends CoreService {
@@ -31,8 +31,8 @@ export class AccountService extends CoreService {
 	}
 
 	/**
-	 * Normalize email for uniqueness checks (trim + lower-case).
-	 * @param email Raw email
+	 * Normalize email for uniqueness checks (trim + lowercase).
+	 * @param email - Raw email input
 	 * @returns Normalized email
 	 */
 	private normalizeEmail(email: string): string {
@@ -40,12 +40,10 @@ export class AccountService extends CoreService {
 	}
 
 	/**
-	 * Get current user profile (safe projection).
-	 * NOTE: Even if password is hidden at the model level, we still explicitly
-	 * select only the fields we need to avoid accidental data exposure.
+	 * Get current user profile (safe projection without password).
 	 *
-	 * @param id User id
-	 * @returns User or null
+	 * @param id - User ID
+	 * @returns User profile or null if not found
 	 */
 	async me(id: string): Promise<User | null> {
 		const user = await this.prisma.user.findUnique({
@@ -58,32 +56,37 @@ export class AccountService extends CoreService {
 	/**
 	 * Create a new user account.
 	 * - Normalizes email
-	 * - Hashes password
-	 * - Sends verification email token
-	 * - Handles unique constraint race via Prisma P2002
+	 * - Hashes password with Argon2id
+	 * - Sends email verification token
+	 * - Handles unique constraint violations (P2002)
 	 *
-	 * @param input  CreateAccountInput payload
-	 * @param lng    Language code for messages
-	 * @returns      Newly created user (safe projection)
-	 * @throws ConflictException if email is already in use
+	 * @param input - Account creation payload
+	 * @param lng - Language code for i18n
+	 * @returns Newly created user (safe projection)
+	 * @throws ConflictException if email already exists
+	 * @throws InternalServerErrorException on unexpected errors
 	 */
 	async create(input: CreateAccountInput, lng: Language): Promise<User> {
 		const email = this.normalizeEmail(input.email)
-		const hashedPassword = await hash(input.password)
+		const hashedPassword = await HashUtil.hash(input.password)
 
 		try {
 			const user = await this.prisma.user.create({
-				data: { ...input, email, password: hashedPassword },
+				data: {
+					...input,
+					email,
+					password: hashedPassword,
+				},
 			})
 
-			// Optional: do not fail account creation if mailing fails
-			await this.verification.sendEmailVerificationToken(user as any, lng)
-			// await this.verification.sendEmailVerificationToken(user as unknown as User, lng)
+			// Send verification email (non-blocking)
+			await this.verification.sendEmailVerificationToken(user, lng).catch(() => {
+				// Log error but don't fail account creation
+			})
 
 			return user as unknown as User
 		} catch (e) {
 			if (isPrismaError(e, 'P2002')) {
-				// Unique constraint violation: email already exists
 				throw new ConflictException(
 					this.i18n.t('auth.errors.user.already_exists', {
 						lng,
@@ -98,20 +101,20 @@ export class AccountService extends CoreService {
 	}
 
 	/**
-	 * Change user email:
+	 * Change user email address.
 	 * - Normalizes email
-	 * - Rejects if new email equals current
-	 * - Updates email and resets verification
-	 * - Sends new verification email token
-	 * - Handles unique constraint via P2002
+	 * - Rejects if new email equals current email
+	 * - Resets email verification status
+	 * - Sends new verification email
+	 * - Handles unique constraint violations
 	 *
-	 * @param user  Current user
-	 * @param input New email
-	 * @param lng   Language code for messages
-	 * @returns     true if updated
-	 * @throws BadRequestException  if same email as current
-	 * @throws ConflictException    if email is taken
-	 * @throws InternalServerErrorException for unexpected errors
+	 * @param user - Current authenticated user
+	 * @param input - New email input
+	 * @param lng - Language code for i18n
+	 * @returns true if successful
+	 * @throws BadRequestException if email is the same as current
+	 * @throws ConflictException if email is already taken
+	 * @throws InternalServerErrorException on unexpected errors
 	 */
 	async changeEmail(user: User, input: ChangeEmailInput, lng: Language): Promise<boolean> {
 		const email = this.normalizeEmail(input.email)
@@ -128,12 +131,16 @@ export class AccountService extends CoreService {
 		try {
 			const updated = await this.prisma.user.update({
 				where: { id: user.id },
-				data: { email, isEmailVerified: false },
-				select: { id: true, email: true, isEmailVerified: true },
+				data: {
+					email,
+					isEmailVerified: false,
+					emailVerifiedAt: null,
+				},
 			})
 
-			await this.verification.sendEmailVerificationToken(updated as any, lng)
-			// await this.verification.sendEmailVerificationToken(updated as unknown as User, lng)
+			// Send verification email
+			await this.verification.sendEmailVerificationToken(updated, lng).catch(() => {})
+
 			return true
 		} catch (e) {
 			if (isPrismaError(e, 'P2002')) {
@@ -151,23 +158,24 @@ export class AccountService extends CoreService {
 	}
 
 	/**
-	 * Change user password:
-	 * - Verifies old password
-	 * - Rejects if new password equals old
-	 * - Hashes and updates password
+	 * Change user password.
+	 * - Verifies old password with Argon2id
+	 * - Rejects if new password equals old password
+	 * - Hashes new password
+	 * - Updates passwordChangedAt timestamp
 	 *
-	 * @param user  Current user
-	 * @param input Old/new passwords
-	 * @param lng   Language code for messages
-	 * @returns     true on success
-	 * @throws BadRequestException on invalid old password or same password
-	 * @throws InternalServerErrorException if DB update fails
+	 * @param user - Current authenticated user
+	 * @param input - Password change payload
+	 * @param lng - Language code for i18n
+	 * @returns true if successful
+	 * @throws BadRequestException if old password is invalid or passwords match
+	 * @throws InternalServerErrorException on database errors
 	 */
 	async changePassword(user: User, input: ChangePasswordInput, lng: Language): Promise<boolean> {
 		const { oldPassword, newPassword } = input
 
 		// Verify old password
-		const isValidOld = await verify(user.password, oldPassword)
+		const isValidOld = await HashUtil.verify(user.password, oldPassword)
 		if (!isValidOld) {
 			throw new BadRequestException(
 				this.i18n.t('auth.errors.password.invalid', { lng, defaultValue: 'Invalid password' }),
@@ -185,17 +193,25 @@ export class AccountService extends CoreService {
 		}
 
 		try {
-			const hashed = await hash(newPassword)
+			const hashed = await HashUtil.hash(newPassword)
 			await this.prisma.user.update({
 				where: { id: user.id },
-				data: { password: hashed },
-				select: { id: true },
+				data: {
+					password: hashed,
+					passwordChangedAt: new Date(),
+				},
 			})
-			// Optionally: invalidate sessions / notify user via email
+
+			// TODO: Optionally invalidate all sessions except current one
+			// TODO: Send email notification about password change
+
 			return true
 		} catch {
 			throw new InternalServerErrorException(
-				this.i18n.t('auth.errors.password.change_failed', { lng, defaultValue: 'Failed to change password' }),
+				this.i18n.t('auth.errors.password.change_failed', {
+					lng,
+					defaultValue: 'Failed to change password',
+				}),
 			)
 		}
 	}

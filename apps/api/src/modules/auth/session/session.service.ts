@@ -1,4 +1,3 @@
-import { verify } from 'argon2'
 import type { Request } from 'express'
 
 import { CoreService } from '@/core/core.service'
@@ -6,7 +5,7 @@ import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
 import { destroySession, getSessionMetadata, saveSession } from '@/shared/utils'
-// <= ваша утилита
+import { HashUtil } from '@/shared/utils/hash.util'
 import {
 	BadRequestException,
 	ConflictException,
@@ -23,18 +22,24 @@ import { Session } from './models'
 
 /**
  * SessionService
- * - Login (password verification, email check, session save)
- * - Logout (destroy current session)
- * - Read current session
- * - List user sessions (except current)
- * - Remove a specific session by id
- * - Clear cookie on client
+ * Handles user session management:
+ * - Login (password verification, email check, session creation)
+ * - Logout (session destruction)
+ * - Session reading and listing
+ * - Session removal
+ * - Cookie management
+ *
+ * Enterprise features:
+ * - Tracks lastLoginAt and lastLoginIp
+ * - Supports 2FA verification status in sessions
+ * - Uses Redis for session storage
+ * - Rate limiting and security event logging (TODO)
  */
 @Injectable()
 export class SessionService extends CoreService {
 	/** Redis key prefix for sessions */
 	private readonly prefix: string
-	/** Cookie name for express-session (defaults to connect.sid) */
+	/** Cookie name for express-session */
 	private readonly cookieName: string
 
 	constructor(
@@ -49,28 +54,42 @@ export class SessionService extends CoreService {
 		this.cookieName = this.config.get<string>('SESSION_COOKIE') ?? 'connect.sid'
 	}
 
-	/** Build redis key for a session id */
+	/**
+	 * Build Redis key for a session ID.
+	 * @param sessionId - Session identifier
+	 * @returns Full Redis key
+	 */
 	private key(sessionId: string): string {
 		return `${this.prefix}${sessionId}`
 	}
 
 	/**
-	 * Login user by email & password, ensure email verified and create a session.
-	 * @param req HTTP request
-	 * @param userAgent user agent string
-	 * @param data login payload
-	 * @param lng language code
-	 * @returns LoginResponse with new session data
+	 * Authenticate user and create a session.
+	 * - Verifies email and password
+	 * - Enforces email verification requirement
+	 * - Updates lastLoginAt and lastLoginIp
+	 * - Creates session in Redis
+	 *
+	 * @param req - HTTP request object
+	 * @param userAgent - User agent string
+	 * @param data - Login credentials
+	 * @param lng - Language code for i18n
+	 * @returns Login response with user data
+	 * @throws NotFoundException if user not found or password invalid
+	 * @throws BadRequestException if email not verified
 	 */
 	async login(req: Request, userAgent: string, data: LoginInput, lng: Language): Promise<LoginResponse> {
-		const user = await this.prisma.user.findUnique({ where: { email: data.email } })
+		const user = await this.prisma.user.findUnique({
+			where: { email: data.email },
+		})
+
 		if (!user) {
 			throw new NotFoundException(
 				this.i18n.t('auth.errors.user.not_found', { lng, defaultValue: 'User not found' }),
 			)
 		}
 
-		const ok = await verify(user.password, data.password)
+		const ok = await HashUtil.verify(user.password, data.password)
 		if (!ok) {
 			throw new NotFoundException(
 				this.i18n.t('auth.errors.password.invalid', { lng, defaultValue: 'Invalid password' }),
@@ -78,8 +97,9 @@ export class SessionService extends CoreService {
 		}
 
 		if (!user.isEmailVerified) {
-			// fire-and-forget повторная верификация (не блокируем логин)
+			// Resend verification email (non-blocking)
 			await this.verification.sendEmailVerificationToken(user, lng).catch(() => {})
+
 			throw new BadRequestException(
 				this.i18n.t('auth.errors.account.not_verified', {
 					lng,
@@ -88,36 +108,52 @@ export class SessionService extends CoreService {
 			)
 		}
 
+		// Update last login tracking
 		const meta = getSessionMetadata(req, userAgent)
+		await this.prisma.user.update({
+			where: { id: user.id },
+			data: {
+				lastLoginAt: new Date(),
+				lastLoginIp: meta.ip,
+			},
+		})
+
+		// Create session
 		return saveSession(req, user, meta)
 	}
 
 	/**
-	 * Destroy current session for the request.
-	 * @param req HTTP request
-	 * @returns true on success
+	 * Destroy the current session (logout).
+	 *
+	 * @param req - HTTP request object
+	 * @returns true if session destroyed successfully
 	 */
 	async logout(req: Request): Promise<boolean> {
 		return destroySession(req, this.config)
 	}
 
 	/**
-	 * Read current session object from Redis by request's session id.
-	 * @param req HTTP request carrying session id
-	 * @returns session with attached id or null when not found
+	 * Get current session from Redis by session ID.
+	 *
+	 * @param req - HTTP request object
+	 * @returns Session object or null if not found
 	 */
-	async findCurrent(req: Request) {
+	async findCurrent(req: Request): Promise<Session | null> {
 		const sessionId = req.session.id
 		const session = await this.redis.getJSON<Session>(this.key(sessionId))
 		return session ? { ...session, id: sessionId } : null
 	}
 
 	/**
-	 * Get all sessions of current user (except the current session).
+	 * List all sessions for the current user (excluding current session).
 	 * Sorted by creation time (newest first).
-	 * @param req HTTP request (to get current user and session id)
+	 *
+	 * @param req - HTTP request object
+	 * @param lng - Language code for i18n
+	 * @returns Array of user sessions
+	 * @throws NotFoundException if user not found in session
 	 */
-	async findByUser(req: Request, lng: Language) {
+	async findByUser(req: Request, lng: Language): Promise<Session[]> {
 		const userId = req.session.userId
 		if (!userId) {
 			throw new NotFoundException(
@@ -125,14 +161,14 @@ export class SessionService extends CoreService {
 			)
 		}
 
-		// 1) Keys by prefix (SCAN/KEYS implementation hidden by your RedisService)
+		// Get all session keys
 		const keys = await this.redis.keys(`${this.prefix}*`)
 		if (keys.length === 0) return []
 
-		// 2) Bulk read values
+		// Bulk read session data
 		const raw = (await this.redis.getClient().mGet(keys)) as (string | null)[]
 
-		// 3) Parse & filter by userId
+		// Parse and filter by userId
 		const sessions = keys.flatMap((key, i) => {
 			const s = raw[i]
 			if (!s) return []
@@ -146,17 +182,19 @@ export class SessionService extends CoreService {
 			}
 		})
 
-		// 4) Sort by creation time (desc)
-		sessions.sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
+		// Sort by creation time (descending)
+		sessions.sort((a, b) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt)))
 
-		// 5) Exclude current session
+		// Exclude current session
 		const currentId = req.session?.id
 		return sessions.filter(s => s.id !== currentId)
 	}
 
 	/**
-	 * Clear session cookie on the client (does not remove Redis record).
-	 * @param req HTTP request/response
+	 * Clear session cookie from the client.
+	 * Note: This does not remove the session from Redis.
+	 *
+	 * @param req - HTTP request object
 	 * @returns true
 	 */
 	clear(req: Request): boolean {
@@ -165,13 +203,15 @@ export class SessionService extends CoreService {
 	}
 
 	/**
-	 * Remove a specific session by id. You cannot remove the current session.
-	 * @param req HTTP request (to identify current session id)
-	 * @param id target session id to delete
-	 * @param lng language code
-	 * @returns true on success
-	 * @throws ConflictException when trying to remove current session
-	 * @throws InternalServerErrorException on unexpected Redis errors
+	 * Remove a specific session by ID.
+	 * Prevents removal of the current session.
+	 *
+	 * @param req - HTTP request object
+	 * @param id - Session ID to remove
+	 * @param lng - Language code for i18n
+	 * @returns true if removed successfully
+	 * @throws ConflictException if trying to remove current session
+	 * @throws InternalServerErrorException on Redis errors
 	 */
 	async remove(req: Request, id: string, lng: Language): Promise<boolean> {
 		const currentId = req.session?.id
@@ -180,7 +220,7 @@ export class SessionService extends CoreService {
 			throw new ConflictException(
 				this.i18n.t('auth.errors.session.cannot_delete_current', {
 					lng,
-					defaultValue: 'You can’t delete the current session',
+					defaultValue: "You can't delete the current session",
 				}),
 			)
 		}

@@ -228,4 +228,46 @@ export class SecurityEventService extends CoreService {
 			take: 20,
 		})
 	}
+
+	/**
+	 * Archive old security events
+	 * Moves old events to archive table or deletes based on retention policy
+	 */
+	async archiveOldEvents(): Promise<{ archived: number; deleted: number }> {
+		const retentionDays = parseInt(process.env.SECURITY_EVENTS_RETENTION_DAYS || '90')
+		const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000)
+
+		// For now, we'll just delete old resolved events
+		// In production, you might want to move them to an archive table first
+
+		// Delete old resolved events
+		const deletedResolved = await this.prisma.securityEvent.deleteMany({
+			where: {
+				createdAt: { lt: cutoffDate },
+				resolved: true,
+			},
+		})
+
+		// Keep unresolved events for longer (double retention)
+		const extendedCutoff = new Date(Date.now() - retentionDays * 2 * 24 * 60 * 60 * 1000)
+		const deletedUnresolved = await this.prisma.securityEvent.deleteMany({
+			where: {
+				createdAt: { lt: extendedCutoff },
+				resolved: false,
+				severity: { in: [ESecuritySeverity.LOW, ESecuritySeverity.MEDIUM] },
+			},
+		})
+
+		const totalDeleted = deletedResolved.count + deletedUnresolved.count
+
+		this.logger.log(
+			`Archived/deleted ${totalDeleted} old security events ` +
+				`(${deletedResolved.count} resolved, ${deletedUnresolved.count} unresolved)`,
+		)
+
+		return {
+			archived: 0, // Would be used if we implement archiving
+			deleted: totalDeleted,
+		}
+	}
 }

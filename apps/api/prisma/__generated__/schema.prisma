@@ -28,6 +28,9 @@ model User {
 
   password String
 
+  // ✅ Role-Based Access Control
+  roles EUserRole[] @default([USER])
+
   // Email verification
   isEmailVerified Boolean   @default(false) @map("is_email_verified")
   emailVerifiedAt DateTime? @map("email_verified_at")
@@ -40,7 +43,7 @@ model User {
   isPhoneVerified Boolean   @default(false) @map("is_phone_verified")
   phoneVerifiedAt DateTime? @map("phone_verified_at")
 
-  // ✅ SMS reputation field
+  // SMS reputation field
   phoneBouncedAt DateTime? @map("phone_bounced_at")
 
   // ========== NEW: Unified 2FA System ==========
@@ -428,6 +431,14 @@ model AuditLog {
 // ============================================================================
 // ENUMS
 // ============================================================================
+
+// User Roles Enum
+enum EUserRole {
+  USER
+  SUPER_ADMIN
+
+  @@map("user_roles")
+}
 
 /// Modern 2FA authentication methods
 enum E2FAMethod {

@@ -6,7 +6,7 @@ import { PrismaService } from '@/core/prisma'
 import { MailService, SmsService } from '@/modules/libs'
 import { generateToken, getSessionMetadata, saveSession } from '@/shared/utils'
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
-import { ETokenType, type User } from '@prisma/__generated__'
+import { ETokenType, User } from '@prisma/__generated__'
 
 import { VerificationInput, VerificationResponse } from './dtos'
 
@@ -86,7 +86,7 @@ export class VerificationService extends CoreService {
 
 		// 3) Create session
 		const meta = getSessionMetadata(req, userAgent)
-		return saveSession(req, updatedUser as unknown as User, meta)
+		return saveSession(req, updatedUser as User, meta)
 	}
 
 	/**

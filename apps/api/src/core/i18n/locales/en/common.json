@@ -17,7 +17,8 @@
 		"session": {
 			"save_error": "Error saving session",
 			"not_found": "Session not found",
-			"destroy_error": "Error destroying session"
+			"destroy_error": "Error destroying session",
+			"not_initialized": "Session is not initialized"
 		}
 	}
 }

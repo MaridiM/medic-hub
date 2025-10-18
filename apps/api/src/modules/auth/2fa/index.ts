@@ -1,6 +1,6 @@
 // Module
 export * from './2fa.module'
-export * from './2fa.resolver'
+export * from './resolvers'
 export * from './services'
 export * from './dtos'
 export * from './models'

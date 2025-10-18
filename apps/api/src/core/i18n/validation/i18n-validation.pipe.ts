@@ -4,6 +4,7 @@ import {
 	ArgumentMetadata,
 	Inject,
 	Injectable,
+	Optional,
 	Scope,
 	ValidationError,
 	ValidationPipe,
@@ -11,7 +12,7 @@ import {
 } from '@nestjs/common'
 import { REQUEST } from '@nestjs/core'
 
-type ReqLike = {
+export type ReqLike = {
 	cookies?: Record<string, string | undefined>
 	language?: string
 	headers?: Record<string, string | string[] | undefined>
@@ -37,7 +38,7 @@ export class I18nValidationPipe extends ValidationPipe {
 
 	constructor(
 		@Inject(REQUEST) private readonly request: ReqLike,
-		options?: ValidationPipeOptions,
+		@Optional() options?: ValidationPipeOptions,
 	) {
 		super({
 			...options,

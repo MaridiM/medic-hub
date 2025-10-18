@@ -1,4 +1,6 @@
+export * from './admin-2fa.dto'
 export * from './setup-totp.dto'
 export * from './setup-otp.dto'
 export * from './verify-2fa.dto'
 export * from './manage-methods.dto'
+export * from './webauthn.dto'

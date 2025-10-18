@@ -145,6 +145,11 @@ export const REDIS_KEYS = {
 	// Risk
 	RISK_SCORE: (userId: string) => `2fa:risk:score:${userId}`,
 	RISK_FACTORS: (userId: string) => `2fa:risk:factors:${userId}`,
+
+	// WebAuthn
+	WEBAUTHN_CHALLENGE: (challengeId: string) => `webauthn:challenge:${challengeId}`,
+	WEBAUTHN_REGISTRATION: (userId: string) => `webauthn:registration:${userId}`,
+	WEBAUTHN_AUTHENTICATION: (userId: string) => `webauthn:authentication:${userId}`,
 } as const
 
 // ===== AUDIT ACTIONS =====

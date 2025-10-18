@@ -295,22 +295,64 @@ export class DeviceTrustService extends CoreService {
 
 	/**
 	 * Cleanup old/expired devices (cron job)
+	 * Returns metrics about the cleanup operation
 	 */
-	async cleanupDevices(): Promise<number> {
+	async cleanupDevices(): Promise<{ deleted: number; sessionsInvalidated: number }> {
 		const cutoffDate = new Date(Date.now() - DEVICE_LIMITS.CLEANUP_AFTER_DAYS * 24 * 60 * 60 * 1000)
 
-		const result = await this.prisma.trustedDevice.deleteMany({
+		// Get devices to be deleted for metrics
+		const devicesToDelete = await this.prisma.trustedDevice.findMany({
 			where: {
 				OR: [
 					{ expiresAt: { lt: new Date() } },
 					{ lastSeenAt: { lt: cutoffDate } },
-					{ isActive: false, revokedAt: { lt: cutoffDate } },
+					{
+						isActive: false,
+						revokedAt: { lt: cutoffDate },
+					},
+				],
+			},
+			select: {
+				deviceId: true,
+				userId: true,
+			},
+		})
+
+		const deviceIds = devicesToDelete.map(d => d.deviceId)
+
+		// Invalidate sessions from these devices
+		const sessionsResult = await this.prisma.session.updateMany({
+			where: {
+				deviceId: { in: deviceIds },
+				revokedAt: null,
+			},
+			data: {
+				revokedAt: new Date(),
+			},
+		})
+
+		// Delete the devices
+		const devicesResult = await this.prisma.trustedDevice.deleteMany({
+			where: {
+				OR: [
+					{ expiresAt: { lt: new Date() } },
+					{ lastSeenAt: { lt: cutoffDate } },
+					{
+						isActive: false,
+						revokedAt: { lt: cutoffDate },
+					},
 				],
 			},
 		})
 
-		this.logger.log(`Cleaned up ${result.count} old devices`)
-		return result.count
+		this.logger.log(
+			`Cleaned up ${devicesResult.count} old devices and invalidated ${sessionsResult.count} sessions`,
+		)
+
+		return {
+			deleted: devicesResult.count,
+			sessionsInvalidated: sessionsResult.count,
+		}
 	}
 
 	/**
@@ -330,6 +372,66 @@ export class DeviceTrustService extends CoreService {
 			}
 
 			this.logger.log(`Revoked ${toRevoke.length} devices for user ${userId} (limit exceeded)`)
+		}
+	}
+
+	/**
+	 * Enforce device limits for all users
+	 * Returns metrics about enforcement actions
+	 */
+	async enforceAllUsersDeviceLimits(): Promise<{
+		usersChecked: number
+		usersAffected: number
+		devicesRevoked: number
+	}> {
+		// Get all users with their device counts
+		const usersWithDevices = await this.prisma.user.findMany({
+			where: {
+				trustedDevices: {
+					some: {
+						isActive: true,
+					},
+				},
+			},
+			select: {
+				id: true,
+				email: true,
+				trustedDevices: {
+					where: { isActive: true },
+					orderBy: { lastSeenAt: 'desc' },
+					select: {
+						id: true,
+						deviceId: true,
+						lastSeenAt: true,
+					},
+				},
+			},
+		})
+
+		let usersAffected = 0
+		let totalDevicesRevoked = 0
+
+		for (const user of usersWithDevices) {
+			if (user.trustedDevices.length > DEVICE_LIMITS.MAX_TRUSTED_DEVICES) {
+				const devicesToRevoke = user.trustedDevices.slice(DEVICE_LIMITS.MAX_TRUSTED_DEVICES)
+
+				for (const device of devicesToRevoke) {
+					await this.revokeDevice(user.id, device.deviceId)
+					totalDevicesRevoked++
+				}
+
+				usersAffected++
+
+				this.logger.warn(
+					`User ${user.email} exceeded device limit. Revoked ${devicesToRevoke.length} oldest devices`,
+				)
+			}
+		}
+
+		return {
+			usersChecked: usersWithDevices.length,
+			usersAffected,
+			devicesRevoked: totalDevicesRevoked,
 		}
 	}
 }

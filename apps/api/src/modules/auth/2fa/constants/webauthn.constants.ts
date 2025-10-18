@@ -22,18 +22,18 @@ export const AUTHENTICATOR_SELECTION = {
 	/** Authenticator attachment: 'platform', 'cross-platform', or undefined (both) */
 	AUTHENTICATOR_ATTACHMENT: undefined as 'platform' | 'cross-platform' | undefined,
 
-	/** Require resident key (for passwordless): 'required', 'preferred', 'discouraged' */
-	RESIDENT_KEY: 'preferred' as ResidentKeyRequirement,
+	/** Require resident key (for passwordless) */
+	RESIDENT_KEY: 'preferred' as const,
 
-	/** User verification: 'required', 'preferred', 'discouraged' */
-	USER_VERIFICATION: 'preferred' as UserVerificationRequirement,
+	/** User verification */
+	USER_VERIFICATION: 'preferred' as const,
 } as const
 
 // ===== ATTESTATION =====
 
 export const ATTESTATION_CONFIG = {
-	/** Attestation conveyance: 'none', 'indirect', 'direct', 'enterprise' */
-	CONVEYANCE: 'none' as AttestationConveyancePreference,
+	/** Attestation conveyance */
+	CONVEYANCE: 'none' as const,
 
 	/** Verify attestation (requires attestation metadata) */
 	VERIFY_ATTESTATION: false,
@@ -56,26 +56,6 @@ export const CREDENTIAL_PARAMS = {
 
 	/** Timeout for user interaction (milliseconds) */
 	TIMEOUT: 60000, // 60 seconds
-} as const
-
-// ===== ALLOWED TRANSPORTS =====
-
-export const ALLOWED_TRANSPORTS = {
-	REGISTRATION: ['usb', 'nfc', 'ble', 'internal', 'hybrid'] as AuthenticatorTransport[],
-	AUTHENTICATION: ['usb', 'nfc', 'ble', 'internal', 'hybrid'] as AuthenticatorTransport[],
-} as const
-
-// ===== PASSKEY SPECIFIC =====
-
-export const PASSKEY_CONFIG = {
-	/** Enable passkey sync (iCloud Keychain, Google Password Manager) */
-	ALLOW_SYNC: true,
-
-	/** Backup eligibility */
-	BACKUP_ELIGIBLE: true,
-
-	/** Prefer platform authenticators (Touch ID, Face ID, Windows Hello) */
-	PREFER_PLATFORM: true,
 } as const
 
 // ===== VALIDATION =====
@@ -107,22 +87,11 @@ export const WEBAUTHN_STORAGE = {
 	MAX_CREDENTIALS_PER_USER: 10,
 } as const
 
-// ===== REDIS KEYS =====
+// ===== COMBINED CONFIG EXPORT =====
 
-export const WEBAUTHN_REDIS_KEYS = {
-	CHALLENGE: (userId: string) => `webauthn:challenge:${userId}`,
-	REGISTRATION: (userId: string) => `webauthn:registration:${userId}`,
-	AUTHENTICATION: (userId: string) => `webauthn:authentication:${userId}`,
-} as const
-
-// ===== ERROR MESSAGES =====
-
-export const WEBAUTHN_ERRORS = {
-	CHALLENGE_EXPIRED: 'webauthn.challenge_expired',
-	INVALID_SIGNATURE: 'webauthn.invalid_signature',
-	COUNTER_MISMATCH: 'webauthn.counter_mismatch',
-	CREDENTIAL_NOT_FOUND: 'webauthn.credential_not_found',
-	ATTESTATION_FAILED: 'webauthn.attestation_failed',
-	USER_VERIFICATION_FAILED: 'webauthn.user_verification_failed',
-	UNSUPPORTED_ALGORITHM: 'webauthn.unsupported_algorithm',
+export const WEBAUTHN_CONFIG = {
+	AUTHENTICATOR_SELECTION,
+	ATTESTATION_CONFIG,
+	CREDENTIAL_PARAMS,
+	VALIDATION_CONFIG,
 } as const

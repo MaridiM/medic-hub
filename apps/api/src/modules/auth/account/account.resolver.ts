@@ -6,7 +6,7 @@ import { AccountService } from './account.service'
 import { ChangeEmailInput, ChangePasswordInput, CreateAccountInput } from './dtos'
 import { User } from './models'
 
-@Resolver()
+@Resolver(() => User)
 export class AccountResolver {
 	constructor(private readonly accountService: AccountService) {}
 
@@ -16,10 +16,9 @@ export class AccountResolver {
 	@Authorization()
 	@Query(() => User, {
 		name: 'profile',
-		description:
-			'Get the currently authenticated user profile. Requires auth. Returns a safe projection (no password).',
+		description: 'Get the currently authenticated user profile. Returns safe projection without sensitive data.',
 	})
-	async me(@Authorized('id') id: string) {
+	async me(@Authorized('id') id: string): Promise<User> {
 		return this.accountService.me(id)
 	}
 
@@ -29,7 +28,7 @@ export class AccountResolver {
 	@Mutation(() => User, {
 		name: 'createAccount',
 		description:
-			'Create a new user account. Normalizes email, hashes password, and sends a verification email token.',
+			'Create a new user account. Normalizes email, hashes password with Argon2id, and sends verification email.',
 	})
 	create(@Args('data') input: CreateAccountInput, @Lang() lng: Language): Promise<User> {
 		return this.accountService.create(input, lng)
@@ -41,8 +40,7 @@ export class AccountResolver {
 	@Authorization()
 	@Mutation(() => Boolean, {
 		name: 'changeEmail',
-		description:
-			'Change the current user email. Normalizes email, rejects same email, resets verification and sends a new verification token.',
+		description: 'Change current user email address. Resets verification status and sends new verification email.',
 	})
 	async changeEmail(
 		@Authorized() user: User,
@@ -58,8 +56,7 @@ export class AccountResolver {
 	@Authorization()
 	@Mutation(() => Boolean, {
 		name: 'changePassword',
-		description:
-			'Change the current user password. Verifies old password, rejects identical new password, hashes and updates on success.',
+		description: 'Change current user password. Verifies old password, updates passwordChangedAt timestamp.',
 	})
 	async changePassword(
 		@Authorized() user: User,

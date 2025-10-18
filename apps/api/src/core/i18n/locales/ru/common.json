@@ -2,7 +2,7 @@
 	"errors": {
 		"unexpected": "Непредвиденная ошибка",
 		"auth": {
-			"user_not_authorized": "Пользователь не авторизован"
+			"user_not_authorized": "Пользователь"
 		},
 		"request": {
 			"invalid_data": "Некорректные данные запроса",
@@ -16,7 +16,8 @@
 		"session": {
 			"save_error": "Ошибка сохранения сессии",
 			"not_found": "Сессия не найдена",
-			"destroy_error": "Ошибка уничтожения сессии"
+			"destroy_error": "Ошибка уничтожения сессии",
+			"not_initialized": "Сессия не авторизованa"
 		}
 	}
 }

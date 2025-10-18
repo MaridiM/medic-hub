@@ -7,17 +7,17 @@ import { LoginInput, LoginResponse } from './dtos'
 import { Session } from './models'
 import { SessionService } from './session.service'
 
-@Resolver()
+@Resolver(() => Session)
 export class SessionResolver {
 	constructor(private readonly sessionService: SessionService) {}
 
 	/**
 	 * Authenticate the user and create a server session.
-	 * Sets the session cookie and returns basic session metadata.
 	 */
 	@Mutation(() => LoginResponse, {
 		name: 'login',
-		description: 'Authenticate the user and create a session (cookie-based). Returns session metadata.',
+		description:
+			'Authenticate user with email and password. Creates session cookie and tracks login metadata (IP, device, location).',
 	})
 	login(
 		@Context() { req }: GqlContext,
@@ -34,31 +34,32 @@ export class SessionResolver {
 	@Authorization()
 	@Mutation(() => Boolean, {
 		name: 'logout',
-		description: 'Destroy the current session (logout).',
+		description: 'Destroy current session and clear session cookie.',
 	})
 	logout(@Context() { req }: GqlContext): Promise<boolean> {
 		return this.sessionService.logout(req)
 	}
 
 	/**
-	 * Read the current session object (by the request’s session id).
+	 * Read the current session object.
 	 */
 	@Authorization()
 	@Query(() => Session, {
-		name: 'findCurrentSession',
-		description: 'Get the current session by the request session id.',
+		name: 'currentSession',
+		description: 'Get current session metadata including device, location, and security status.',
+		nullable: true,
 	})
 	findCurrent(@Context() { req }: GqlContext): Promise<Session | null> {
 		return this.sessionService.findCurrent(req)
 	}
 
 	/**
-	 * List all active sessions for the current user (excluding the current one).
+	 * List all active sessions for the current user (excluding current).
 	 */
 	@Authorization()
 	@Query(() => [Session], {
-		name: 'findSessionsByUser',
-		description: 'List all active sessions for the current user (the current session is excluded).',
+		name: 'userSessions',
+		description: 'List all active sessions for current user (sorted by creation time, current session excluded).',
 	})
 	findByUser(@Context() { req }: GqlContext, @Lang() lng: Language): Promise<Session[]> {
 		return this.sessionService.findByUser(req, lng)
@@ -70,19 +71,19 @@ export class SessionResolver {
 	@Authorization()
 	@Mutation(() => Boolean, {
 		name: 'clearSessionCookie',
-		description: 'Clear the session cookie from the response.',
+		description: 'Clear session cookie from client (does not invalidate Redis session).',
 	})
 	clearSession(@Context() { req }: GqlContext): boolean {
 		return this.sessionService.clear(req)
 	}
 
 	/**
-	 * Remove a specific session by id. You cannot remove the current session.
+	 * Remove a specific session by id.
 	 */
 	@Authorization()
 	@Mutation(() => Boolean, {
 		name: 'removeSession',
-		description: 'Remove a specific session by id (fails if the id belongs to the current session).',
+		description: 'Remove specific session by ID (cannot remove current session).',
 	})
 	removeSession(@Context() { req }: GqlContext, @Args('id') id: string, @Lang() lng: Language): Promise<boolean> {
 		return this.sessionService.remove(req, id, lng)

@@ -17,18 +17,23 @@ import type { ISessionMetadata } from '../types'
  */
 export function saveSession(req: Request, user: User, metadata: ISessionMetadata) {
 	const lang = req.language || DEFAULT_LANGUAGE
-	return new Promise((resolve, reject) => {
+
+	return new Promise<{ user: User }>((resolve, reject) => {
+		if (!req.session) {
+			const message =
+				i18n.t('common.errors.session.not_initialized', { lng: lang }) || 'Session is not initialized'
+			return reject(new InternalServerErrorException(message))
+		}
+
 		req.session.createdAt = new Date()
 		req.session.userId = user.id
 		req.session.metadata = metadata
 
 		req.session.save(err => {
 			if (err) {
-				console.log('err', err)
 				const message = i18n.t('common.errors.session.save_error', { lng: lang }) || 'Error saving session'
 				return reject(new InternalServerErrorException(message))
 			}
-
 			resolve({ user })
 		})
 	})
@@ -42,7 +47,13 @@ export function saveSession(req: Request, user: User, metadata: ISessionMetadata
  */
 export function destroySession(req: Request, configService: ConfigService): Promise<boolean> {
 	const lang = req.language || DEFAULT_LANGUAGE
-	return new Promise((resolve, reject) => {
+
+	return new Promise<boolean>((resolve, reject) => {
+		if (!req.session) {
+			// если сессии нет — считать уничтоженной
+			return resolve(true)
+		}
+
 		req.session.destroy(err => {
 			if (err) {
 				const message =
@@ -50,7 +61,12 @@ export function destroySession(req: Request, configService: ConfigService): Prom
 				return reject(new InternalServerErrorException(message))
 			}
 
-			req.res.clearCookie(configService.getOrThrow<string>('SESSION_NAME'))
+			// req.res может быть undefined в некоторых контекстах (тесты/скрипты)
+			const sessionCookieName = configService.get<string>('SESSION_NAME')
+			if (sessionCookieName && req.res?.clearCookie) {
+				req.res.clearCookie(sessionCookieName)
+			}
+
 			resolve(true)
 		})
 	})

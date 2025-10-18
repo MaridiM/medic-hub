@@ -130,6 +130,7 @@ exports.Prisma.UserScalarFieldEnum = {
   avatar: 'avatar',
   bio: 'bio',
   password: 'password',
+  roles: 'roles',
   isEmailVerified: 'isEmailVerified',
   emailVerifiedAt: 'emailVerifiedAt',
   isUnsubscribed: 'isUnsubscribed',
@@ -320,6 +321,11 @@ exports.E2FAMethod = exports.$Enums.E2FAMethod = {
   WEBAUTHN: 'WEBAUTHN',
   PASSKEY: 'PASSKEY',
   BACKUP_CODE: 'BACKUP_CODE'
+};
+
+exports.EUserRole = exports.$Enums.EUserRole = {
+  USER: 'USER',
+  SUPER_ADMIN: 'SUPER_ADMIN'
 };
 
 exports.ESecurityEvent = exports.$Enums.ESecurityEvent = {

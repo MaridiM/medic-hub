@@ -2,6 +2,20 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AdminActionSuccess {
+  """Affected user ID"""
+  affectedUserId: String!
+
+  """Admin action ID for audit trail"""
+  auditLogId: String
+
+  """Success message"""
+  message: String!
+
+  """Operation success status"""
+  success: Boolean!
+}
+
 type BackupCodesRegenerated {
   """New backup codes"""
   backupCodes: [String!]!
@@ -30,12 +44,18 @@ type BackupCodesStatus {
   used: Int!
 }
 
+"""Input data for changing user email address"""
 input ChangeEmailInput {
+  """New email address (must be unique and different from current)"""
   email: String!
 }
 
+"""Input data for changing user password"""
 input ChangePasswordInput {
+  """New password (minimum 8 characters, must differ from old)"""
   newPassword: String!
+
+  """Current password (for verification)"""
   oldPassword: String!
 }
 
@@ -50,10 +70,49 @@ input CompleteTotpSetupInput {
   secret: String!
 }
 
+"""
+Input for completing WebAuthn authentication with authenticator response
+"""
+input CompleteWebAuthnAuthenticationInput {
+  """
+  Challenge ID from authentication options (used to verify this response)
+  """
+  challengeId: String!
+
+  """
+  AuthenticationResponseJSON from @simplewebauthn/browser startAuthentication(). Contains id, rawId, response.authenticatorData, response.clientDataJSON, response.signature, response.userHandle, and type.
+  """
+  response: JSON!
+}
+
+"""Input for completing WebAuthn registration with authenticator response"""
+input CompleteWebAuthnRegistrationInput {
+  """
+  Custom name for this authenticator (overrides name from StartWebAuthnRegistrationInput)
+  """
+  authenticatorName: String
+
+  """Challenge ID from registration options (used to verify this response)"""
+  challengeId: String!
+
+  """
+  RegistrationResponseJSON from @simplewebauthn/browser startRegistration(). Contains id, rawId, response.attestationObject, response.clientDataJSON, type, and optional fields.
+  """
+  response: JSON!
+}
+
+"""Input data for creating a new user account"""
 input CreateAccountInput {
+  """Email address (must be unique)"""
   email: String!
+
+  """Full name (alphanumeric with hyphens allowed)"""
   fullName: String!
+
+  """Password (minimum 8 characters)"""
   password: String!
+
+  """Phone number in E.164 format (e.g., +1234567890)"""
   phone: String!
 }
 
@@ -62,20 +121,57 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+"""Device information parsed from User-Agent header"""
 type Device {
+  """Browser name and version (e.g., "Chrome 120.0")"""
   browser: String!
+
+  """Operating system (e.g., "macOS 14.0")"""
   os: String!
+
+  """Device type (desktop, mobile, tablet)"""
   type: String!
 }
 
-"""Allowed OTP methods for setup (email or SMS)."""
+input DisableUser2FAInput {
+  """Whether to notify the user via email"""
+  notifyUser: Boolean = true
+
+  """Reason for disabling 2FA"""
+  reason: String!
+
+  """User ID whose 2FA should be disabled"""
+  userId: String!
+}
+
+"""Available two-factor authentication methods"""
 enum E2FAMethod {
-  BACKUP_CODE @deprecated(reason: "Not allowed in SetupOtpInput")
+  """Backup recovery codes for emergency access"""
+  BACKUP_CODE
+
+  """One-time password sent via email"""
   OTP_EMAIL
+
+  """One-time password sent via SMS"""
   OTP_SMS
-  PASSKEY @deprecated(reason: "Not allowed in SetupOtpInput")
-  TOTP @deprecated(reason: "Not allowed in SetupOtpInput")
-  WEBAUTHN @deprecated(reason: "Not allowed in SetupOtpInput")
+
+  """Passkeys using biometrics (TouchID, FaceID, Windows Hello)"""
+  PASSKEY
+
+  """Time-based one-time password (Google Authenticator, Authy, 1Password)"""
+  TOTP
+
+  """WebAuthn/FIDO2 hardware security keys (YubiKey, Titan)"""
+  WEBAUTHN
+}
+
+"""User role for access control and permissions"""
+enum EUserRole {
+  """Super administrator with full system access"""
+  SUPER_ADMIN
+
+  """Regular user with standard permissions"""
+  USER
 }
 
 input GenerateTotpSetupInput {
@@ -83,51 +179,101 @@ input GenerateTotpSetupInput {
   name: String
 }
 
+input GetUserSecurityEventsInput {
+  """Filter by event types"""
+  events: [String!]
+
+  """Number of events to return"""
+  limit: Int = 50
+
+  """Filter by severity levels"""
+  severities: [String!]
+
+  """User ID"""
+  userId: String!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+"""Geographic location information derived from IP address"""
 type Location {
+  """City name (e.g., "New York")"""
   city: String!
+
+  """Country name (e.g., "United States")"""
   country: String!
+
+  """Latitude coordinate"""
   latitude: Float!
+
+  """Longitude coordinate"""
   longitude: Float!
 }
 
+"""User credentials for authentication"""
 input LoginInput {
+  """User email address"""
   email: String!
+
+  """User password (min 8 characters)"""
   password: String!
 }
 
+"""Response after successful authentication"""
 type LoginResponse {
+  """JWT access token (null if using cookie-based sessions)"""
   accessToken: String
+
+  """Authenticated user data"""
   user: User
 }
 
 type Mutation {
+  """[Admin] Disable 2FA for a user in emergency situations"""
+  adminDisableUser2FA(input: DisableUser2FAInput!): AdminActionSuccess!
+
+  """[Admin] Revoke all trusted devices and sessions for a user"""
+  adminRevokeAllUserDevices(input: RevokeAllUserDevicesInput!): AdminActionSuccess!
+
+  """[Admin] Revoke a specific trusted device for a user"""
+  adminRevokeUserDevice(input: RevokeUserDeviceInput!): AdminActionSuccess!
+
   """
-  Change the current user email. Normalizes email, rejects same email, resets verification and sends a new verification token.
+  Change current user email address. Resets verification status and sends new verification email.
   """
   changeEmail(data: ChangeEmailInput!): Boolean!
 
   """
-  Change the current user password. Verifies old password, rejects identical new password, hashes and updates on success.
+  Change current user password. Verifies old password, updates passwordChangedAt timestamp.
   """
   changePassword(data: ChangePasswordInput!): Boolean!
 
-  """Clear the session cookie from the response."""
+  """Clear session cookie from client (does not invalidate Redis session)."""
   clearSessionCookie: Boolean!
 
   """Complete TOTP setup by verifying code and receive backup codes"""
   completeTotpSetup(data: CompleteTotpSetupInput!): TwoFactorSetupComplete!
 
+  """Verify WebAuthn authentication response"""
+  completeWebAuthnAuthentication(data: CompleteWebAuthnAuthenticationInput!): WebAuthnAuthenticationComplete!
+
+  """Verify and save WebAuthn credential"""
+  completeWebAuthnRegistration(data: CompleteWebAuthnRegistrationInput!): WebAuthnRegistrationComplete!
+
   """
-  Create a new user account. Normalizes email, hashes password, and sends a verification email token.
+  Create a new user account. Normalizes email, hashes password with Argon2id, and sends verification email.
   """
   createAccount(data: CreateAccountInput!): User!
 
   """
-  Authenticate the user and create a session (cookie-based). Returns session metadata.
+  Authenticate user with email and password. Creates session cookie and tracks login metadata (IP, device, location).
   """
   login(data: LoginInput!): LoginResponse!
 
-  """Destroy the current session (logout)."""
+  """Destroy current session and clear session cookie."""
   logout: Boolean!
 
   """
@@ -144,10 +290,11 @@ type Mutation {
   """Remove 2FA method (requires password confirmation)"""
   remove2FAMethod(data: Remove2FAMethodInput!): TwoFactorSuccess!
 
-  """
-  Remove a specific session by id (fails if the id belongs to the current session).
-  """
+  """Remove specific session by ID (cannot remove current session)."""
   removeSession(id: String!): Boolean!
+
+  """Remove a WebAuthn credential"""
+  removeWebAuthnCredential(data: RemoveWebAuthnCredentialInput!): TwoFactorSuccess!
 
   """
   Initiate password reset: generate a one-time token and send a reset link to the user’s email.
@@ -165,6 +312,11 @@ type Mutation {
 
   """Setup OTP method (Email or SMS)"""
   setupOtp(data: SetupOtpInput!): OtpSetup!
+
+  """
+  Generate WebAuthn registration options for adding a security key or passkey
+  """
+  startWebAuthnRegistration(data: StartWebAuthnRegistrationInput): WebAuthnRegistrationOptions!
 
   """Update 2FA method (name, primary status, etc.)"""
   update2FAMethod(data: Update2FAMethodInput!): TwoFactorSuccess!
@@ -201,16 +353,22 @@ type OtpSetup {
 }
 
 type Query {
+  """[Admin] Get comprehensive 2FA status for a user"""
+  adminGetUser2FAStatus(userId: String!): User2FAStatus!
+
+  """[Admin] Get security events for a user"""
+  adminGetUserSecurityEvents(input: GetUserSecurityEventsInput!): [SecurityEventSummary!]!
+
+  """[Admin] Get all trusted devices for a user"""
+  adminGetUserTrustedDevices(userId: String!): [TrustedDeviceSummary!]!
+
   """Get status of backup codes"""
   backupCodesStatus(methodId: String): BackupCodesStatus!
 
-  """Get the current session by the request session id."""
-  findCurrentSession: Session!
-
   """
-  List all active sessions for the current user (the current session is excluded).
+  Get current session metadata including device, location, and security status.
   """
-  findSessionsByUser: [Session!]!
+  currentSession: Session
 
   """Generate TOTP QR code and secret for setup"""
   generateTotpSetup(data: GenerateTotpSetupInput): TotpSetup!
@@ -227,10 +385,21 @@ type Query {
   """Get user's trusted devices"""
   myTrustedDevices: [TwoFactorMethod!]!
 
+  """Get user's registered WebAuthn credentials"""
+  myWebAuthnCredentials: [WebAuthnCredential!]!
+
   """
-  Get the currently authenticated user profile. Requires auth. Returns a safe projection (no password).
+  Get the currently authenticated user profile. Returns safe projection without sensitive data.
   """
   profile: User!
+
+  """Generate WebAuthn authentication options"""
+  startWebAuthnAuthentication(data: StartWebAuthnAuthenticationInput): WebAuthnAuthenticationOptions!
+
+  """
+  List all active sessions for current user (sorted by creation time, current session excluded).
+  """
+  userSessions: [Session!]!
 }
 
 input RegenerateBackupCodesInput {
@@ -252,8 +421,66 @@ input Remove2FAMethodInput {
   password: String!
 }
 
+"""
+Input for removing a registered WebAuthn credential (requires password confirmation)
+"""
+input RemoveWebAuthnCredentialInput {
+  """Credential ID (base64url) or authentication method ID to remove"""
+  credentialId: String!
+
+  """
+  User password for confirmation (security measure to prevent unauthorized removal)
+  """
+  password: String!
+}
+
 input ResetPasswordInput {
   email: String!
+}
+
+input RevokeAllUserDevicesInput {
+  """Reason for revoking all devices"""
+  reason: String!
+
+  """User ID"""
+  userId: String!
+}
+
+input RevokeUserDeviceInput {
+  """Device ID to revoke"""
+  deviceId: String!
+
+  """Reason for revoking device"""
+  reason: String!
+
+  """User ID"""
+  userId: String!
+}
+
+type SecurityEventSummary {
+  """City"""
+  city: String
+
+  """Country"""
+  country: String
+
+  """Event timestamp"""
+  createdAt: DateTime!
+
+  """Event type"""
+  event: String!
+
+  """Event ID"""
+  id: String!
+
+  """IP address"""
+  ip: String
+
+  """Resolved status"""
+  resolved: Boolean!
+
+  """Severity"""
+  severity: String!
 }
 
 input SendOtpCodeInput {
@@ -261,16 +488,42 @@ input SendOtpCodeInput {
   methodId: String
 }
 
+"""Active user session with security tracking"""
 type Session {
+  """Session creation timestamp (ISO 8601 string)"""
   createdAt: String!
+
+  """Unique session identifier (used for session management)"""
   id: ID!
+
+  """Whether 2FA has been verified for this session"""
+  is2FAVerified: Boolean
+
+  """Whether this session is from a trusted device (reduces 2FA friction)"""
+  isTrusted: Boolean
+
+  """Session metadata (location, device, IP)"""
   metadata: SessionMetadata!
+
+  """Risk score for this session (0-100): 0 = safe, 100 = suspicious"""
+  riskScore: Float
+
+  """User ID associated with this session"""
   userId: String!
+
+  """Timestamp when 2FA was successfully verified"""
+  verified2FAAt: DateTime
 }
 
+"""Session metadata including location, device, and network information"""
 type SessionMetadata {
+  """Device information"""
   device: Device!
+
+  """IP address (IPv4 or IPv6)"""
   ip: String!
+
+  """Geographic location of the session"""
   location: Location!
 }
 
@@ -288,6 +541,39 @@ input SetupOtpInput {
   phone: String
 }
 
+"""Input for initiating WebAuthn authentication challenge"""
+input StartWebAuthnAuthenticationInput {
+  """
+  Specific credential ID to use for authentication (if null, user picks from available credentials)
+  """
+  credentialId: String
+
+  """
+  User email for authentication (required if user is not already logged in)
+  """
+  email: String
+}
+
+"""
+Input for initiating WebAuthn credential registration (passkey or security key)
+"""
+input StartWebAuthnRegistrationInput {
+  """
+  Authenticator attachment: "platform" (TouchID, FaceID, Windows Hello) or "cross-platform" (YubiKey, external USB key)
+  """
+  authenticatorAttachment: String
+
+  """
+  Custom name for the authenticator (e.g., "YubiKey 5C", "iPhone 15 Pro")
+  """
+  authenticatorName: String
+
+  """
+  Prefer platform authenticators (built-in biometrics) over external keys
+  """
+  preferPlatform: Boolean = true
+}
+
 type TotpSetup {
   """Account name (user email)"""
   accountName: String!
@@ -303,6 +589,38 @@ type TotpSetup {
 
   """QR code as data URL"""
   qrCodeUrl: String!
+}
+
+type TrustedDeviceSummary {
+  """Browser"""
+  browser: String
+
+  """Device identifier"""
+  deviceId: String!
+
+  """Device ID"""
+  id: String!
+
+  """Is active"""
+  isActive: Boolean!
+
+  """Last country"""
+  lastCountry: String
+
+  """Last IP"""
+  lastIp: String
+
+  """Last seen"""
+  lastSeenAt: DateTime!
+
+  """Device name"""
+  name: String
+
+  """Operating system"""
+  os: String
+
+  """Trust score"""
+  trustScore: Float!
 }
 
 type TwoFactorMethod {
@@ -328,6 +646,32 @@ type TwoFactorMethod {
   name: String
 
   """Number of times used"""
+  useCount: Int!
+}
+
+type TwoFactorMethodSummary {
+  """Created at"""
+  createdAt: DateTime!
+
+  """Method ID"""
+  id: String!
+
+  """Is active"""
+  isActive: Boolean!
+
+  """Is primary"""
+  isPrimary: Boolean!
+
+  """Last used"""
+  lastUsedAt: DateTime
+
+  """Method type"""
+  method: String!
+
+  """Method name"""
+  name: String
+
+  """Use count"""
   useCount: Int!
 }
 
@@ -381,22 +725,119 @@ input Update2FAMethodInput {
   name: String
 }
 
+"""User account with profile, security, and authentication settings"""
 type User {
+  """Avatar image URL (optional)"""
   avatar: String
+
+  """User biography or description (optional)"""
   bio: String
+
+  """Account creation timestamp"""
   createdAt: DateTime!
+
+  """Soft delete timestamp (null if account is active)"""
+  deletedAt: DateTime
+
+  """Email address (unique, used for login and notifications)"""
   email: String!
+
+  """Timestamp of last email bounce (for reputation tracking)"""
+  emailBouncedAt: DateTime
+
+  """Timestamp when email was verified (null if not verified)"""
+  emailVerifiedAt: DateTime
+
+  """First name (optional, parsed from fullName)"""
   firstName: String
+
+  """Full name of the user (displayed in UI)"""
   fullName: String!
+
+  """Unique user identifier (UUID v4)"""
   id: ID!
+
+  """Global 2FA status - true if user has at least one active 2FA method"""
+  is2FAEnabled: Boolean!
+
+  """Whether the email address has been verified"""
   isEmailVerified: Boolean!
-  isOtpEnabled: Boolean!
-  isTotpEnabled: Boolean!
+
+  """Whether the phone number has been verified"""
+  isPhoneVerified: Boolean!
+
+  """Whether user has unsubscribed from email notifications"""
+  isUnsubscribed: Boolean
+
+  """Timestamp of last successful login"""
+  lastLoginAt: DateTime
+
+  """IP address of last successful login"""
+  lastLoginIp: String
+
+  """Last name (optional, parsed from fullName)"""
   lastName: String
-  otpSecret: String
+
+  """Timestamp when risk score was last calculated"""
+  lastRiskAssessAt: DateTime
+
+  """Timestamp when password was last changed"""
+  passwordChangedAt: DateTime
+
+  """Phone number in E.164 format (optional, used for SMS 2FA)"""
   phone: String
-  totpSecret: String
+
+  """Timestamp of last SMS delivery failure (for reputation tracking)"""
+  phoneBouncedAt: DateTime
+
+  """Timestamp when phone was verified (null if not verified)"""
+  phoneVerifiedAt: DateTime
+
+  """User preferred 2FA method used by default during login"""
+  preferred2FAMethod: E2FAMethod
+
+  """Whether 2FA is mandatory for this user (admin-enforced for compliance)"""
+  require2FA: Boolean!
+
+  """
+  User risk score (0-100): 0 = trusted, 100 = high risk. Based on login patterns and behavior.
+  """
+  riskScore: Float
+
+  """User roles for access control (can have multiple roles)"""
+  roles: [EUserRole!]!
+
+  """Account last update timestamp (auto-updated)"""
   updatedAt: DateTime!
+}
+
+type User2FAStatus {
+  """Number of backup codes remaining"""
+  backupCodesRemaining: Int!
+
+  """User email"""
+  email: String!
+
+  """Whether 2FA is enabled"""
+  is2FAEnabled: Boolean!
+
+  """Active 2FA methods"""
+  methods: [TwoFactorMethodSummary!]!
+
+  """Preferred 2FA method"""
+  preferred2FAMethod: String
+
+  """Recent security events"""
+  recentEvents: [SecurityEventSummary!]!
+
+  """User risk score"""
+  riskScore: Float
+
+  """Trusted devices"""
+  trustedDevices: [TrustedDeviceSummary!]!
+
+  """User ID"""
+  userId: String!
 }
 
 input VerificationInput {
@@ -432,4 +873,140 @@ input VerifyOtpSetupInput {
 
   """Method ID from setup"""
   methodId: String!
+}
+
+"""Response after successful WebAuthn credential verification"""
+type WebAuthnAuthenticationComplete {
+  """Name of the authenticator that was used (e.g., "YubiKey 5C")"""
+  authenticatorName: String
+
+  """
+  Updated signature counter (detects cloned authenticators if counter decreases)
+  """
+  counter: Int!
+
+  """Credential ID that was used for authentication (base64url encoded)"""
+  credentialId: String!
+
+  """Human-readable success message for UI display"""
+  message: String!
+
+  """Whether authentication was successful"""
+  success: Boolean!
+}
+
+"""
+WebAuthn authentication options for verifying a passkey or security key
+"""
+type WebAuthnAuthenticationOptions {
+  """
+  Unique challenge identifier for this authentication session (used to verify response)
+  """
+  challengeId: String!
+
+  """Number of registered WebAuthn credentials for this user"""
+  credentialCount: Int!
+
+  """
+  PublicKeyCredentialRequestOptions as JSON. Pass this to @simplewebauthn/browser startAuthentication() or navigator.credentials.get({ publicKey: options })
+  """
+  options: JSON!
+
+  """Relying Party ID - must match registration domain"""
+  rpId: String!
+}
+
+"""Registered WebAuthn credential (security key or passkey)"""
+type WebAuthnCredential {
+  """Credential registration timestamp"""
+  createdAt: DateTime!
+
+  """WebAuthn credential ID (base64url encoded, unique per credential)"""
+  credentialId: String!
+
+  """Unique authentication method ID (database primary key)"""
+  id: String!
+
+  """
+  Whether credential is synced to cloud (iCloud Keychain, Google Password Manager)
+  """
+  isBackedUp: Boolean!
+
+  """
+  Platform authenticator (TouchID, FaceID, Windows Hello) vs cross-platform (YubiKey, USB key)
+  """
+  isPlatform: Boolean!
+
+  """Timestamp of last successful authentication with this credential"""
+  lastUsedAt: DateTime
+
+  """
+  User-provided name for this credential (e.g., "Work YubiKey", "Personal iPhone")
+  """
+  name: String
+
+  """Supported transports (usb, nfc, ble, internal, hybrid)"""
+  transports: [String!]!
+
+  """Total number of successful authentications with this credential"""
+  useCount: Int!
+}
+
+"""Response after successful WebAuthn credential registration"""
+type WebAuthnRegistrationComplete {
+  """User-provided authenticator name (e.g., "YubiKey 5C", "iPhone 15 Pro")"""
+  authenticatorName: String
+
+  """
+  Backup recovery codes for emergency access (store securely, shown only once)
+  """
+  backupCodes: [String!]!
+
+  """WebAuthn credential ID (base64url encoded, used for authentication)"""
+  credentialId: String!
+
+  """
+  Whether credential is backed up to cloud (iCloud Keychain, Google Password Manager)
+  """
+  isBackedUp: Boolean!
+
+  """
+  Whether this is a platform authenticator (TouchID, FaceID, Windows Hello)
+  """
+  isPlatform: Boolean!
+
+  """Human-readable success message for UI display"""
+  message: String!
+
+  """Unique authentication method ID (stored in database)"""
+  methodId: String!
+
+  """Whether registration was successful"""
+  success: Boolean!
+}
+
+"""
+WebAuthn registration options for creating a new passkey or security key
+"""
+type WebAuthnRegistrationOptions {
+  """
+  Unique challenge identifier for this registration session (used to verify response)
+  """
+  challengeId: String!
+
+  """
+  PublicKeyCredentialCreationOptions as JSON. Pass this to @simplewebauthn/browser startRegistration() or navigator.credentials.create({ publicKey: options })
+  """
+  options: JSON!
+
+  """Relying Party ID - domain name (e.g., "medichub.com")"""
+  rpId: String!
+
+  """Relying Party name displayed to user (e.g., "MedicHub")"""
+  rpName: String!
+
+  """
+  User display name shown in authenticator UI (e.g., "John Doe <john@example.com>")
+  """
+  userDisplayName: String!
 }
