@@ -49,7 +49,6 @@ export class WebAuthnService extends CoreService {
 	async generateRegistrationOptions(
 		user: User,
 		authenticatorAttachment?: 'platform' | 'cross-platform',
-		preferPlatform = true,
 		lng: Language = 'en',
 	): Promise<{
 		challengeId: string

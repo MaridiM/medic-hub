@@ -3,9 +3,9 @@ import { PrismaService } from '@/core/prisma'
 import { Authorization, Authorized } from '@/shared/decorators'
 import type { GqlContext } from '@/shared/types'
 import { getSessionMetadata } from '@/shared/utils'
-import { UseGuards } from '@nestjs/common'
+import { BadRequestException, UnauthorizedException, UseGuards } from '@nestjs/common'
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
-import { type User } from '@prisma/__generated__'
+import { E2FAMethod, type User } from '@prisma/__generated__'
 
 import {
 	CompleteTotpSetupInput,
@@ -47,6 +47,7 @@ import {
 	TwoFactorMethodService,
 	WebAuthnService,
 } from '../services'
+import { ITotpMethodData } from '../types'
 
 /**
  * GraphQL Resolver for 2FA operations
@@ -176,7 +177,7 @@ export class TwoFactorResolver {
 		const isBackupCode = /^[A-F0-9]{8}$/i.test(input.code)
 
 		if (isBackupCode) {
-			// Verify backup code
+			// --- Handle Backup Code Verification ---
 			const method = input.methodId
 				? await this.twoFactorService['prisma'].authenticationMethod.findUnique({
 						where: { id: input.methodId },
@@ -186,37 +187,72 @@ export class TwoFactorResolver {
 					})
 
 			if (!method) {
-				throw new Error('2FA method not found')
+				throw new BadRequestException(
+					this.i18n.t('auth.errors.2fa.method_not_found', { lng, defaultValue: '2FA method not found' }),
+				)
 			}
 
-			await this.backupCodeService.verifyBackupCode(user, input.code, method.method, lng)
-
-			// Log successful backup code verification
-			await this.securityEventService.log2FASuccess(user.id, 'BACKUP_CODE', session)
+			try {
+				await this.backupCodeService.verifyBackupCode(user, input.code, method.method, lng, session.ip)
+				await this.securityEventService.log2FASuccess(user.id, 'BACKUP_CODE', session)
+			} catch (error) {
+				await this.securityEventService.log2FAFailed(user.id, 'BACKUP_CODE', session, 1)
+				throw error
+			}
 		} else {
-			// Verify regular code (TOTP or OTP)
-			// For now, we'll use TOTP verification as example
-			// In production, this should detect method type and verify accordingly
+			// --- Handle TOTP/OTP Code Verification ---
 			const method = input.methodId
-				? await this.twoFactorService['prisma'].authenticationMethod.findUnique({
-						where: { id: input.methodId },
+				? await this.prisma.authenticationMethod.findFirst({
+						where: { id: input.methodId, userId: user.id },
 					})
-				: await this.twoFactorService['prisma'].authenticationMethod.findFirst({
+				: await this.prisma.authenticationMethod.findFirst({
 						where: { userId: user.id, isPrimary: true },
 					})
 
 			if (!method) {
-				throw new Error('2FA method not found')
+				throw new BadRequestException(
+					this.i18n.t('auth.errors.2fa.method_not_found', { lng, defaultValue: '2FA method not found' }),
+				)
 			}
 
-			// TODO: Implement method-specific verification
+			let isCodeValid = false
+
+			switch (method.method) {
+				case E2FAMethod.TOTP: {
+					const totpData = method.data as unknown as ITotpMethodData
+					isCodeValid = this.twoFactorService.verifyTotpCode(user.email, totpData.secret, input.code)
+					break
+				}
+
+				case E2FAMethod.OTP_EMAIL:
+				case E2FAMethod.OTP_SMS: {
+					isCodeValid = await this.twoFactorService.verifyOneTimeCode(user.id, method.id, input.code, lng)
+					break
+				}
+
+				default: {
+					throw new BadRequestException(
+						`Verification for method type ${method.method} is not supported here.`,
+					)
+				}
+			}
+
+			if (!isCodeValid) {
+				await this.securityEventService.log2FAFailed(user.id, method.method, session, 1)
+				throw new UnauthorizedException(
+					this.i18n.t('auth.errors.2fa.invalid_code', { lng, defaultValue: 'Invalid 2FA code' }),
+				)
+			}
+
+			await this.securityEventService.log2FASuccess(user.id, method.method, session)
+
 			// For now, return success
 			await this.securityEventService.log2FASuccess(user.id, method.method, session)
 		}
 
 		// If trustDevice is true, register device as trusted
 		if (input.trustDevice) {
-			const deviceId = await this.deviceTrustService.registerDevice(user.id, session)
+			const deviceId = await this.deviceTrustService.registerDevice(user.id, session, lng)
 			await this.deviceTrustService.trustDevice(user.id, deviceId)
 		}
 
@@ -486,7 +522,6 @@ export class TwoFactorResolver {
 		const { challengeId, options } = await this.webauthnService.generateRegistrationOptions(
 			user,
 			input.authenticatorAttachment,
-			input.preferPlatform,
 			lng,
 		)
 
@@ -552,7 +587,6 @@ export class TwoFactorResolver {
 	async startWebAuthnAuthentication(
 		@Args('data', { nullable: true }) input: StartWebAuthnAuthenticationInput = {},
 		@Context() context: GqlContext,
-		@Lang() lng: Language,
 	): Promise<WebAuthnAuthenticationOptionsModel> {
 		// Try to get user ID from session or input
 		const userId =

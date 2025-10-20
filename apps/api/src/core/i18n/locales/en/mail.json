@@ -10,10 +10,11 @@
 		"subject": "Email Verification",
 		"preview": "Confirm your email to finish signing up.",
 		"title": "Verify your email address",
-		"intro": "Please confirm that you’d like to use this email address for your {{app}} account. Once confirmed, you’ll be able to start using {{app}}.",
+		"intro": "Please confirm that you'd like to use this email address for your {{app}} account. Once confirmed, you'll be able to start using {{app}}.",
 		"cta": "Verify email",
-		"legalNote": "You're receiving this email because you created a {{app}} account. If you didn’t request this, you can safely ignore this email."
+		"legalNote": "You're receiving this email because you created a {{app}} account. If you didn't request this, you can safely ignore this email."
 	},
+
 	"reset_password": {
 		"subject": "Reset your password",
 		"preview": "Set a new password to regain access.",
@@ -27,24 +28,244 @@
 			"os": "📱 Operating system: {{os}}",
 			"browser": "🌐 Browser: {{browser}}",
 			"ip": "💻 IP address: {{ip}}",
-			"note": "If you didn’t initiate this request, please ignore this message."
+			"note": "If you didn't initiate this request, please ignore this message."
 		}
 	},
+
 	"password_changed": {
 		"subject": "Your password was changed",
 		"preview": "The password for your {{app}} account has been updated.",
 		"title": "Password changed successfully",
 		"intro": "This is to let you know that the password for your {{app}} account was changed successfully.",
-		"legalNote": "If you didn’t make this change, please reset your password immediately and contact support.",
+		"legalNote": "If you didn't make this change, please reset your password immediately and contact support.",
 		"cta": "Go to sign in"
 	},
+
 	"otp_code": {
 		"subject": "Your Verification Code",
 		"preview": "Your verification code for OTP.",
 		"title": "Your Verification Code",
 		"intro": "Use the following code to complete your verification. This code is valid for 5 minutes.",
-		"legalNote": "If you didn’t make this change, please reset your password immediately and contact support."
+		"legalNote": "If you didn't make this change, please reset your password immediately and contact support."
 	},
+
+	"2fa_method_added": {
+		"subject": "🔐 New 2FA Method Added",
+		"preview": "A new two-factor authentication method was added to your account.",
+		"title": "🔐 New 2FA Method Added",
+		"intro": "A new two-factor authentication method ({{method}}) was added to your {{app}} account.",
+		"cta": "Manage 2FA Settings",
+		"legalNote": "If you didn't make this change, your account may be compromised. Please review your security settings immediately.",
+		"details": {
+			"title": "Method Details:",
+			"type": "🔑 Type: {{type}}",
+			"name": "📝 Name: {{name}}",
+			"timestamp": "⏰ Added: {{time}}"
+		},
+		"warning": {
+			"action": "Please review your security settings immediately and remove any unauthorized methods."
+		}
+	},
+
+	"2fa_method_removed": {
+		"subject": "🔓 2FA Method Removed",
+		"preview": "A two-factor authentication method was removed from your account.",
+		"title": "🔓 2FA Method Removed",
+		"intro": "A two-factor authentication method ({{method}}) was removed from your {{app}} account.",
+		"cta": "Review Security Settings",
+		"legalNote": "If you didn't remove this method, please secure your account immediately and contact support.",
+		"details": {
+			"title": "Removed Method:",
+			"type": "🔑 Type: {{type}}",
+			"name": "📝 Name: {{name}}",
+			"timestamp": "⏰ Removed: {{time}}"
+		},
+		"warning": {
+			"message": "Removing 2FA methods reduces your account security.",
+			"action": "If you didn't remove this method, please secure your account immediately and add it back."
+		}
+	},
+
+	"2fa_disabled": {
+		"subject": "🚨 Two-Factor Authentication Disabled",
+		"preview": "Two-factor authentication has been disabled on your account.",
+		"title": "🚨 Two-Factor Authentication Disabled",
+		"intro": "Two-factor authentication has been completely disabled on your {{app}} account.",
+		"cta": "Re-Enable 2FA Now",
+		"legalNote": "If you didn't disable 2FA, your account may be compromised. Take immediate action: change your password and re-enable 2FA now.",
+		"critical_warning": {
+			"title": "CRITICAL SECURITY ALERT",
+			"message": "Your account is now significantly less secure. We strongly recommend re-enabling 2FA immediately."
+		},
+		"risks": [
+			"Your account can now be accessed with just a password",
+			"Unauthorized access is much easier for attackers",
+			"Your data and privacy are at increased risk"
+		],
+		"timestamp": "⏰ Disabled at: {{time}}"
+	},
+
+	"new_device_login": {
+		"subject": "🔐 New Device Login Detected",
+		"preview": "We detected a login to your account from a new device or location.",
+		"title": "🔐 New Device Login Detected",
+		"intro": "We detected a login to your {{app}} account from a new device or location.",
+		"cta": "Review Security Activity",
+		"legalNote": "If you recognize this activity, no action is needed. If you did NOT perform this login, your account may be compromised. Secure it immediately!",
+		"login_details": {
+			"title": "Login Details:",
+			"location": "🌍 Location: {{country}}, {{city}}",
+			"device": "📱 Device: {{device}}",
+			"os": "💻 OS: {{os}}",
+			"browser": "🌐 Browser: {{browser}}",
+			"ip": "🔢 IP: {{ip}}",
+			"time": "⏰ Time: {{time}}"
+		},
+		"recognized": {
+			"title": "Was this you?",
+			"message": "If you recognize this activity, no action is needed."
+		},
+		"unrecognized": {
+			"title": "Wasn't you?",
+			"message": "If you did NOT perform this login, your account may be compromised. Secure it immediately!"
+		}
+	},
+
+	"suspicious_activity": {
+		"subject": "🚨 Suspicious Activity Detected",
+		"preview": "We detected suspicious activity on your account that requires your attention.",
+		"title": "🚨 Suspicious Activity Detected",
+		"intro": "We detected suspicious activity on your {{app}} account that requires your attention.",
+		"cta": "Review Activity",
+		"cta_secondary": "Lock My Account",
+		"legalNote": "This is a security alert. If you recognize this activity, you can ignore this email. Otherwise, please take immediate action to secure your account.",
+		"alert": {
+			"title": "{{level}} RISK DETECTED"
+		},
+		"risk_score": "Risk Score:",
+		"timestamp": "⏰ Detected at: {{time}}",
+		"what_to_do": {
+			"title": "What should you do?",
+			"steps": [
+				"Review your recent security activity",
+				"Change your password if you suspect unauthorized access",
+				"Enable 2FA if not already enabled",
+				"Lock your account if you did not perform this action"
+			]
+		}
+	},
+
+	"low_backup_codes": {
+		"subject": "⚠️ Running Low on Backup Codes",
+		"preview": "Your account has only a few backup codes remaining.",
+		"title": "⚠️ Running Low on Backup Codes",
+		"intro": "Your {{app}} account has only {{remaining}} backup codes remaining.",
+		"cta": "Regenerate Backup Codes",
+		"legalNote": "Backup codes are important for account recovery. We recommend regenerating them before you run out.",
+		"remaining_label": "{{count}} codes left",
+		"threshold_info": "Warning threshold: {{threshold}} codes",
+		"what_are": {
+			"title": "What are backup codes?",
+			"description": "Backup codes are one-time use codes that allow you to access your account if you lose access to your 2FA device."
+		},
+		"recommendation": {
+			"title": "Action Required",
+			"message": "We recommend regenerating your backup codes before you run out. Each code can only be used once.",
+			"steps": ["Generate new backup codes", "Save them in a secure location", "Old codes will be invalidated"]
+		}
+	},
+
+	"backup_codes_regenerated": {
+		"subject": "✅ Backup Codes Regenerated",
+		"preview": "Your backup codes have been successfully regenerated.",
+		"title": "✅ Backup Codes Regenerated",
+		"intro": "Your {{app}} backup codes have been successfully regenerated.",
+		"cta": "View New Backup Codes",
+		"legalNote": "All your previous backup codes are now INVALID and cannot be used. Please save your new codes in a secure location.",
+		"success_message": "New backup codes generated successfully",
+		"timestamp": "Generated at: {{time}}",
+		"important": {
+			"title": "IMPORTANT NOTICE"
+		},
+		"next_steps": {
+			"title": "Next Steps:",
+			"steps": [
+				"Log in to your account to view your new codes",
+				"Download or print them immediately",
+				"Store them in a secure location (password manager, safe)",
+				"Never share them with anyone"
+			]
+		},
+		"security_reminder": {
+			"title": "Security Reminder",
+			"message": "Each backup code can only be used once. Once used, it becomes invalid permanently."
+		}
+	},
+
+	"2fa_disabled_by_admin": {
+		"subject": "👤 2FA Disabled by Administrator",
+		"preview": "An administrator has disabled two-factor authentication on your account.",
+		"title": "👤 2FA Disabled by Administrator",
+		"intro": "An administrator has disabled two-factor authentication on your {{app}} account.",
+		"cta": "Re-Enable 2FA",
+		"cta_secondary": "Contact Support",
+		"legalNote": "This action was performed by an administrator. If you have questions or believe this was made in error, please contact our support team.",
+		"action_details": {
+			"title": "Administrative Action Details:",
+			"admin": "👤 Administrator: {{admin}}",
+			"action": "🔓 Action: Two-Factor Authentication Disabled",
+			"time": "⏰ Time: {{time}}"
+		},
+		"reason": {
+			"title": "Reason Provided:"
+		},
+		"security_impact": {
+			"title": "Security Impact",
+			"message": "Your account security has been reduced. We recommend re-enabling 2FA as soon as possible."
+		},
+		"questions": {
+			"title": "Have Questions?",
+			"message": "If you have questions about this action or believe it was made in error, please contact our support team."
+		}
+	},
+
+	"device_revoked_by_admin": {
+		"subject": "🚫 Device Revoked by Administrator",
+		"preview": "An administrator has revoked a device from your account.",
+		"title": "🚫 Device Revoked by Administrator",
+		"intro": "An administrator has revoked device \"{{device}}\" from your {{app}} account.",
+		"cta": "Review Security",
+		"cta_secondary": "Contact Support",
+		"legalNote": "This action was performed by an administrator. All active sessions from this device have been terminated. You will need to log in again.",
+		"action_details": {
+			"title": "Administrative Action Details:",
+			"admin": "👤 Administrator: {{admin}}",
+			"device": "📱 Device: {{device}}",
+			"action": "🚫 Action: Device Revoked",
+			"time": "⏰ Time: {{time}}"
+		},
+		"reason": {
+			"title": "Reason Provided:"
+		},
+		"impact": {
+			"title": "What this means:",
+			"items": [
+				"This device is no longer trusted for your account",
+				"All active sessions from this device have been terminated",
+				"You will need to log in again from this device",
+				"2FA verification will be required on next login"
+			]
+		},
+		"next_steps": {
+			"title": "What should you do?",
+			"items": [
+				"Review your recent security activity",
+				"Contact support if you believe this was done in error",
+				"Update your security settings if needed"
+			]
+		}
+	},
+
 	"errors": {
 		"api_key_missing": "API key is missing.",
 		"message_send_failed": "Failed to send the message."

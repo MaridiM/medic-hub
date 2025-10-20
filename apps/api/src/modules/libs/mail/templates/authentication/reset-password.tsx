@@ -6,7 +6,7 @@ import {
   Tailwind,
   Text
 } from "@react-email/components";
-import { TemplateWrapper } from "./components";
+import { TemplateWrapper } from '../components';
 import { ISessionMetadata } from "@/shared/types";
 import { type I18nService } from "@/core/i18n";
 import { APP_NAME } from "@/core/config";

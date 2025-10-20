@@ -9,6 +9,7 @@ import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
 import { MailService, SmsService } from '@/modules/libs'
+import { NotificationService } from '@/modules/notification'
 import { HashUtil } from '@/shared/utils'
 import {
 	BadRequestException,
@@ -33,7 +34,6 @@ import type { IOtpEmailMethodData, IOtpSmsMethodData, ITotpMethodData } from '..
 import { EncryptionUtil } from '../utils'
 
 import { BackupCodeService } from './backup-code.service'
-import { DeviceTrustService } from './device-trust.service'
 import { SecurityEventService } from './security-event.service'
 
 /**
@@ -50,9 +50,9 @@ export class TwoFactorMethodService extends CoreService {
 		redis: RedisService,
 		private readonly backupCodeService: BackupCodeService,
 		private readonly securityEventService: SecurityEventService,
-		private readonly deviceTrustService: DeviceTrustService,
 		private readonly mailService: MailService,
 		private readonly smsService: SmsService,
+		private readonly notificationService: NotificationService,
 	) {
 		super(i18n, prisma, redis)
 	}
@@ -195,6 +195,9 @@ export class TwoFactorMethodService extends CoreService {
 				timestamp: new Date().toISOString(),
 			},
 		})
+
+		// ✅ NOTIFICATION CALL
+		await this.notificationService.notify2FAMethodAdded(user, E2FAMethod.TOTP, result.name, lng)
 
 		// Clear temp secret
 		await this.rDel(tempKey)
@@ -435,6 +438,9 @@ export class TwoFactorMethodService extends CoreService {
 		const backupCodes = await this.backupCodeService.generateBackupCodes(user.id, result.method, result.id)
 		await this.rDel(codeKey)
 
+		// ✅ NOTIFICATION CALL
+		await this.notificationService.notify2FAMethodAdded(user, result.method, result.name, lng)
+
 		return {
 			success: true,
 			methodId: result.id,
@@ -591,6 +597,14 @@ export class TwoFactorMethodService extends CoreService {
 			metadata: { methodId: input.methodId, methodType: method.method, timestamp: new Date().toISOString() },
 		})
 
+		// ✅ NOTIFICATION CALL
+		if (activeMethods === 1) {
+			// Last method removed - 2FA completely disabled
+			await this.notificationService.notify2FADisabled(user, lng)
+		} else {
+			await this.notificationService.notify2FAMethodRemoved(user, method.method, method.name, lng)
+		}
+
 		return { success: true }
 	}
 
@@ -633,6 +647,9 @@ export class TwoFactorMethodService extends CoreService {
 			}
 		}
 
+		// ✅ NOTIFICATION CALL
+		await this.notificationService.notifyBackupCodesRegenerated(user, lng)
+
 		await this.securityEventService.logEvent({
 			userId: user.id,
 			event: ESecurityEvent.TWO_FA_BACKUP_CODES_REGENERATED,
@@ -652,6 +669,63 @@ export class TwoFactorMethodService extends CoreService {
 				defaultValue: 'Save these backup codes securely.',
 			}),
 		}
+	}
+
+	// ... (после regenerateBackupCodes)
+
+	// ==================== Method Verification ====================
+
+	/**
+	 * Verifies a TOTP code against the encrypted secret.
+	 * This method is public to be accessible from the resolver.
+	 *
+	 * @param email - User's email (for TOTP label).
+	 * @param encryptedSecret - The encrypted secret from the database.
+	 * @param code - The 6-digit code from the user.
+	 * @returns {boolean} - True if the code is valid.
+	 */
+	public verifyTotpCode(email: string, encryptedSecret: string, code: string): boolean {
+		try {
+			const secret = EncryptionUtil.decrypt(encryptedSecret)
+			const totp = this.createTOTP(email, secret) // createTOTP остается private
+			const delta = totp.validate({ token: code, window: TOTP_CONFIG.WINDOW })
+			return delta !== null
+		} catch (error) {
+			this.logger.error(`TOTP code verification failed: ${(error as Error).message}`)
+			return false
+		}
+	}
+
+	/**
+	 * Verifies a one-time code (Email/SMS) against the value stored in Redis.
+	 * This method is public to be accessible from the resolver.
+	 *
+	 * @param userId - The ID of the user.
+	 * @param methodId - The ID of the OTP method being verified.
+	 * @param code - The 6-digit code from the user.
+	 * @param lng - The language for error messages.
+	 * @returns {Promise<boolean>} - True if the code is valid.
+	 */
+	public async verifyOneTimeCode(userId: string, methodId: string, code: string, lng: Language): Promise<boolean> {
+		const codeKey = REDIS_KEYS.OTP_CODE(userId)
+		const cached = await this.rGetJSON<{ code: string; methodId: string; expiresAt: number }>(codeKey)
+
+		if (!cached) {
+			// Не выбрасываем ошибку здесь, чтобы резолвер мог обработать это как "неверный код"
+			return false
+		}
+
+		// Проверяем, что код предназначен для этого метода
+		if (cached.methodId !== methodId) {
+			return false
+		}
+
+		const isValid = await HashUtil.verify(cached.code, code)
+		if (isValid) {
+			// Prevent code reuse by deleting it after successful verification.
+			await this.rDel(codeKey)
+		}
+		return isValid
 	}
 
 	// ==================== Private Helpers ====================
@@ -685,12 +759,6 @@ export class TwoFactorMethodService extends CoreService {
 			period: TOTP_CONFIG.PERIOD,
 			secret,
 		})
-	}
-
-	private verifyTotpCode(email: string, secret: string, code: string): boolean {
-		const totp = this.createTOTP(email, secret)
-		const delta = totp.validate({ token: code, window: TOTP_CONFIG.WINDOW })
-		return delta !== null
 	}
 
 	private generateOtpCode(): string {

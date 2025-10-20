@@ -1,7 +1,8 @@
 import { CoreService } from '@/core/core.service'
-import { I18nService } from '@/core/i18n'
+import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
+import { NotificationService } from '@/modules/notification'
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { EAuditCategory, ESecurityEvent, ESecuritySeverity, Prisma, type User } from '@prisma/__generated__'
 
@@ -14,7 +15,6 @@ import type {
 import type { AdminActionSuccessModel, User2FAStatusModel } from '../models/admin-2fa.model'
 import { IAdminActionMetadata } from '../types'
 
-import { BackupCodeService } from './backup-code.service'
 import { DeviceTrustService } from './device-trust.service'
 import { SecurityEventService } from './security-event.service'
 
@@ -32,7 +32,7 @@ export class AdminTwoFactorService extends CoreService {
 		redis: RedisService,
 		private readonly securityEventService: SecurityEventService,
 		private readonly deviceTrustService: DeviceTrustService,
-		private readonly backupCodeService: BackupCodeService,
+		private readonly notificationService: NotificationService,
 	) {
 		super(i18n, prisma, redis)
 	}
@@ -127,9 +127,8 @@ export class AdminTwoFactorService extends CoreService {
 		// Log admin action
 		this.logger.warn(`Admin ${adminUser.email} disabled 2FA for user ${targetUser.email}. Reason: ${input.reason}`)
 
-		// TODO: Send notification to user if requested
 		if (input.notifyUser) {
-			// await this.notificationService.notify2FADisabledByAdmin(targetUser, adminUser, input.reason)
+			await this.notificationService.notify2FADisabledByAdmin(targetUser as User, adminUser.email, input.reason)
 		}
 
 		return {
@@ -279,6 +278,17 @@ export class AdminTwoFactorService extends CoreService {
 		this.logger.warn(
 			`Admin ${adminUser.email} revoked device ${input.deviceId} for user ${input.userId}. Reason: ${input.reason}`,
 		)
+
+		const user = await this.prisma.user.findUnique({ where: { id: input.userId } })
+		if (user) {
+			await this.notificationService.notifyDeviceRevokedByAdmin(
+				user,
+				device.name || input.deviceId,
+				adminUser.email,
+				input.reason,
+				'en',
+			)
+		}
 
 		return {
 			success: true,

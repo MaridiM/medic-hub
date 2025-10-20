@@ -1,4 +1,4 @@
-﻿# Session Module
+# Session Module
 
 **root**
 `src/modules/auth/session/index.ts`
@@ -38,17 +38,17 @@ import { LoginInput, LoginResponse } from './dtos'
 import { Session } from './models'
 import { SessionService } from './session.service'
 
-@Resolver()
+@Resolver(() => Session)
 export class SessionResolver {
 	constructor(private readonly sessionService: SessionService) {}
 
 	/**
 	 * Authenticate the user and create a server session.
-	 * Sets the session cookie and returns basic session metadata.
 	 */
 	@Mutation(() => LoginResponse, {
 		name: 'login',
-		description: 'Authenticate the user and create a session (cookie-based). Returns session metadata.',
+		description:
+			'Authenticate user with email and password. Creates session cookie and tracks login metadata (IP, device, location).',
 	})
 	login(
 		@Context() { req }: GqlContext,
@@ -65,31 +65,32 @@ export class SessionResolver {
 	@Authorization()
 	@Mutation(() => Boolean, {
 		name: 'logout',
-		description: 'Destroy the current session (logout).',
+		description: 'Destroy current session and clear session cookie.',
 	})
 	logout(@Context() { req }: GqlContext): Promise<boolean> {
 		return this.sessionService.logout(req)
 	}
 
 	/**
-	 * Read the current session object (by the request’s session id).
+	 * Read the current session object.
 	 */
 	@Authorization()
 	@Query(() => Session, {
-		name: 'findCurrentSession',
-		description: 'Get the current session by the request session id.',
+		name: 'currentSession',
+		description: 'Get current session metadata including device, location, and security status.',
+		nullable: true,
 	})
 	findCurrent(@Context() { req }: GqlContext): Promise<Session | null> {
 		return this.sessionService.findCurrent(req)
 	}
 
 	/**
-	 * List all active sessions for the current user (excluding the current one).
+	 * List all active sessions for the current user (excluding current).
 	 */
 	@Authorization()
 	@Query(() => [Session], {
-		name: 'findSessionsByUser',
-		description: 'List all active sessions for the current user (the current session is excluded).',
+		name: 'userSessions',
+		description: 'List all active sessions for current user (sorted by creation time, current session excluded).',
 	})
 	findByUser(@Context() { req }: GqlContext, @Lang() lng: Language): Promise<Session[]> {
 		return this.sessionService.findByUser(req, lng)
@@ -101,19 +102,19 @@ export class SessionResolver {
 	@Authorization()
 	@Mutation(() => Boolean, {
 		name: 'clearSessionCookie',
-		description: 'Clear the session cookie from the response.',
+		description: 'Clear session cookie from client (does not invalidate Redis session).',
 	})
 	clearSession(@Context() { req }: GqlContext): boolean {
 		return this.sessionService.clear(req)
 	}
 
 	/**
-	 * Remove a specific session by id. You cannot remove the current session.
+	 * Remove a specific session by id.
 	 */
 	@Authorization()
 	@Mutation(() => Boolean, {
 		name: 'removeSession',
-		description: 'Remove a specific session by id (fails if the id belongs to the current session).',
+		description: 'Remove specific session by ID (cannot remove current session).',
 	})
 	removeSession(@Context() { req }: GqlContext, @Args('id') id: string, @Lang() lng: Language): Promise<boolean> {
 		return this.sessionService.remove(req, id, lng)
@@ -124,7 +125,6 @@ export class SessionResolver {
 `src/modules/auth/session/session.service.ts`
 
 ```typescript
-import { verify } from 'argon2'
 import type { Request } from 'express'
 
 import { CoreService } from '@/core/core.service'
@@ -132,7 +132,7 @@ import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
 import { destroySession, getSessionMetadata, saveSession } from '@/shared/utils'
-// <= ваша утилита
+import { HashUtil } from '@/shared/utils/hash.util'
 import {
 	BadRequestException,
 	ConflictException,
@@ -141,7 +141,6 @@ import {
 	NotFoundException,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { User } from '@prisma/__generated__'
 
 import { VerificationService } from '../verification'
 
@@ -150,18 +149,24 @@ import { Session } from './models'
 
 /**
  * SessionService
- * - Login (password verification, email check, session save)
- * - Logout (destroy current session)
- * - Read current session
- * - List user sessions (except current)
- * - Remove a specific session by id
- * - Clear cookie on client
+ * Handles user session management:
+ * - Login (password verification, email check, session creation)
+ * - Logout (session destruction)
+ * - Session reading and listing
+ * - Session removal
+ * - Cookie management
+ *
+ * Enterprise features:
+ * - Tracks lastLoginAt and lastLoginIp
+ * - Supports 2FA verification status in sessions
+ * - Uses Redis for session storage
+ * - Rate limiting and security event logging (TODO)
  */
 @Injectable()
 export class SessionService extends CoreService {
 	/** Redis key prefix for sessions */
 	private readonly prefix: string
-	/** Cookie name for express-session (defaults to connect.sid) */
+	/** Cookie name for express-session */
 	private readonly cookieName: string
 
 	constructor(
@@ -176,28 +181,42 @@ export class SessionService extends CoreService {
 		this.cookieName = this.config.get<string>('SESSION_COOKIE') ?? 'connect.sid'
 	}
 
-	/** Build redis key for a session id */
+	/**
+	 * Build Redis key for a session ID.
+	 * @param sessionId - Session identifier
+	 * @returns Full Redis key
+	 */
 	private key(sessionId: string): string {
 		return `${this.prefix}${sessionId}`
 	}
 
 	/**
-	 * Login user by email & password, ensure email verified and create a session.
-	 * @param req HTTP request
-	 * @param userAgent user agent string
-	 * @param data login payload
-	 * @param lng language code
-	 * @returns LoginResponse with new session data
+	 * Authenticate user and create a session.
+	 * - Verifies email and password
+	 * - Enforces email verification requirement
+	 * - Updates lastLoginAt and lastLoginIp
+	 * - Creates session in Redis
+	 *
+	 * @param req - HTTP request object
+	 * @param userAgent - User agent string
+	 * @param data - Login credentials
+	 * @param lng - Language code for i18n
+	 * @returns Login response with user data
+	 * @throws NotFoundException if user not found or password invalid
+	 * @throws BadRequestException if email not verified
 	 */
 	async login(req: Request, userAgent: string, data: LoginInput, lng: Language): Promise<LoginResponse> {
-		const user = await this.prisma.user.findUnique({ where: { email: data.email } })
+		const user = await this.prisma.user.findUnique({
+			where: { email: data.email },
+		})
+
 		if (!user) {
 			throw new NotFoundException(
 				this.i18n.t('auth.errors.user.not_found', { lng, defaultValue: 'User not found' }),
 			)
 		}
 
-		const ok = await verify(user.password, data.password)
+		const ok = await HashUtil.verify(user.password, data.password)
 		if (!ok) {
 			throw new NotFoundException(
 				this.i18n.t('auth.errors.password.invalid', { lng, defaultValue: 'Invalid password' }),
@@ -205,8 +224,9 @@ export class SessionService extends CoreService {
 		}
 
 		if (!user.isEmailVerified) {
-			// fire-and-forget повторная верификация (не блокируем логин)
+			// Resend verification email (non-blocking)
 			await this.verification.sendEmailVerificationToken(user, lng).catch(() => {})
+
 			throw new BadRequestException(
 				this.i18n.t('auth.errors.account.not_verified', {
 					lng,
@@ -215,36 +235,52 @@ export class SessionService extends CoreService {
 			)
 		}
 
+		// Update last login tracking
 		const meta = getSessionMetadata(req, userAgent)
+		await this.prisma.user.update({
+			where: { id: user.id },
+			data: {
+				lastLoginAt: new Date(),
+				lastLoginIp: meta.ip,
+			},
+		})
+
+		// Create session
 		return saveSession(req, user, meta)
 	}
 
 	/**
-	 * Destroy current session for the request.
-	 * @param req HTTP request
-	 * @returns true on success
+	 * Destroy the current session (logout).
+	 *
+	 * @param req - HTTP request object
+	 * @returns true if session destroyed successfully
 	 */
 	async logout(req: Request): Promise<boolean> {
 		return destroySession(req, this.config)
 	}
 
 	/**
-	 * Read current session object from Redis by request's session id.
-	 * @param req HTTP request carrying session id
-	 * @returns session with attached id or null when not found
+	 * Get current session from Redis by session ID.
+	 *
+	 * @param req - HTTP request object
+	 * @returns Session object or null if not found
 	 */
-	async findCurrent(req: Request) {
+	async findCurrent(req: Request): Promise<Session | null> {
 		const sessionId = req.session.id
 		const session = await this.redis.getJSON<Session>(this.key(sessionId))
 		return session ? { ...session, id: sessionId } : null
 	}
 
 	/**
-	 * Get all sessions of current user (except the current session).
+	 * List all sessions for the current user (excluding current session).
 	 * Sorted by creation time (newest first).
-	 * @param req HTTP request (to get current user and session id)
+	 *
+	 * @param req - HTTP request object
+	 * @param lng - Language code for i18n
+	 * @returns Array of user sessions
+	 * @throws NotFoundException if user not found in session
 	 */
-	async findByUser(req: Request, lng: Language) {
+	async findByUser(req: Request, lng: Language): Promise<Session[]> {
 		const userId = req.session.userId
 		if (!userId) {
 			throw new NotFoundException(
@@ -252,14 +288,14 @@ export class SessionService extends CoreService {
 			)
 		}
 
-		// 1) Keys by prefix (SCAN/KEYS implementation hidden by your RedisService)
+		// Get all session keys
 		const keys = await this.redis.keys(`${this.prefix}*`)
 		if (keys.length === 0) return []
 
-		// 2) Bulk read values
+		// Bulk read session data
 		const raw = (await this.redis.getClient().mGet(keys)) as (string | null)[]
 
-		// 3) Parse & filter by userId
+		// Parse and filter by userId
 		const sessions = keys.flatMap((key, i) => {
 			const s = raw[i]
 			if (!s) return []
@@ -273,17 +309,19 @@ export class SessionService extends CoreService {
 			}
 		})
 
-		// 4) Sort by creation time (desc)
-		sessions.sort((a, b) => Number(b.createdAt) - Number(a.createdAt))
+		// Sort by creation time (descending)
+		sessions.sort((a, b) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt)))
 
-		// 5) Exclude current session
+		// Exclude current session
 		const currentId = req.session?.id
 		return sessions.filter(s => s.id !== currentId)
 	}
 
 	/**
-	 * Clear session cookie on the client (does not remove Redis record).
-	 * @param req HTTP request/response
+	 * Clear session cookie from the client.
+	 * Note: This does not remove the session from Redis.
+	 *
+	 * @param req - HTTP request object
 	 * @returns true
 	 */
 	clear(req: Request): boolean {
@@ -292,13 +330,15 @@ export class SessionService extends CoreService {
 	}
 
 	/**
-	 * Remove a specific session by id. You cannot remove the current session.
-	 * @param req HTTP request (to identify current session id)
-	 * @param id target session id to delete
-	 * @param lng language code
-	 * @returns true on success
-	 * @throws ConflictException when trying to remove current session
-	 * @throws InternalServerErrorException on unexpected Redis errors
+	 * Remove a specific session by ID.
+	 * Prevents removal of the current session.
+	 *
+	 * @param req - HTTP request object
+	 * @param id - Session ID to remove
+	 * @param lng - Language code for i18n
+	 * @returns true if removed successfully
+	 * @throws ConflictException if trying to remove current session
+	 * @throws InternalServerErrorException on Redis errors
 	 */
 	async remove(req: Request, id: string, lng: Language): Promise<boolean> {
 		const currentId = req.session?.id
@@ -307,7 +347,7 @@ export class SessionService extends CoreService {
 			throw new ConflictException(
 				this.i18n.t('auth.errors.session.cannot_delete_current', {
 					lng,
-					defaultValue: 'You can’t delete the current session',
+					defaultValue: "You can't delete the current session",
 				}),
 			)
 		}
@@ -334,24 +374,44 @@ export * from './login.dto'
 `src/modules/auth/session/dtos/login.dto.ts`
 
 ```typescript
-import { User } from '@/modules/auth'
+import { User } from '@/modules/auth/account'
 import { Field, InputType, ObjectType } from '@nestjs/graphql'
 
-@InputType()
+/**
+ * Login credentials input
+ */
+@InputType('LoginInput', {
+	description: 'User credentials for authentication',
+})
 export class LoginInput {
-	@Field(() => String)
+	@Field({
+		description: 'User email address',
+	})
 	email: string
 
-	@Field(() => String)
+	@Field({
+		description: 'User password (min 8 characters)',
+	})
 	password: string
 }
 
-@ObjectType()
+/**
+ * Login response with optional access token and user data
+ */
+@ObjectType('LoginResponse', {
+	description: 'Response after successful authentication',
+})
 export class LoginResponse {
-	@Field(() => String, { nullable: true })
+	@Field({
+		nullable: true,
+		description: 'JWT access token (null if using cookie-based sessions)',
+	})
 	accessToken?: string
 
-	@Field(() => User, { nullable: true })
+	@Field(() => User, {
+		nullable: true,
+		description: 'Authenticated user data',
+	})
 	user?: User
 }
 ```
@@ -366,60 +426,131 @@ export * from './session.model'
 `src/modules/auth/session/models/session.model.ts`
 
 ```typescript
-import type { IDevice, ILocation, ISessionMetadata } from '@/shared/types'
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
-@ObjectType()
-export class Location implements ILocation {
-	@Field(() => String)
+/**
+ * Geographic location information for a session
+ */
+@ObjectType('Location', {
+	description: 'Geographic location information derived from IP address',
+})
+export class Location {
+	@Field({
+		description: 'Country name (e.g., "United States")',
+	})
 	country: string
 
-	@Field(() => String)
+	@Field({
+		description: 'City name (e.g., "New York")',
+	})
 	city: string
 
-	@Field(() => Number)
+	@Field({
+		description: 'Latitude coordinate',
+	})
 	latitude: number
 
-	@Field(() => Number)
+	@Field({
+		description: 'Longitude coordinate',
+	})
 	longitude: number
 }
 
-@ObjectType()
-export class Device implements IDevice {
-	@Field(() => String)
+/**
+ * Device information parsed from User-Agent
+ */
+@ObjectType('Device', {
+	description: 'Device information parsed from User-Agent header',
+})
+export class Device {
+	@Field({
+		description: 'Browser name and version (e.g., "Chrome 120.0")',
+	})
 	browser: string
 
-	@Field(() => String)
+	@Field({
+		description: 'Operating system (e.g., "macOS 14.0")',
+	})
 	os: string
 
-	@Field(() => String)
+	@Field({
+		description: 'Device type (desktop, mobile, tablet)',
+	})
 	type: string
 }
 
-@ObjectType()
-export class SessionMetadata implements ISessionMetadata {
-	@Field(() => Location)
+/**
+ * Session metadata including location, device, and IP
+ */
+@ObjectType('SessionMetadata', {
+	description: 'Session metadata including location, device, and network information',
+})
+export class SessionMetadata {
+	@Field(() => Location, {
+		description: 'Geographic location of the session',
+	})
 	location: Location
 
-	@Field(() => Device)
+	@Field(() => Device, {
+		description: 'Device information',
+	})
 	device: Device
 
-	@Field(() => String)
+	@Field({
+		description: 'IP address (IPv4 or IPv6)',
+	})
 	ip: string
 }
 
-@ObjectType()
+/**
+ * User session representing an active login
+ */
+@ObjectType('Session', {
+	description: 'Active user session with security tracking',
+})
 export class Session {
-	@Field(() => ID)
+	@Field(() => ID, {
+		description: 'Unique session identifier (used for session management)',
+	})
 	id: string
 
-	@Field(() => String)
+	@Field({
+		description: 'User ID associated with this session',
+	})
 	userId: string
 
-	@Field(() => SessionMetadata)
+	@Field(() => SessionMetadata, {
+		description: 'Session metadata (location, device, IP)',
+	})
 	metadata: SessionMetadata
 
-	@Field(() => String)
+	@Field({
+		nullable: true,
+		description: 'Whether this session is from a trusted device (reduces 2FA friction)',
+	})
+	isTrusted?: boolean
+
+	@Field({
+		nullable: true,
+		description: 'Risk score for this session (0-100): 0 = safe, 100 = suspicious',
+	})
+	riskScore?: number
+
+	@Field({
+		nullable: true,
+		description: 'Whether 2FA has been verified for this session',
+	})
+	is2FAVerified?: boolean
+
+	@Field({
+		nullable: true,
+		description: 'Timestamp when 2FA was successfully verified',
+	})
+	verified2FAAt?: Date
+
+	@Field({
+		description: 'Session creation timestamp (ISO 8601 string)',
+	})
 	createdAt: string
 }
 ```

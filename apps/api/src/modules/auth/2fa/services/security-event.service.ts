@@ -1,7 +1,8 @@
 import { CoreService } from '@/core/core.service'
-import { I18nService } from '@/core/i18n'
+import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
+import { NotificationService } from '@/modules/notification'
 import type { ISessionMetadata } from '@/shared/types'
 import { Injectable, Logger } from '@nestjs/common'
 import { EAuditCategory, ESecurityEvent, ESecuritySeverity, type Prisma } from '@prisma/__generated__'
@@ -16,7 +17,12 @@ import type { ICreateSecurityEventInput, ISecurityEventFilter } from '../types'
 export class SecurityEventService extends CoreService {
 	private readonly logger = new Logger(SecurityEventService.name)
 
-	constructor(i18n: I18nService, prisma: PrismaService, redis: RedisService) {
+	constructor(
+		i18n: I18nService,
+		prisma: PrismaService,
+		redis: RedisService,
+		private readonly notificationService: NotificationService,
+	) {
 		super(i18n, prisma, redis)
 	}
 
@@ -158,6 +164,7 @@ export class SecurityEventService extends CoreService {
 		session: ISessionMetadata,
 		reason: string,
 		riskScore: number,
+		lng: Language,
 	): Promise<void> {
 		await this.logEvent({
 			userId,
@@ -173,6 +180,11 @@ export class SecurityEventService extends CoreService {
 			},
 			riskScore,
 		})
+
+		const user = await this.prisma.user.findUnique({ where: { id: userId } })
+		if (user) {
+			await this.notificationService.notifySuspiciousActivity(user, reason, riskScore, lng)
+		}
 	}
 
 	/**

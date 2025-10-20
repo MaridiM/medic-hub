@@ -2,6 +2,7 @@ import 'module-alias/register'
 
 import { AccountModule, RecoveryModule, SessionModule, TwoFactorModule, VerificationModule } from '@/modules/auth'
 import { MailModule, SmsModule } from '@/modules/libs'
+import { NotificationModule } from '@/modules/notification'
 import { RbacModule } from '@/modules/rbac'
 import { IS_DEV_ENV } from '@/shared/utils'
 import { ApolloDriver } from '@nestjs/apollo'
@@ -31,6 +32,7 @@ import { RedisModule } from './redis'
 			inject: [ConfigService],
 		}),
 		ScheduleModule.forRoot(),
+
 		// Core
 		I18nModule,
 		RedisModule,
@@ -41,12 +43,18 @@ import { RedisModule } from './redis'
 		MailModule,
 
 		// Modules
+		// Auth
 		AccountModule,
 		RecoveryModule,
-		RbacModule,
 		SessionModule,
 		TwoFactorModule,
 		VerificationModule,
+
+		// Notification
+		NotificationModule,
+
+		// RBAC
+		RbacModule,
 	],
 	providers: [
 		I18nValidationPipe, // регистрируем сам пайп

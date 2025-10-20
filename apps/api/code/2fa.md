@@ -1,25 +1,10 @@
 # 2FA Module
 
 **root**
-`src/modules/auth/2fa/index.ts`
-
-```typescript
-// Module
-export * from './2fa.module'
-export * from './resolvers'
-export * from './services'
-export * from './dtos'
-export * from './models'
-export * from './guards'
-export * from './types'
-export * from './constants'
-export * from './utils'
-```
-
 `src/modules/auth/2fa/2fa.module.ts`
 
 ```typescript
-import { MailService, SmsService } from '@/modules/libs'
+import { NotificationService } from '@/modules/notification'
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 
@@ -73,12 +58,26 @@ import {
 		// Guards
 		TwoFactorVerifiedGuard,
 
-		// External Providers
-		MailService,
-		SmsService,
+		// Notifications
+		NotificationService,
 	],
 })
 export class TwoFactorModule {}
+```
+
+`src/modules/auth/2fa/index.ts`
+
+```typescript
+// Module
+export * from './2fa.module'
+export * from './resolvers'
+export * from './services'
+export * from './dtos'
+export * from './models'
+export * from './guards'
+export * from './types'
+export * from './constants'
+export * from './utils'
 ```
 
 **constants**
@@ -1028,6 +1027,7 @@ export class VerifyBackupCodeInput {
 
 ```typescript
 import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
+import GraphQLJSON from 'graphql-type-json'
 
 import { Field, InputType } from '@nestjs/graphql'
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simplewebauthn/typescript-types'
@@ -1035,11 +1035,13 @@ import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simp
 /**
  * Input for starting WebAuthn registration
  */
-@InputType('StartWebAuthnRegistrationInput')
+@InputType('StartWebAuthnRegistrationInput', {
+	description: 'Input for initiating WebAuthn credential registration (passkey or security key)',
+})
 export class StartWebAuthnRegistrationInput {
 	@Field(() => String, {
 		nullable: true,
-		description: 'Custom name for the authenticator (e.g., "YubiKey 5C")',
+		description: 'Custom name for the authenticator (e.g., "YubiKey 5C", "iPhone 15 Pro")',
 	})
 	@IsOptional()
 	@IsString()
@@ -1048,7 +1050,8 @@ export class StartWebAuthnRegistrationInput {
 
 	@Field(() => String, {
 		nullable: true,
-		description: 'Authenticator attachment: platform (built-in) or cross-platform (external)',
+		description:
+			'Authenticator attachment: "platform" (TouchID, FaceID, Windows Hello) or "cross-platform" (YubiKey, external USB key)',
 		defaultValue: undefined,
 	})
 	@IsOptional()
@@ -1057,7 +1060,7 @@ export class StartWebAuthnRegistrationInput {
 
 	@Field(() => Boolean, {
 		nullable: true,
-		description: 'Prefer platform authenticators (Touch ID, Face ID, Windows Hello)',
+		description: 'Prefer platform authenticators (built-in biometrics) over external keys',
 		defaultValue: true,
 	})
 	@IsOptional()
@@ -1068,20 +1071,27 @@ export class StartWebAuthnRegistrationInput {
 /**
  * Input for completing WebAuthn registration
  */
-@InputType('CompleteWebAuthnRegistrationInput')
+@InputType('CompleteWebAuthnRegistrationInput', {
+	description: 'Input for completing WebAuthn registration with authenticator response',
+})
 export class CompleteWebAuthnRegistrationInput {
-	@Field(() => String, { description: 'Challenge ID from registration options' })
+	@Field(() => String, {
+		description: 'Challenge ID from registration options (used to verify this response)',
+	})
 	@IsString()
 	@IsNotEmpty()
 	challengeId: string
 
-	@Field(() => Object, { description: 'Registration response from authenticator' })
+	@Field(() => GraphQLJSON, {
+		description:
+			'RegistrationResponseJSON from @simplewebauthn/browser startRegistration(). Contains id, rawId, response.attestationObject, response.clientDataJSON, type, and optional fields.',
+	})
 	@IsNotEmpty()
 	response: RegistrationResponseJSON
 
 	@Field(() => String, {
 		nullable: true,
-		description: 'Custom name for the authenticator',
+		description: 'Custom name for this authenticator (overrides name from StartWebAuthnRegistrationInput)',
 	})
 	@IsOptional()
 	@IsString()
@@ -1092,11 +1102,14 @@ export class CompleteWebAuthnRegistrationInput {
 /**
  * Input for starting WebAuthn authentication
  */
-@InputType('StartWebAuthnAuthenticationInput')
+@InputType('StartWebAuthnAuthenticationInput', {
+	description: 'Input for initiating WebAuthn authentication challenge',
+})
 export class StartWebAuthnAuthenticationInput {
 	@Field(() => String, {
 		nullable: true,
-		description: 'Specific credential ID to use (optional)',
+		description:
+			'Specific credential ID to use for authentication (if null, user picks from available credentials)',
 	})
 	@IsOptional()
 	@IsString()
@@ -1104,7 +1117,7 @@ export class StartWebAuthnAuthenticationInput {
 
 	@Field(() => String, {
 		nullable: true,
-		description: 'User email for authentication (if not already logged in)',
+		description: 'User email for authentication (required if user is not already logged in)',
 	})
 	@IsOptional()
 	@IsString()
@@ -1114,14 +1127,21 @@ export class StartWebAuthnAuthenticationInput {
 /**
  * Input for completing WebAuthn authentication
  */
-@InputType('CompleteWebAuthnAuthenticationInput')
+@InputType('CompleteWebAuthnAuthenticationInput', {
+	description: 'Input for completing WebAuthn authentication with authenticator response',
+})
 export class CompleteWebAuthnAuthenticationInput {
-	@Field(() => String, { description: 'Challenge ID from authentication options' })
+	@Field(() => String, {
+		description: 'Challenge ID from authentication options (used to verify this response)',
+	})
 	@IsString()
 	@IsNotEmpty()
 	challengeId: string
 
-	@Field(() => Object, { description: 'Authentication response from authenticator' })
+	@Field(() => GraphQLJSON, {
+		description:
+			'AuthenticationResponseJSON from @simplewebauthn/browser startAuthentication(). Contains id, rawId, response.authenticatorData, response.clientDataJSON, response.signature, response.userHandle, and type.',
+	})
 	@IsNotEmpty()
 	response: AuthenticationResponseJSON
 }
@@ -1129,14 +1149,20 @@ export class CompleteWebAuthnAuthenticationInput {
 /**
  * Input for removing WebAuthn credential
  */
-@InputType('RemoveWebAuthnCredentialInput')
+@InputType('RemoveWebAuthnCredentialInput', {
+	description: 'Input for removing a registered WebAuthn credential (requires password confirmation)',
+})
 export class RemoveWebAuthnCredentialInput {
-	@Field(() => String, { description: 'Credential ID to remove' })
+	@Field(() => String, {
+		description: 'Credential ID (base64url) or authentication method ID to remove',
+	})
 	@IsString()
 	@IsNotEmpty()
 	credentialId: string
 
-	@Field(() => String, { description: 'Password for confirmation' })
+	@Field(() => String, {
+		description: 'User password for confirmation (security measure to prevent unauthorized removal)',
+	})
 	@IsString()
 	@IsNotEmpty()
 	password: string
@@ -1594,128 +1620,213 @@ export * from './webauthn.model'
 `src/modules/auth/2fa/models/webauthn.model.ts`
 
 ```typescript
+import GraphQLJSON from 'graphql-type-json'
+
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
 /**
  * WebAuthn registration options response
+ * Contains all data needed to create a new WebAuthn credential
  */
-@ObjectType('WebAuthnRegistrationOptions')
+@ObjectType('WebAuthnRegistrationOptions', {
+	description: 'WebAuthn registration options for creating a new passkey or security key',
+})
 export class WebAuthnRegistrationOptionsModel {
-	@Field(() => String, { description: 'Challenge ID for this registration attempt' })
+	@Field(() => String, {
+		description: 'Unique challenge identifier for this registration session (used to verify response)',
+	})
 	challengeId: string
 
-	@Field(() => Object, { description: 'WebAuthn registration options' })
-	options: any // Use any for GraphQL compatibility
+	@Field(() => GraphQLJSON, {
+		description:
+			'PublicKeyCredentialCreationOptions as JSON. Pass this to @simplewebauthn/browser startRegistration() or navigator.credentials.create({ publicKey: options })',
+	})
+	options: Record<string, any>
 
-	@Field(() => String, { description: 'Relying party name' })
+	@Field(() => String, {
+		description: 'Relying Party name displayed to user (e.g., "MedicHub")',
+	})
 	rpName: string
 
-	@Field(() => String, { description: 'Relying party ID' })
+	@Field(() => String, {
+		description: 'Relying Party ID - domain name (e.g., "medichub.com")',
+	})
 	rpId: string
 
-	@Field(() => String, { description: 'User display name' })
+	@Field(() => String, {
+		description: 'User display name shown in authenticator UI (e.g., "John Doe <john@example.com>")',
+	})
 	userDisplayName: string
 }
 
 /**
  * WebAuthn registration complete response
+ * Returned after successful credential creation
  */
-@ObjectType('WebAuthnRegistrationComplete')
+@ObjectType('WebAuthnRegistrationComplete', {
+	description: 'Response after successful WebAuthn credential registration',
+})
 export class WebAuthnRegistrationCompleteModel {
-	@Field(() => Boolean, { description: 'Registration success status' })
+	@Field(() => Boolean, {
+		description: 'Whether registration was successful',
+	})
 	success: boolean
 
-	@Field(() => String, { description: 'Authentication method ID' })
+	@Field(() => String, {
+		description: 'Unique authentication method ID (stored in database)',
+	})
 	methodId: string
 
-	@Field(() => String, { description: 'Credential ID (base64url)' })
+	@Field(() => String, {
+		description: 'WebAuthn credential ID (base64url encoded, used for authentication)',
+	})
 	credentialId: string
 
-	@Field(() => String, { nullable: true, description: 'Authenticator name' })
+	@Field(() => String, {
+		nullable: true,
+		description: 'User-provided authenticator name (e.g., "YubiKey 5C", "iPhone 15 Pro")',
+	})
 	authenticatorName?: string
 
-	@Field(() => Boolean, { description: 'Whether this is a platform authenticator' })
+	@Field(() => Boolean, {
+		description: 'Whether this is a platform authenticator (TouchID, FaceID, Windows Hello)',
+	})
 	isPlatform: boolean
 
-	@Field(() => Boolean, { description: 'Whether credential is backed up' })
+	@Field(() => Boolean, {
+		description: 'Whether credential is backed up to cloud (iCloud Keychain, Google Password Manager)',
+	})
 	isBackedUp: boolean
 
-	@Field(() => [String], { description: 'Backup recovery codes' })
+	@Field(() => [String], {
+		description: 'Backup recovery codes for emergency access (store securely, shown only once)',
+	})
 	backupCodes: string[]
 
-	@Field(() => String, { description: 'Success message' })
+	@Field(() => String, {
+		description: 'Human-readable success message for UI display',
+	})
 	message: string
 }
 
 /**
  * WebAuthn authentication options response
+ * Contains data needed to verify an existing credential
  */
-@ObjectType('WebAuthnAuthenticationOptions')
+@ObjectType('WebAuthnAuthenticationOptions', {
+	description: 'WebAuthn authentication options for verifying a passkey or security key',
+})
 export class WebAuthnAuthenticationOptionsModel {
-	@Field(() => String, { description: 'Challenge ID for this authentication attempt' })
+	@Field(() => String, {
+		description: 'Unique challenge identifier for this authentication session (used to verify response)',
+	})
 	challengeId: string
 
-	@Field(() => Object, { description: 'WebAuthn authentication options' })
-	options: any // Use any for GraphQL compatibility
+	@Field(() => GraphQLJSON, {
+		description:
+			'PublicKeyCredentialRequestOptions as JSON. Pass this to @simplewebauthn/browser startAuthentication() or navigator.credentials.get({ publicKey: options })',
+	})
+	options: Record<string, any>
 
-	@Field(() => String, { description: 'Relying party ID' })
+	@Field(() => String, {
+		description: 'Relying Party ID - must match registration domain',
+	})
 	rpId: string
 
-	@Field(() => Int, { description: 'Number of registered credentials' })
+	@Field(() => Int, {
+		description: 'Number of registered WebAuthn credentials for this user',
+	})
 	credentialCount: number
 }
 
 /**
  * WebAuthn authentication complete response
+ * Returned after successful authentication
  */
-@ObjectType('WebAuthnAuthenticationComplete')
+@ObjectType('WebAuthnAuthenticationComplete', {
+	description: 'Response after successful WebAuthn credential verification',
+})
 export class WebAuthnAuthenticationCompleteModel {
-	@Field(() => Boolean, { description: 'Authentication success status' })
+	@Field(() => Boolean, {
+		description: 'Whether authentication was successful',
+	})
 	success: boolean
 
-	@Field(() => String, { description: 'Credential ID used' })
+	@Field(() => String, {
+		description: 'Credential ID that was used for authentication (base64url encoded)',
+	})
 	credentialId: string
 
-	@Field(() => String, { nullable: true, description: 'Authenticator name' })
+	@Field(() => String, {
+		nullable: true,
+		description: 'Name of the authenticator that was used (e.g., "YubiKey 5C")',
+	})
 	authenticatorName?: string
 
-	@Field(() => Int, { description: 'Updated signature counter' })
+	@Field(() => Int, {
+		description: 'Updated signature counter (detects cloned authenticators if counter decreases)',
+	})
 	counter: number
 
-	@Field(() => String, { description: 'Success message' })
+	@Field(() => String, {
+		description: 'Human-readable success message for UI display',
+	})
 	message: string
 }
 
 /**
  * WebAuthn credential info
+ * Represents a registered security key or passkey
  */
-@ObjectType('WebAuthnCredential')
+@ObjectType('WebAuthnCredential', {
+	description: 'Registered WebAuthn credential (security key or passkey)',
+})
 export class WebAuthnCredentialModel {
-	@Field(() => String, { description: 'Method ID' })
+	@Field(() => String, {
+		description: 'Unique authentication method ID (database primary key)',
+	})
 	id: string
 
-	@Field(() => String, { description: 'Credential ID (base64url)' })
+	@Field(() => String, {
+		description: 'WebAuthn credential ID (base64url encoded, unique per credential)',
+	})
 	credentialId: string
 
-	@Field(() => String, { nullable: true, description: 'Authenticator name' })
+	@Field(() => String, {
+		nullable: true,
+		description: 'User-provided name for this credential (e.g., "Work YubiKey", "Personal iPhone")',
+	})
 	name?: string
 
-	@Field(() => Boolean, { description: 'Is platform authenticator' })
+	@Field(() => Boolean, {
+		description: 'Platform authenticator (TouchID, FaceID, Windows Hello) vs cross-platform (YubiKey, USB key)',
+	})
 	isPlatform: boolean
 
-	@Field(() => Boolean, { description: 'Is backed up' })
+	@Field(() => Boolean, {
+		description: 'Whether credential is synced to cloud (iCloud Keychain, Google Password Manager)',
+	})
 	isBackedUp: boolean
 
-	@Field(() => [String], { description: 'Supported transports' })
+	@Field(() => [String], {
+		description: 'Supported transports (usb, nfc, ble, internal, hybrid)',
+	})
 	transports: string[]
 
-	@Field(() => Date, { nullable: true, description: 'Last used' })
+	@Field(() => Date, {
+		nullable: true,
+		description: 'Timestamp of last successful authentication with this credential',
+	})
 	lastUsedAt?: Date
 
-	@Field(() => Int, { description: 'Use count' })
+	@Field(() => Int, {
+		description: 'Total number of successful authentications with this credential',
+	})
 	useCount: number
 
-	@Field(() => Date, { description: 'Created at' })
+	@Field(() => Date, {
+		description: 'Credential registration timestamp',
+	})
 	createdAt: Date
 }
 ```
@@ -1729,9 +1840,9 @@ import { PrismaService } from '@/core/prisma'
 import { Authorization, Authorized } from '@/shared/decorators'
 import type { GqlContext } from '@/shared/types'
 import { getSessionMetadata } from '@/shared/utils'
-import { UseGuards } from '@nestjs/common'
+import { BadRequestException, UnauthorizedException, UseGuards } from '@nestjs/common'
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
-import { type User } from '@prisma/__generated__'
+import { E2FAMethod, type User } from '@prisma/__generated__'
 
 import {
 	CompleteTotpSetupInput,
@@ -1773,6 +1884,7 @@ import {
 	TwoFactorMethodService,
 	WebAuthnService,
 } from '../services'
+import { ITotpMethodData } from '../types'
 
 /**
  * GraphQL Resolver for 2FA operations
@@ -1902,7 +2014,7 @@ export class TwoFactorResolver {
 		const isBackupCode = /^[A-F0-9]{8}$/i.test(input.code)
 
 		if (isBackupCode) {
-			// Verify backup code
+			// --- Handle Backup Code Verification ---
 			const method = input.methodId
 				? await this.twoFactorService['prisma'].authenticationMethod.findUnique({
 						where: { id: input.methodId },
@@ -1912,37 +2024,72 @@ export class TwoFactorResolver {
 					})
 
 			if (!method) {
-				throw new Error('2FA method not found')
+				throw new BadRequestException(
+					this.i18n.t('auth.errors.2fa.method_not_found', { lng, defaultValue: '2FA method not found' }),
+				)
 			}
 
-			await this.backupCodeService.verifyBackupCode(user, input.code, method.method, lng)
-
-			// Log successful backup code verification
-			await this.securityEventService.log2FASuccess(user.id, 'BACKUP_CODE', session)
+			try {
+				await this.backupCodeService.verifyBackupCode(user, input.code, method.method, lng, session.ip)
+				await this.securityEventService.log2FASuccess(user.id, 'BACKUP_CODE', session)
+			} catch (error) {
+				await this.securityEventService.log2FAFailed(user.id, 'BACKUP_CODE', session, 1)
+				throw error
+			}
 		} else {
-			// Verify regular code (TOTP or OTP)
-			// For now, we'll use TOTP verification as example
-			// In production, this should detect method type and verify accordingly
+			// --- Handle TOTP/OTP Code Verification ---
 			const method = input.methodId
-				? await this.twoFactorService['prisma'].authenticationMethod.findUnique({
-						where: { id: input.methodId },
+				? await this.prisma.authenticationMethod.findFirst({
+						where: { id: input.methodId, userId: user.id },
 					})
-				: await this.twoFactorService['prisma'].authenticationMethod.findFirst({
+				: await this.prisma.authenticationMethod.findFirst({
 						where: { userId: user.id, isPrimary: true },
 					})
 
 			if (!method) {
-				throw new Error('2FA method not found')
+				throw new BadRequestException(
+					this.i18n.t('auth.errors.2fa.method_not_found', { lng, defaultValue: '2FA method not found' }),
+				)
 			}
 
-			// TODO: Implement method-specific verification
+			let isCodeValid = false
+
+			switch (method.method) {
+				case E2FAMethod.TOTP: {
+					const totpData = method.data as unknown as ITotpMethodData
+					isCodeValid = this.twoFactorService.verifyTotpCode(user.email, totpData.secret, input.code)
+					break
+				}
+
+				case E2FAMethod.OTP_EMAIL:
+				case E2FAMethod.OTP_SMS: {
+					isCodeValid = await this.twoFactorService.verifyOneTimeCode(user.id, method.id, input.code, lng)
+					break
+				}
+
+				default: {
+					throw new BadRequestException(
+						`Verification for method type ${method.method} is not supported here.`,
+					)
+				}
+			}
+
+			if (!isCodeValid) {
+				await this.securityEventService.log2FAFailed(user.id, method.method, session, 1)
+				throw new UnauthorizedException(
+					this.i18n.t('auth.errors.2fa.invalid_code', { lng, defaultValue: 'Invalid 2FA code' }),
+				)
+			}
+
+			await this.securityEventService.log2FASuccess(user.id, method.method, session)
+
 			// For now, return success
 			await this.securityEventService.log2FASuccess(user.id, method.method, session)
 		}
 
 		// If trustDevice is true, register device as trusted
 		if (input.trustDevice) {
-			const deviceId = await this.deviceTrustService.registerDevice(user.id, session)
+			const deviceId = await this.deviceTrustService.registerDevice(user.id, session, lng)
 			await this.deviceTrustService.trustDevice(user.id, deviceId)
 		}
 
@@ -2212,7 +2359,6 @@ export class TwoFactorResolver {
 		const { challengeId, options } = await this.webauthnService.generateRegistrationOptions(
 			user,
 			input.authenticatorAttachment,
-			input.preferPlatform,
 			lng,
 		)
 
@@ -2278,7 +2424,6 @@ export class TwoFactorResolver {
 	async startWebAuthnAuthentication(
 		@Args('data', { nullable: true }) input: StartWebAuthnAuthenticationInput = {},
 		@Context() context: GqlContext,
-		@Lang() lng: Language,
 	): Promise<WebAuthnAuthenticationOptionsModel> {
 		// Try to get user ID from session or input
 		const userId =
@@ -2867,6 +3012,7 @@ import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
 import { MailService, SmsService } from '@/modules/libs'
+import { NotificationService } from '@/modules/notification'
 import { HashUtil } from '@/shared/utils'
 import {
 	BadRequestException,
@@ -2891,7 +3037,6 @@ import type { IOtpEmailMethodData, IOtpSmsMethodData, ITotpMethodData } from '..
 import { EncryptionUtil } from '../utils'
 
 import { BackupCodeService } from './backup-code.service'
-import { DeviceTrustService } from './device-trust.service'
 import { SecurityEventService } from './security-event.service'
 
 /**
@@ -2908,9 +3053,9 @@ export class TwoFactorMethodService extends CoreService {
 		redis: RedisService,
 		private readonly backupCodeService: BackupCodeService,
 		private readonly securityEventService: SecurityEventService,
-		private readonly deviceTrustService: DeviceTrustService,
 		private readonly mailService: MailService,
 		private readonly smsService: SmsService,
+		private readonly notificationService: NotificationService,
 	) {
 		super(i18n, prisma, redis)
 	}
@@ -3053,6 +3198,9 @@ export class TwoFactorMethodService extends CoreService {
 				timestamp: new Date().toISOString(),
 			},
 		})
+
+		// ✅ NOTIFICATION CALL
+		await this.notificationService.notify2FAMethodAdded(user, E2FAMethod.TOTP, result.name, lng)
 
 		// Clear temp secret
 		await this.rDel(tempKey)
@@ -3293,6 +3441,9 @@ export class TwoFactorMethodService extends CoreService {
 		const backupCodes = await this.backupCodeService.generateBackupCodes(user.id, result.method, result.id)
 		await this.rDel(codeKey)
 
+		// ✅ NOTIFICATION CALL
+		await this.notificationService.notify2FAMethodAdded(user, result.method, result.name, lng)
+
 		return {
 			success: true,
 			methodId: result.id,
@@ -3449,6 +3600,14 @@ export class TwoFactorMethodService extends CoreService {
 			metadata: { methodId: input.methodId, methodType: method.method, timestamp: new Date().toISOString() },
 		})
 
+		// ✅ NOTIFICATION CALL
+		if (activeMethods === 1) {
+			// Last method removed - 2FA completely disabled
+			await this.notificationService.notify2FADisabled(user, lng)
+		} else {
+			await this.notificationService.notify2FAMethodRemoved(user, method.method, method.name, lng)
+		}
+
 		return { success: true }
 	}
 
@@ -3491,6 +3650,9 @@ export class TwoFactorMethodService extends CoreService {
 			}
 		}
 
+		// ✅ NOTIFICATION CALL
+		await this.notificationService.notifyBackupCodesRegenerated(user, lng)
+
 		await this.securityEventService.logEvent({
 			userId: user.id,
 			event: ESecurityEvent.TWO_FA_BACKUP_CODES_REGENERATED,
@@ -3510,6 +3672,63 @@ export class TwoFactorMethodService extends CoreService {
 				defaultValue: 'Save these backup codes securely.',
 			}),
 		}
+	}
+
+	// ... (после regenerateBackupCodes)
+
+	// ==================== Method Verification ====================
+
+	/**
+	 * Verifies a TOTP code against the encrypted secret.
+	 * This method is public to be accessible from the resolver.
+	 *
+	 * @param email - User's email (for TOTP label).
+	 * @param encryptedSecret - The encrypted secret from the database.
+	 * @param code - The 6-digit code from the user.
+	 * @returns {boolean} - True if the code is valid.
+	 */
+	public verifyTotpCode(email: string, encryptedSecret: string, code: string): boolean {
+		try {
+			const secret = EncryptionUtil.decrypt(encryptedSecret)
+			const totp = this.createTOTP(email, secret) // createTOTP остается private
+			const delta = totp.validate({ token: code, window: TOTP_CONFIG.WINDOW })
+			return delta !== null
+		} catch (error) {
+			this.logger.error(`TOTP code verification failed: ${(error as Error).message}`)
+			return false
+		}
+	}
+
+	/**
+	 * Verifies a one-time code (Email/SMS) against the value stored in Redis.
+	 * This method is public to be accessible from the resolver.
+	 *
+	 * @param userId - The ID of the user.
+	 * @param methodId - The ID of the OTP method being verified.
+	 * @param code - The 6-digit code from the user.
+	 * @param lng - The language for error messages.
+	 * @returns {Promise<boolean>} - True if the code is valid.
+	 */
+	public async verifyOneTimeCode(userId: string, methodId: string, code: string, lng: Language): Promise<boolean> {
+		const codeKey = REDIS_KEYS.OTP_CODE(userId)
+		const cached = await this.rGetJSON<{ code: string; methodId: string; expiresAt: number }>(codeKey)
+
+		if (!cached) {
+			// Не выбрасываем ошибку здесь, чтобы резолвер мог обработать это как "неверный код"
+			return false
+		}
+
+		// Проверяем, что код предназначен для этого метода
+		if (cached.methodId !== methodId) {
+			return false
+		}
+
+		const isValid = await HashUtil.verify(cached.code, code)
+		if (isValid) {
+			// Prevent code reuse by deleting it after successful verification.
+			await this.rDel(codeKey)
+		}
+		return isValid
 	}
 
 	// ==================== Private Helpers ====================
@@ -3545,12 +3764,6 @@ export class TwoFactorMethodService extends CoreService {
 		})
 	}
 
-	private verifyTotpCode(email: string, secret: string, code: string): boolean {
-		const totp = this.createTOTP(email, secret)
-		const delta = totp.validate({ token: code, window: TOTP_CONFIG.WINDOW })
-		return delta !== null
-	}
-
 	private generateOtpCode(): string {
 		return Math.floor(100000 + Math.random() * 900000).toString()
 	}
@@ -3561,9 +3774,10 @@ export class TwoFactorMethodService extends CoreService {
 
 ```typescript
 import { CoreService } from '@/core/core.service'
-import { I18nService } from '@/core/i18n'
+import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
+import { NotificationService } from '@/modules/notification'
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { EAuditCategory, ESecurityEvent, ESecuritySeverity, Prisma, type User } from '@prisma/__generated__'
 
@@ -3576,7 +3790,6 @@ import type {
 import type { AdminActionSuccessModel, User2FAStatusModel } from '../models/admin-2fa.model'
 import { IAdminActionMetadata } from '../types'
 
-import { BackupCodeService } from './backup-code.service'
 import { DeviceTrustService } from './device-trust.service'
 import { SecurityEventService } from './security-event.service'
 
@@ -3594,7 +3807,7 @@ export class AdminTwoFactorService extends CoreService {
 		redis: RedisService,
 		private readonly securityEventService: SecurityEventService,
 		private readonly deviceTrustService: DeviceTrustService,
-		private readonly backupCodeService: BackupCodeService,
+		private readonly notificationService: NotificationService,
 	) {
 		super(i18n, prisma, redis)
 	}
@@ -3689,9 +3902,8 @@ export class AdminTwoFactorService extends CoreService {
 		// Log admin action
 		this.logger.warn(`Admin ${adminUser.email} disabled 2FA for user ${targetUser.email}. Reason: ${input.reason}`)
 
-		// TODO: Send notification to user if requested
 		if (input.notifyUser) {
-			// await this.notificationService.notify2FADisabledByAdmin(targetUser, adminUser, input.reason)
+			await this.notificationService.notify2FADisabledByAdmin(targetUser as User, adminUser.email, input.reason)
 		}
 
 		return {
@@ -3842,6 +4054,17 @@ export class AdminTwoFactorService extends CoreService {
 			`Admin ${adminUser.email} revoked device ${input.deviceId} for user ${input.userId}. Reason: ${input.reason}`,
 		)
 
+		const user = await this.prisma.user.findUnique({ where: { id: input.userId } })
+		if (user) {
+			await this.notificationService.notifyDeviceRevokedByAdmin(
+				user,
+				device.name || input.deviceId,
+				adminUser.email,
+				input.reason,
+				'en',
+			)
+		}
+
 		return {
 			success: true,
 			message: `Device ${device.name || input.deviceId} revoked successfully`,
@@ -3949,6 +4172,7 @@ import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
+import { NotificationService } from '@/modules/notification'
 import { HashUtil } from '@/shared/utils'
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { E2FAMethod, type User } from '@prisma/__generated__'
@@ -3963,7 +4187,12 @@ import { BACKUP_CODE_CONFIG } from '../constants'
 export class BackupCodeService extends CoreService {
 	private readonly logger = new Logger(BackupCodeService.name)
 
-	constructor(i18n: I18nService, prisma: PrismaService, redis: RedisService) {
+	constructor(
+		i18n: I18nService,
+		prisma: PrismaService,
+		redis: RedisService,
+		private readonly notificationService: NotificationService,
+	) {
 		super(i18n, prisma, redis)
 	}
 
@@ -4098,9 +4327,8 @@ export class BackupCodeService extends CoreService {
 				const remaining = backupCodes.length - 1
 				if (remaining <= BACKUP_CODE_CONFIG.LOW_CODES_THRESHOLD) {
 					this.logger.warn(`User ${user.id} has only ${remaining} backup codes remaining`)
-					// TODO: Send notification to user
-					// Here you would call a notification service
-					// await this.notificationService.sendLowBackupCodesWarning(user.email, remaining, lng);
+					// ✅ NOTIFICATION CALL
+					await this.notificationService.notifyLowBackupCodes(user, remaining, lng)
 				}
 
 				return true
@@ -4222,9 +4450,10 @@ export class BackupCodeService extends CoreService {
 import { addSeconds } from 'date-fns'
 
 import { CoreService } from '@/core/core.service'
-import { I18nService } from '@/core/i18n'
+import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
+import { NotificationService } from '@/modules/notification'
 import type { ISessionMetadata } from '@/shared/types'
 import { Injectable, Logger } from '@nestjs/common'
 import { type Prisma } from '@prisma/__generated__'
@@ -4242,7 +4471,12 @@ import { FingerprintUtil } from '../utils'
 export class DeviceTrustService extends CoreService {
 	private readonly logger = new Logger(DeviceTrustService.name)
 
-	constructor(i18n: I18nService, prisma: PrismaService, redis: RedisService) {
+	constructor(
+		i18n: I18nService,
+		prisma: PrismaService,
+		redis: RedisService,
+		private readonly notificationService: NotificationService,
+	) {
 		super(i18n, prisma, redis)
 	}
 
@@ -4257,6 +4491,7 @@ export class DeviceTrustService extends CoreService {
 	async registerDevice(
 		userId: string,
 		session: ISessionMetadata,
+		lng: Language,
 		fingerprint?: IDeviceFingerprint,
 		name?: string,
 	): Promise<string> {
@@ -4310,6 +4545,12 @@ export class DeviceTrustService extends CoreService {
 		})
 
 		this.logger.log(`Registered new device ${deviceId} for user ${userId}`)
+
+		// ✅ NOTIFICATION CALL (just for new devices)
+		const user = await this.prisma.user.findUnique({ where: { id: userId } })
+		if (user) {
+			await this.notificationService.notifyNewDeviceLogin(user, session, lng)
+		}
 
 		return deviceId
 	}
@@ -4674,9 +4915,10 @@ export * from './webauthn.service'
 
 ```typescript
 import { CoreService } from '@/core/core.service'
-import { I18nService } from '@/core/i18n'
+import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
+import { NotificationService } from '@/modules/notification'
 import type { ISessionMetadata } from '@/shared/types'
 import { Injectable, Logger } from '@nestjs/common'
 import { EAuditCategory, ESecurityEvent, ESecuritySeverity, type Prisma } from '@prisma/__generated__'
@@ -4691,7 +4933,12 @@ import type { ICreateSecurityEventInput, ISecurityEventFilter } from '../types'
 export class SecurityEventService extends CoreService {
 	private readonly logger = new Logger(SecurityEventService.name)
 
-	constructor(i18n: I18nService, prisma: PrismaService, redis: RedisService) {
+	constructor(
+		i18n: I18nService,
+		prisma: PrismaService,
+		redis: RedisService,
+		private readonly notificationService: NotificationService,
+	) {
 		super(i18n, prisma, redis)
 	}
 
@@ -4833,6 +5080,7 @@ export class SecurityEventService extends CoreService {
 		session: ISessionMetadata,
 		reason: string,
 		riskScore: number,
+		lng: Language,
 	): Promise<void> {
 		await this.logEvent({
 			userId,
@@ -4848,6 +5096,11 @@ export class SecurityEventService extends CoreService {
 			},
 			riskScore,
 		})
+
+		const user = await this.prisma.user.findUnique({ where: { id: userId } })
+		if (user) {
+			await this.notificationService.notifySuspiciousActivity(user, reason, riskScore, lng)
+		}
 	}
 
 	/**
@@ -5002,7 +5255,6 @@ export class WebAuthnService extends CoreService {
 	async generateRegistrationOptions(
 		user: User,
 		authenticatorAttachment?: 'platform' | 'cross-platform',
-		preferPlatform = true,
 		lng: Language = 'en',
 	): Promise<{
 		challengeId: string

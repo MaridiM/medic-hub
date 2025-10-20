@@ -4,6 +4,7 @@ import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
+import { NotificationService } from '@/modules/notification'
 import { HashUtil } from '@/shared/utils'
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { E2FAMethod, type User } from '@prisma/__generated__'
@@ -18,7 +19,12 @@ import { BACKUP_CODE_CONFIG } from '../constants'
 export class BackupCodeService extends CoreService {
 	private readonly logger = new Logger(BackupCodeService.name)
 
-	constructor(i18n: I18nService, prisma: PrismaService, redis: RedisService) {
+	constructor(
+		i18n: I18nService,
+		prisma: PrismaService,
+		redis: RedisService,
+		private readonly notificationService: NotificationService,
+	) {
 		super(i18n, prisma, redis)
 	}
 
@@ -153,9 +159,8 @@ export class BackupCodeService extends CoreService {
 				const remaining = backupCodes.length - 1
 				if (remaining <= BACKUP_CODE_CONFIG.LOW_CODES_THRESHOLD) {
 					this.logger.warn(`User ${user.id} has only ${remaining} backup codes remaining`)
-					// TODO: Send notification to user
-					// Here you would call a notification service
-					// await this.notificationService.sendLowBackupCodesWarning(user.email, remaining, lng);
+					// ✅ NOTIFICATION CALL
+					await this.notificationService.notifyLowBackupCodes(user, remaining, lng)
 				}
 
 				return true

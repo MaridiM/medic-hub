@@ -1,5 +1,5 @@
 import { Heading, Section, Tailwind, Text } from "@react-email/components";
-import { TemplateWrapper } from "./components";
+import { TemplateWrapper } from '../components';
 import { type I18nService } from "@/core/i18n";
 
 interface IProps {

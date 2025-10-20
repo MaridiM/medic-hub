@@ -1,9 +1,10 @@
 import { addSeconds } from 'date-fns'
 
 import { CoreService } from '@/core/core.service'
-import { I18nService } from '@/core/i18n'
+import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
+import { NotificationService } from '@/modules/notification'
 import type { ISessionMetadata } from '@/shared/types'
 import { Injectable, Logger } from '@nestjs/common'
 import { type Prisma } from '@prisma/__generated__'
@@ -21,7 +22,12 @@ import { FingerprintUtil } from '../utils'
 export class DeviceTrustService extends CoreService {
 	private readonly logger = new Logger(DeviceTrustService.name)
 
-	constructor(i18n: I18nService, prisma: PrismaService, redis: RedisService) {
+	constructor(
+		i18n: I18nService,
+		prisma: PrismaService,
+		redis: RedisService,
+		private readonly notificationService: NotificationService,
+	) {
 		super(i18n, prisma, redis)
 	}
 
@@ -36,6 +42,7 @@ export class DeviceTrustService extends CoreService {
 	async registerDevice(
 		userId: string,
 		session: ISessionMetadata,
+		lng: Language,
 		fingerprint?: IDeviceFingerprint,
 		name?: string,
 	): Promise<string> {
@@ -89,6 +96,12 @@ export class DeviceTrustService extends CoreService {
 		})
 
 		this.logger.log(`Registered new device ${deviceId} for user ${userId}`)
+
+		// ✅ NOTIFICATION CALL (just for new devices)
+		const user = await this.prisma.user.findUnique({ where: { id: userId } })
+		if (user) {
+			await this.notificationService.notifyNewDeviceLogin(user, session, lng)
+		}
 
 		return deviceId
 	}

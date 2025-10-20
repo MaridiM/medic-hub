@@ -61,6 +61,39 @@ export type ChildNodeKeys<K extends string> = {
 			: never
 }[keyof NodeValue<K> & string]
 
+/* ===== ✅ НОВОЕ: Вложенные пути внутри узла ===== */
+
+/**
+ * Все вложенные пути внутри объекта T (включая вложенные через точку)
+ * Например, для { details: { title: "...", type: "..." } }
+ * вернет: "details" | "details.title" | "details.type"
+ */
+export type NestedPaths<T, D extends Depth = 6, P extends string = ''> = [D] extends [0]
+	? never
+	: T extends object
+		? {
+				[K in keyof T & string]:
+					| `${P}${K}`
+					| (T[K] extends object
+							? T[K] extends readonly any[]
+								? never
+								: NestedPaths<T[K], Dec<D>, `${P}${K}.`>
+							: never)
+			}[keyof T & string]
+		: never
+
+/**
+ * Значение по относительному пути внутри объекта T
+ * Например: RelativeValue<{ details: { title: "..." } }, "details.title"> = string
+ */
+export type RelativeValue<T, P extends string> = P extends `${infer K}.${infer R}`
+	? K extends keyof T
+		? RelativeValue<T[K], R>
+		: never
+	: P extends keyof T
+		? T[P]
+		: never
+
 /** Опции */
 export type StrOptions = Omit<TOptions, 'returnObjects'> & {
 	lng?: string
@@ -71,15 +104,34 @@ export type ObjOptions = Omit<TOptions, 'returnObjects'> & {
 	returnObjects: true
 }
 
-/** Скоуп-t */
+/* ===== ✅ ОБНОВЛЕННЫЙ ScopedT с поддержкой вложенных путей ===== */
+
+/**
+ * Скоуп-функция для вложенных переводов
+ *
+ * Поддерживает:
+ * 1. Прямые дочерние ключи: t('title') → string
+ * 2. Вложенные пути: t('details.title') → string
+ * 3. Вложенные объекты: t('details') → ScopedT
+ * 4. Массивы строк: t('risks') → string[]
+ */
 export type ScopedT<K extends string> = {
-	<C extends ChildLeafKeys<K>>(
-		child: C,
+	// ✅ Вложенные пути (например, 'details.title', 'warning.message')
+	<P extends NestedPaths<NodeValue<K>>>(
+		path: P,
 		opts?: StrOptions,
-	): NodeValue<K>[C] extends readonly string[] ? string[] : string
+	): RelativeValue<NodeValue<K>, P> extends readonly string[]
+		? string[]
+		: RelativeValue<NodeValue<K>, P> extends string
+			? string
+			: RelativeValue<NodeValue<K>, P> extends object
+				? ScopedT<`${K}.${P}`>
+				: string
 } & {
+	// Узлы с returnObjects: true
 	<C extends ChildNodeKeys<K>>(child: C, opts: ObjOptions): ValueAtPath<Res, `${K}.${C}`>
 } & {
+	// Узлы без opts или returnObjects: false → новый ScopedT
 	<C extends ChildNodeKeys<K>>(child: C, opts?: StrOptions): ScopedT<`${K}.${C}`>
 }
 

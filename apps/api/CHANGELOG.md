@@ -36,6 +36,16 @@
     - [Step 2: WebAuthn GraphQL Schema Fix](#step-2-webauthn-graphql-schema-fix)
     - [Step 2.1: WebAuthn GraphQL Schema Fix](#step-21-webauthn-graphql-schema-fix)
     - [Step 2.2: WebAuthn GraphQL Schema Fix](#step-22-webauthn-graphql-schema-fix)
+- [Module: 2FA System Modernization \& RBAC Foundation](#module-2fa-system-modernization--rbac-foundation-1)
+    - [Step 1: Core Infrastructure Updates for Notifications](#step-1-core-infrastructure-updates-for-notifications)
+    - [Step 2: Notification Module Foundation](#step-2-notification-module-foundation)
+    - [Step 3: Email Templates \& MailService Integration](#step-3-email-templates--mailservice-integration)
+    - [Step 4: i18n Nested Paths Support](#step-4-i18n-nested-paths-support)
+  - [**✅ CHECKLIST**](#-checklist)
+    - [Step 5: Template \& i18n Corrections](#step-5-template--i18n-corrections)
+    - [Step 6: Integration of NotificationService](#step-6-integration-of-notificationservice)
+    - [Step 7: 2FA Code Verification Implementation](#step-7-2fa-code-verification-implementation)
+    - [Step 7.1: Access Modifier and Method Naming Correction](#step-71-access-modifier-and-method-naming-correction)
 
 ---
 
@@ -968,5 +978,317 @@ All notable changes to this project will be documented in this file.
 **Files Modified**
 
 - `src/modules/auth/2fa/models/webauthn.model.ts` (added 3 missing models)
+
+---
+
+# Module: 2FA System Modernization & RBAC Foundation
+
+### Step 1: Core Infrastructure Updates for Notifications
+
+:calendar: `2025.10.19`
+
+**Added**
+
+- ✅ `CoreService.rExpire()`: Added method to set TTL for existing Redis keys
+- ✅ Type-safe constant for priority-based notification channels
+
+**Changed**
+
+- ✅ **`PRIORITY_CHANNELS` constant**: Fixed TypeScript inference from literal types to `ENotificationChannel[]`
+- ✅ **`CoreService`**: Extended with Redis TTL management helper
+
+**Fixed**
+
+- ✅ TypeScript error: `ENotificationChannel.EMAIL` literal type in `PRIORITY_CHANNELS`
+- ✅ Missing `rExpire` method in `CoreService`
+
+**Files Modified**
+
+- `src/core/core.service.ts`
+- `src/modules/notification/constants/notification.constants.ts`
+
+---
+
+### Step 2: Notification Module Foundation
+
+:calendar: `2025.10.19`
+
+**Added**
+
+- ✅ **`NotificationModule`**: Created global notification module with `@Global()` decorator
+- ✅ **`NotificationService`**: Centralized notification orchestration service
+- ✅ **Notification Types**: Complete TypeScript type system for all notification scenarios
+  - `ENotificationCategory`: SECURITY, AUTHENTICATION, USER, ADMIN, SYSTEM
+  - `ENotificationChannel`: EMAIL, SMS, PUSH, IN_APP
+  - `ENotificationPriority`: LOW, NORMAL, HIGH, CRITICAL
+  - Specialized interfaces for 2FA, device, admin, and suspicious activity notifications
+- ✅ **Rate Limiting**: Configurable hourly/daily limits per user (10/hour, 50/day)
+- ✅ **Duplicate Detection**: 5-minute cooldown for identical notifications
+- ✅ **Delivery Tracking**: Result tracking for all notification channels
+- ✅ **Email Reputation Check**: Integration with `MailService.canSendEmail()`
+- ✅ **Phone Validation**: Integration with `SmsService.canSendSms()`
+
+**Changed**
+
+- ✅ **Architecture**: Moved notification logic from `2fa/` to standalone `modules/notification/`
+- ✅ **Separation of Concerns**: Decoupled notification delivery from business logic
+
+**Security Enhancements**
+
+- ✅ Email verification requirement for security notifications
+- ✅ Phone verification requirement for SMS notifications
+- ✅ Bounced/unsubscribed email filtering
+- ✅ Configurable rate limits to prevent spam
+
+**Files Created**
+
+- `src/modules/notification/notification.module.ts`
+- `src/modules/notification/notification.service.ts`
+- `src/modules/notification/index.ts`
+- `src/modules/notification/types/notification.types.ts`
+- `src/modules/notification/types/index.ts`
+- `src/modules/notification/constants/notification.constants.ts`
+- `src/modules/notification/constants/index.ts`
+
+**Files Modified**
+
+- `src/core/core.service.ts` (added Redis helpers)
+
+---
+
+### Step 3: Email Templates & MailService Integration
+
+:calendar: `2025.10.19`
+
+**Added**
+
+- ✅ **9 Security Email Templates** (React Email):
+  - `2fa-method-added.template.tsx` - New 2FA method notification
+  - `2fa-method-removed.template.tsx` - 2FA method removal alert
+  - `2fa-disabled.template.tsx` - Critical: 2FA completely disabled
+  - `new-device-login.template.tsx` - New device login detection
+  - `suspicious-activity.template.tsx` - Suspicious activity with risk scoring
+  - `low-backup-codes.template.tsx` - Running low on backup codes
+  - `backup-codes-regenerated.template.tsx` - Backup codes regenerated
+  - `2fa-disabled-by-admin.template.tsx` - Admin disabled 2FA
+  - `device-revoked-by-admin.template.tsx` - Admin revoked device
+- ✅ **9 New MailService Methods**:
+  - `send2FAMethodAddedEmail()`
+  - `send2FAMethodRemovedEmail()`
+  - `send2FADisabledEmail()`
+  - `sendNewDeviceLoginEmail()`
+  - `sendSuspiciousActivityEmail()`
+  - `sendLowBackupCodesEmail()`
+  - `sendBackupCodesRegeneratedEmail()`
+  - `send2FADisabledByAdminEmail()`
+  - `sendDeviceRevokedByAdminEmail()`
+- ✅ **Email Template Features**:
+  - Responsive Tailwind CSS design
+  - Multilingual support (en/ru)
+  - Risk score visualization (progress bars)
+  - Device/login details display
+  - Action buttons with direct links
+  - Security warnings with color coding
+  - Timestamp localization
+
+**Changed**
+
+- ✅ **MailService.canSendEmail()**: Now returns boolean (simplified API)
+- ✅ Added `checkEmailSendability()` as private method for detailed checks
+- ✅ All security emails include device fingerprint validation
+
+**Security Enhancements**
+
+- ✅ Email reputation checking before send
+- ✅ Disposable email detection
+- ✅ DNS MX record validation
+- ✅ Bounce and unsubscribe tracking
+- ✅ Automatic email validation
+
+**Documentation**
+
+- ✅ JSDoc for all new methods
+- ✅ TypeScript interfaces for all template props
+- ✅ Inline comments for security considerations
+
+**Files Created**
+
+- `src/modules/libs/mail/templates/2fa-method-added.template.tsx`
+- `src/modules/libs/mail/templates/2fa-method-removed.template.tsx`
+- `src/modules/libs/mail/templates/2fa-disabled.template.tsx`
+- `src/modules/libs/mail/templates/new-device-login.template.tsx`
+- `src/modules/libs/mail/templates/suspicious-activity.template.tsx`
+- `src/modules/libs/mail/templates/low-backup-codes.template.tsx`
+- `src/modules/libs/mail/templates/backup-codes-regenerated.template.tsx`
+- `src/modules/libs/mail/templates/2fa-disabled-by-admin.template.tsx`
+- `src/modules/libs/mail/templates/device-revoked-by-admin.template.tsx`
+
+**Files Modified**
+
+- `src/modules/libs/mail/mail.service.ts`
+
+---
+
+### Step 4: i18n Nested Paths Support
+
+:calendar: `2025.10.19`
+
+**Added**
+
+- ✅ **Nested paths support in `ScopedT`**: Now you can use `t('details.title')` instead of `t('details')('title')`
+- ✅ **`NestedPaths<T>` type**: Generates all possible nested paths within an object
+- ✅ **`RelativeValue<T, P>` type**: Extracts value type by relative path
+
+**Changed**
+
+- ✅ **`ScopedT` type**: Extended with new overload for nested paths
+- ✅ Improved TypeScript inference for deeply nested translations
+
+**Example**
+
+```typescript
+const t = i18n.t('mail.2fa_method_added', { lng })
+
+// ✅ Both work now:
+t('details.title')           // NEW: direct nested path
+t('details')('title')        // OLD: still works
+
+// ✅ All these work:
+t('warning.message')
+t('details.type', { type: 'TOTP' })
+t('intro', { app: 'MyApp', method: 'TOTP' })
+```
+
+**Files Modified**
+
+- `src/core/i18n/types/typed.ts`
+
+---
+
+## **✅ CHECKLIST**
+
+- [x] Добавлен `NestedPaths<T>` для генерации вложенных путей
+- [x] Добавлен `RelativeValue<T, P>` для извлечения значения по пути
+- [x] Обновлен `ScopedT` с новой перегрузкой для вложенных путей
+- [x] Runtime уже поддерживает вложенные пути (не требует изменений)
+- [x] Changelog Step 5.4 создан
+- [x] Все варианты вызовов работают:
+  - `t('title')` ✅
+  - `t('details.title')` ✅ NEW
+  - `t('details')('title')` ✅
+  - `t('warning.message', { params })` ✅
+
+---
+
+**Теперь ваши email templates будут работать с вложенными путями!** 🎯
+
+```typescript
+// ✅ ВСЕ ЭТО ТЕПЕРЬ РАБОТАЕТ:
+{t('details.title') || 'Method Details:'}
+{t('details.type', { type: methodType }) || `🔑 Type: ${methodType}`}
+{t('warning.message') || "If you didn't make this change..."}
+{t('details.timestamp', { time: timestamp })}
+```
+
+---
+
+### Step 5: Template & i18n Corrections
+
+:calendar: `2025.10.19`
+
+**Fixed**
+
+- ✅ **`SuspiciousActivityTemplate.tsx`**: Fixed a JSX error where dynamic `eventDescription` was not wrapped in a `<Text>` component.
+- ✅ **i18n JSON structure**: Removed unused translation keys from `en/mail.json` and `ru/mail.json`.
+- ✅ **i18n Type Mismatches**: Corrected a type mismatch in `legalNote` for `2fa_disabled`, ensuring all locales have consistent string/array structures.
+
+**Changed**
+
+- ✅ **`i18n/locales/mail.json`**: Cleaned up translation files, removing fields not used in the templates to reduce complexity and improve maintainability.
+- ✅ **Code Readability**: Improved the readability of security email templates.
+
+**Files Modified**
+
+- `src/modules/libs/mail/templates/suspicious-activity.template.tsx`
+- `src/core/i18n/locales/en/mail.json`
+- `src/core/i18n/locales/ru/mail.json`
+
+---
+
+### Step 6: Integration of NotificationService
+
+:calendar: `2025.10.19`
+
+**Added**
+
+-   ✅ **Dependency Injection**: `NotificationService` is now injected into `TwoFactorMethodService`, `BackupCodeService`, `DeviceTrustService`, `AdminTwoFactorService`, and `SecurityEventService`.
+-   ✅ **`notify2FAMethodAdded`**: Called after successful setup of TOTP or OTP methods.
+-   ✅ **`notify2FAMethodRemoved` / `notify2FADisabled`**: Called when a 2FA method is removed.
+-   ✅ **`notifyBackupCodesRegenerated`**: Called after backup codes are regenerated.
+-   ✅ **`notifyLowBackupCodes`**: Called when the number of remaining backup codes drops below the configured threshold.
+-   ✅ **`notifyNewDeviceLogin`**: Called when a login from a new, unrecognized device is detected.
+-   ✅ **`notify2FADisabledByAdmin`**: Called when an administrator disables 2FA for a user.
+-   ✅ **`notifyDeviceRevokedByAdmin`**: Called when an administrator revokes a trusted device.
+-   ✅ **`notifySuspiciousActivity`**: Called when a high-risk security event is logged.
+
+**Changed**
+
+-   ✅ **`AppModule`**: Now imports the global `NotificationModule` to make `NotificationService` available application-wide.
+-   ✅ **Core Business Logic**: The logic of all relevant 2FA services has been enhanced to trigger user notifications at critical security-related touchpoints.
+
+**Files Modified**
+
+-   `src/app.module.ts`
+-   `src/modules/auth/2fa/services/2fa-method.service.ts`
+-   `src/modules/auth/2fa/services/backup-code.service.ts`
+-   `src/modules/auth/2fa/services/device-trust.service.ts`
+-   `src/modules/auth/2fa/services/admin-2fa.service.ts`
+-   `src/modules/auth/2fa/services/security-event.service.ts`
+
+---
+
+### Step 7: 2FA Code Verification Implementation
+
+:calendar: `2025.10.20`
+
+**Added**
+
+-   ✅ **`TwoFactorMethodService.verifyTotpCode()`**: New method to validate TOTP codes by decrypting the secret and checking against the provided code.
+-   ✅ **`TwoFactorMethodService.verifyOtpCode()`**: New method to validate OTP (Email/SMS) codes against the value stored in Redis, with a built-in anti-replay mechanism (deletes code on success).
+
+**Changed**
+
+-   ✅ **`TwoFactorResolver.verify2FA()`**: The `TODO` has been completed. The method now performs method-specific verification for `TOTP`, `OTP_EMAIL`, and `OTP_SMS` codes.
+-   ✅ **Security Flow**: Incorrect codes now trigger a `log2FAFailed` event and throw a proper `UnauthorizedException`.
+
+**Fixed**
+
+-   ✅ **Critical Flaw**: Removed the security vulnerability where 2FA codes were not actually being verified, and success was always returned.
+
+**Files Modified**
+
+-   `src/modules/auth/2fa/services/2fa-method.service.ts`
+-   `src/modules/auth/2fa/resolvers/2fa.resolver.ts`
+-   
+---
+
+### Step 7.1: Access Modifier and Method Naming Correction
+
+:calendar: `2025.10.20`
+
+**Fixed**
+
+-   ✅ **Access Modifier Error**: Corrected `private` access modifiers on `verifyTotpCode` and `verifyOtpCode` in `TwoFactorMethodService` to `public`, allowing them to be called from the resolver.
+-   ✅ **Method Naming**: Renamed `verifyOtpCode` to `verifyOneTimeCode` for clarity, as it handles generic one-time password verification.
+-   ✅ **Error Handling**: `verifyOneTimeCode` now returns `false` for expired/missing codes instead of throwing an exception, centralizing error handling in the resolver.
+
+**Changed**
+
+-   ✅ **`TwoFactorResolver.verify2FA`**: Updated to call the correctly named public methods (`verifyTotpCode`, `verifyOneTimeCode`).
+
+**Files Modified**
+
+-   `src/modules/auth/2fa/services/2fa-method.service.ts`
+-   `src/modules/auth/2fa/resolvers/2fa.resolver.ts`
 
 ---

@@ -1,4 +1,4 @@
-import { MailService, SmsService } from '@/modules/libs'
+import { NotificationService } from '@/modules/notification'
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 
@@ -52,9 +52,8 @@ import {
 		// Guards
 		TwoFactorVerifiedGuard,
 
-		// External Providers
-		MailService,
-		SmsService,
+		// Notifications
+		NotificationService,
 	],
 })
 export class TwoFactorModule {}

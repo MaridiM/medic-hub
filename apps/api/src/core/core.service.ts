@@ -163,4 +163,14 @@ export abstract class CoreService {
 	protected async rSetNumber(key: string, value: number, ttlSec?: number): Promise<void> {
 		await this.rSet(key, value.toString(), ttlSec)
 	}
+
+	/**
+	 * Set TTL for existing key in Redis
+	 * @param key Redis key
+	 * @param ttlSec TTL in seconds
+	 * @returns true if TTL was set, false otherwise
+	 */
+	protected async rExpire(key: string, ttlSec: number): Promise<boolean> {
+		return (await this.redis?.expire(key, ttlSec)) ?? false
+	}
 }
