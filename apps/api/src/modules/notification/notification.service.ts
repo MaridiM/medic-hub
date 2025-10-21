@@ -4,7 +4,7 @@ import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
-import { MailService, SmsService } from '@/modules/libs'
+import { MailService, SmsService } from '@/core/provider'
 import type { ISessionMetadata } from '@/shared/types'
 import { Injectable, Logger } from '@nestjs/common'
 import type { E2FAMethod, User } from '@prisma/__generated__'
@@ -56,7 +56,7 @@ export class NotificationService extends CoreService {
 		private readonly mailService: MailService,
 		private readonly smsService: SmsService,
 	) {
-		super(i18n, prisma, redis)
+		super({ i18n, prisma, redis })
 	}
 
 	// ==================== Core Notification Logic ====================

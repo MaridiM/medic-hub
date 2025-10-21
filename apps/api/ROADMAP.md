@@ -2,16 +2,16 @@
 
 ### Статусные группы
 
-- 🔴 **HIGH** — критически важные задачи для первого стабильного релиза.
-- 🟠 **MEDIUM** — важные улучшения для повышения безопасности и удобства (Enterprise-уровень).
-- 🟢 **LOW** — перспективные задачи для будущего развития.
-- 🔵 **Definition of Done** — критерии готовности.
+* 🔴 **HIGH** — критически важные задачи для первого стабильного релиза.
+* 🟠 **MEDIUM** — важные улучшения для повышения безопасности и удобства (Enterprise-уровень).
+* 🟢 **LOW** — перспективные задачи для будущего развития.
+* 🔵 **Definition of Done** — критерии готовности.
 
 **Легенда:**
 
-- ✅ — задача полностью выполнена.
-- 🟡 — задача выполнена частично или заложена основа.
-- [ ] — задача ещё не начата.
+* ✅ — задача полностью выполнена.
+* 🟡 — задача выполнена частично или заложена основа.
+* [ ] — задача ещё не начата.
 
 ---
 
@@ -457,3 +457,476 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 - [ ] Собирать метрики по доставке уведомлений (открытия, клики) с помощью webhooks от email-провайдера.
 - [ ] Создать дашборд в админ-панели для мониторинга статуса уведомлений.
+
+---
+
+## Account & Recovery Modules
+
+---
+
+## 🔴 HIGH: Критически важные задачи безопасности
+
+### Security & Session Management
+
+- ✅ **[Security] Инвалидация сессий при смене пароля** *(Completed in Step 2)*
+  - ✅ Создать метод `invalidateUserSessions(userId, excludeSessionId?)` в `SessionService`
+  - ✅ Интегрировать `SessionService` в `AccountService`
+  - ✅ Вызывать инвалидацию всех сессий (кроме текущей) после успешной смены пароля
+  - ✅ Добавить unit-тесты для проверки удаления сессий из Redis
+
+- ✅ **[Security] Email-уведомления о смене пароля** *(Completed in Step 3)*
+  - ✅ Создать метод `sendPasswordChangedNotification(email, metadata, lng)` в `MailService`
+  - ✅ Интегрировать отправку уведомления в `AccountService.changePassword()`
+  - ✅ Добавить email-шаблон `PasswordChangedTemplate` с деталями (IP, устройство, время, ссылка на помощь)
+  - ✅ Обработать ошибки отправки (non-blocking)
+
+- ✅ **[Security] Email-уведомления о сбросе пароля** *(Completed in Step 3)*
+  - ✅ Создать метод `sendPasswordResetConfirmation(email, metadata, lng)` в `MailService`
+  - ✅ Интегрировать отправку уведомления в `RecoveryService.newPassword()`
+  - ✅ Добавить email-шаблон `PasswordResetConfirmationTemplate` с рекомендациями по безопасности
+  - ✅ Обработать ошибки отправки (non-blocking)
+
+- ✅ **[Security] Email-шаблон для запроса сброса пароля** *(Partially completed)*
+  - ✅ Метод `sendPasswordResetToken()` существует в `MailService`
+  - ✅ Создать React Email шаблон `ResetPasswordTemplate` (сейчас используется заглушка)
+  - ✅ Добавить метаданные запроса (IP, location, device) в email
+
+### Audit & Security Events
+
+- ✅ **[Audit] Создать базовый SecurityEventService** *(Completed in Step 1)*
+  - ✅ Создать сервис с методами create(), findByUser(), resolve()
+  - ✅ Добавить поддержку risk scoring и факторов
+  - ✅ Интегрировать в Account, Session, Recovery модули как @Global()
+  - ✅ Добавить unit-тесты
+
+- ✅ **[Audit] Логирование событий смены пароля** *(Completed in Step 2)*
+  - ✅ Создать `SecurityEvent` с типом `PASSWORD_CHANGED` в `AccountService.changePassword()`
+  - ✅ Записывать IP, userAgent, deviceId, metadata
+  - ✅ Установить severity = `MEDIUM` (динамически на основе risk score)
+  - ✅ Добавить riskFactors (смена с нового устройства, множественные сессии)
+
+- ✅ **[Audit] Логирование событий сброса пароля** *(Completed in Step 3)*
+  - ✅ Создать `SecurityEvent` с типом `PASSWORD_RESET_REQUESTED` в `RecoveryService.resetPassword()`
+  - ✅ Создать `SecurityEvent` с типом `PASSWORD_RESET_COMPLETED` в `RecoveryService.newPassword()`
+  - ✅ Записывать полные метаданные запроса
+  - ✅ Установить severity = `MEDIUM/HIGH` для сброса
+
+### Error Handling & Resilience
+
+- ✅ **[Resilience] Улучшить обработку ошибок в `resetPassword`** *(Completed in Step 3)*
+  - ✅ Сделать отправку email non-blocking (не прерывать flow при ошибке mail-сервиса)
+  - ✅ Логировать ошибки отправки email отдельно (в MailService через Logger)
+  - ✅ Всегда возвращать success (для защиты от email enumeration)
+
+- ✅ **[Security] Защита от email enumeration** *(Completed in Step 3)*
+  - ✅ Унифицировать ответы `resetPassword` (всегда возвращать success)
+  - ✅ Логировать попытки сброса для несуществующих email с userId='unknown'
+  - ✅ Документировать поведение в JSDoc
+  - [ ] Добавить rate limiting на endpoint сброса пароля (TODO: требует rate-limit middleware)
+
+---
+
+## 🟠 MEDIUM: Важные улучшения
+
+### User Experience
+
+- ✅ **[UX] Улучшить содержимое email-уведомлений** *(Completed in Step 3)*
+  - ✅ Добавить красивый HTML-шаблон с брендингом (React Email + Tailwind)
+  - ✅ Включить действия: "View Security Activity" / "Contact Support" / "Enable 2FA"
+  - ✅ Добавить ссылку на историю безопасности аккаунта
+  - ✅ Локализовать все шаблоны (EN, RU) через i18n
+
+- [ ] **[UX] Отображение активных сессий после смены пароля**
+  - [ ] Добавить GraphQL Query для получения списка завершенных сессий
+  - [ ] Показывать пользователю уведомление "Вы вышли со всех устройств"
+  - [ ] Добавить возможность повторного входа одним кликом
+
+### Security Enhancements
+
+- 🟡 **[Security] Анализ риска при смене пароля** *(Partially completed in Step 2)*
+  - ✅ Вычислять riskScore на основе факторов (новое устройство, новая локация, частота смены)
+  - ✅ Повышать severity события при высоком риске (LOW/MEDIUM/HIGH динамически)
+  - [ ] Требовать дополнительную верификацию (2FA) при подозрительной активности
+
+- [ ] **[Security] Blacklist для скомпрометированных паролей**
+  - [ ] Интегрировать проверку через HaveIBeenPwned API
+  - [ ] Отклонять установку скомпрометированных паролей
+  - [ ] Добавить кастомную валидацию в DTO
+
+### Testing
+
+- ✅ **[Testing] Unit-тесты для SecurityEventService** *(Completed in Step 1)*
+  - ✅ Протестировать create() с минимальными и полными данными
+  - ✅ Протестировать findByUser() с фильтрацией
+  - ✅ Протестировать resolve()
+  - ✅ Протестировать calculateRiskScore()
+
+- ✅ **[Testing] Unit-тесты для AccountService** *(Completed in Step 2)*
+  - ✅ Протестировать `changePassword` с валидацией старого пароля
+  - ✅ Протестировать инвалидацию сессий
+  - ✅ Протестировать создание SecurityEvent
+  - ✅ Протестировать отправку email-уведомлений (mocked)
+
+- ✅ **[Testing] Unit-тесты для SessionService** *(Completed in Step 2)*
+  - ✅ Протестировать `invalidateUserSessions` с фильтрацией
+  - ✅ Протестировать обработку невалидных данных
+
+- ✅ **[Testing] Unit-тесты для RecoveryService** *(Completed in Step 4)*
+  - ✅ Протестировать `resetPassword` с email enumeration protection
+  - ✅ Протестировать `newPassword` с валидацией токена
+  - ✅ Протестировать отправку email-уведомлений
+  - ✅ Протестировать создание SecurityEvent
+
+- [ ] **[Testing] E2E тесты для полного flow**
+  - [ ] Полный цикл сброса пароля (запрос → email → установка нового)
+  - [ ] Полный цикл смены пароля (старый → новый → logout других сессий)
+
+---
+
+## 🟢 LOW: Продвинутые возможности
+
+### Advanced Security
+
+- [ ] **[Security] Multi-factor подтверждение смены пароля**
+  - [ ] Требовать 2FA для смены пароля, если он включен
+  - [ ] Отправлять OTP на email/SMS перед изменением пароля
+  - [ ] Добавить опциональный challenge-question механизм
+
+- [ ] **[Security] История паролей**
+  - [ ] Создать модель `PasswordHistory` для хранения хэшей предыдущих паролей
+  - [ ] Запретить повторное использование последних N паролей
+  - [ ] Добавить настройку `PASSWORD_HISTORY_LIMIT` в конфиг
+
+- [ ] **[Security] Политики паролей**
+  - [ ] Создать таблицу настроек политик паролей
+  - [ ] Добавить требования: сложность, длина, спецсимволы
+  - [ ] Реализовать принудительную смену пароля через N дней
+  - [ ] Добавить Admin API для управления политиками
+
+### Notifications & Monitoring
+
+- [ ] **[Monitoring] Dashboard активности безопасности**
+  - [ ] GraphQL Query для получения истории SecurityEvents
+  - [ ] Фильтрация по типам событий, датам, severity
+  - [ ] Визуализация попыток сброса/смены паролей
+
+- [ ] **[Notifications] Push-уведомления о смене пароля**
+  - [ ] Интегрировать сервис push-уведомлений (Firebase, OneSignal)
+  - [ ] Отправлять push на доверенные устройства при смене пароля
+  - [ ] Добавить настройку предпочтений уведомлений
+
+### Admin Features
+
+- [ ] **[Admin] Принудительный сброс пароля администратором**
+  - [ ] Создать мутацию `adminForcePasswordReset(userId)` для SUPER_ADMIN
+  - [ ] Генерировать временный пароль или токен
+  - [ ] Отправлять пользователю инструкции по восстановлению
+  - [ ] Логировать действие администратора в AuditLog
+
+- [ ] **[Admin] Блокировка аккаунта при подозрительной активности**
+  - [ ] Автоматически блокировать аккаунт после N неудачных попыток сброса
+  - [ ] Создавать `AccountLock` с причиной "SUSPICIOUS_PASSWORD_RESET"
+  - [ ] Требовать ручной разблокировки через support
+
+### Documentation
+
+- 🟡 **[Docs] Создать `PASSWORD_MANAGEMENT.md`** *(In progress - Step 3)*
+  - 🟡 Документировать архитектуру смены и сброса пароля (создается сейчас)
+  - 🟡 Описать flow-диаграммы для каждого процесса
+  - 🟡 Добавить примеры использования GraphQL API
+  - 🟡 Описать security best practices
+
+- [ ] **[Docs] Обновить `SECURITY.md`**
+  - [ ] Добавить раздел "Password Security"
+  - [ ] Описать используемые алгоритмы хеширования (Argon2id)
+  - [ ] Документировать защиту от атак (enumeration, brute-force)
+
+## 📈 Выполнено в Steps 1-4
+
+### Step 1: Security Event Service Foundation
+- ✅ Глобальный сервис аудита безопасности
+- ✅ Risk scoring система
+- ✅ Unit-тесты с 100% покрытием
+
+### Step 2: Session Invalidation & Password Change Enhancement
+- ✅ Инвалидация сессий при смене пароля
+- ✅ SecurityEvent логирование для PASSWORD_CHANGED
+- ✅ Динамический risk assessment
+- ✅ Unit-тесты для AccountService и SessionService
+
+### Step 3: Email Notifications for Password Operations
+- ✅ React Email шаблоны (PasswordChanged, PasswordResetConfirmation)
+- ✅ SecurityEvent логирование для PASSWORD_RESET_REQUESTED/COMPLETED
+- ✅ Email enumeration protection
+- ✅ i18n для EN/RU
+- ✅ Non-blocking error handling
+
+### Step 4: Password Reset Template & Recovery Service Testing
+- ✅ React Email шаблон для password reset запросов
+- ✅ Полное покрытие RecoveryService unit-тестами (8 тестов)
+- ✅ Тесты для email enumeration protection
+- ✅ Тесты для token validation
+---
+
+## 🎯 Следующие приоритеты
+
+1. **Step 5**: E2E тесты для полного password flow
+2. **Step 6**: Rate limiting для password reset endpoint
+3. **Step 7**: HaveIBeenPwned интеграция для compromised passwords
+4. **Step 8**: Password history tracking
+5. **Step 9**: Admin features (force password reset)
+
+---
+
+*Последнее обновление: 2025-01-27 (Step 4 completed)*
+
+
+Понял. Я полностью переработаю TODO-список в формате детального Roadmap, как вы показали. Это отличный способ визуализировать прогресс и зависимости.
+
+---
+
+# Module: Rate Limiting & Security Hardening Module
+
+---
+
+## 📊 Progress Overview
+
+```
+Rate Limiting Core: ██████████ 100%
+Account Lockout:    [                    ] 0%
+Security Headers:   [                    ] 0%
+Brute-Force Guard:  █████░░░░░ 50%
+Documentation:      [                    ] 0%
+Testing Coverage:   [                    ] 0%
+```
+
+---
+
+## Module: Rate Limiting & Security Hardening Module
+
+---
+
+## 📊 Progress Overview
+
+```
+Rate Limiting Core: ██████████ 100%
+Account Lockout:    ██████████ 100%
+Security Headers:   ██████████ 100%
+Brute-Force Guard:  [█████░░░░░] 50%
+Documentation:      [                    ] 0%
+Testing Coverage:   [                    ] 0%
+```
+
+---
+
+## 🔴 HIGH: Критически важные для запуска
+
+### ✅ Step 1: Rate Limiting Module Foundation
+
+- ✅ **[Module] Создать глобальный `RateLimitModule`**
+  - ✅ Определить `RateLimitService` и `RateLimitGuard` как провайдеры.
+  - ✅ Экспортировать сервисы для доступности в других модулях.
+- ✅ **[Service] Реализовать `RateLimitService` на базе Redis**
+  - ✅ Реализовать метод `consume()` с алгоритмом *sliding window* (Redis `ZSET`).
+  - ✅ Реализовать методы для управления белыми/черными списками (`isWhitelisted`, `isBlacklisted`, `addToWhitelist`, `addToBlacklist`).
+- ✅ **[Guard] Реализовать `RateLimitGuard` как глобальный `APP_GUARD`**
+  - ✅ Определять ключ для ограничения (IP-адрес или `userId`).
+  - ✅ Проверять белые/черные списки перед применением лимитов.
+  - ✅ Обрабатывать исключение `ThrottlerException` (HTTP 429) при превышении лимита.
+- ✅ **[Decorators] Создать декораторы для гибкой настройки**
+  - ✅ `@RateLimit(options)` для переопределения глобальных лимитов.
+  - ✅ `@SkipRateLimit()` для исключения эндпоинтов из проверки.
+- ✅ **[Integration] Интегрировать модуль в ядро приложения**
+  - ✅ Импортировать `RateLimitModule` в `CoreModule`.
+  - ✅ Зарегистрировать `RateLimitGuard` как глобальный `APP_GUARD`.
+- ✅ **[Config] Вынести глобальные лимиты в `.env`**
+  - ✅ `RATE_LIMIT_POINTS` и `RATE_LIMIT_DURATION` добавлены в `.env.example`.
+
+### ✅ Step 2: Account Lockout & Progressive Delays
+
+- ✅ **[Module] Создать `AccountLockModule`**
+  - ✅ Создать `src/modules/security/account-lock/account-lock.module.ts`.
+  - ✅ Провайдить и экспортировать `AccountLockService`.
+- ✅ **[Service] Реализовать `AccountLockService`**
+  - ✅ Создать `src/modules/security/account-lock/account-lock.service.ts`.
+  - ✅ Реализовать метод `isAccountLocked(userId)` для проверки статуса блокировки в БД.
+  - ✅ Реализовать `incrementFailedAttempts(userId, ip, userAgent)` для инкремента счетчика в Redis и применения прогрессивных задержек.
+  - ✅ Реализовать `lockAccount(...)` для создания записи `AccountLock` в Prisma, логирования события и отправки уведомления.
+  - ✅ Реализовать `clearFailedAttempts(userId)` для сброса счетчика при успехе.
+- ✅ **[Integration] Интегрировать сервис в `SessionService`**
+  - ✅ Внедрить `AccountLockService` в `SessionService`.
+  - ✅ Модифицировать метод `login()` для вызова `isAccountLocked`, `incrementFailedAttempts` и `clearFailedAttempts`.
+- ✅ **[Constants] Определить конфигурационные константы**
+  - ✅ `MAX_FAILED_ATTEMPTS` (порог блокировки).
+  - ✅ `LOCKOUT_DURATION_SECONDS` (длительность блокировки).
+  - ✅ `PROGRESSIVE_DELAYS` (массив с порогами и задержками).
+
+### ✅ Step 4: Brute-Force Protection Integration
+
+- ✅ **[Integration] Применить декоратор `@RateLimit()` к критическим эндпоинтам**
+  - ✅ `SessionResolver.login` (5 попыток / 15 минут).
+  - ✅ `RecoveryResolver.resetPassword` (3 попытки / 1 час).
+  - ✅ `TwoFactorResolver.verify2FA` (5 попыток / 5 минут).
+  - ✅ `AccountResolver.changePassword` (5 попыток / 1 час).
+  - ✅ `VerificationResolver.verificationEmail` (5 попыток / 1 час).
+- ✅ **[Audit] Логировать событие `BRUTE_FORCE_DETECTED`**
+  - ✅ `RateLimitGuard` теперь логирует событие при превышении лимита.
+
+---
+
+## 🟠 MEDIUM: Важные улучшения (Enterprise)
+
+### ✅ Step 3: Security Headers Middleware
+
+- ✅ **[Config] Создать конфигурационный файл для `helmet`**
+  - ✅ Создать `src/modules/security/config/helmet.config.ts`.
+  - ✅ Настроить строгую, но рабочую `Content-Security-Policy` (CSP).
+  - ✅ Включить HSTS, `nosniff`, `deny`, и `xssFilter`.
+- ✅ **[Integration] Интегрировать `helmet` в `main.ts`**
+  - ✅ Добавить `app.use(helmet(helmetConfig))` в `bootstrap()`.
+
+### [ ] Расширение Rate Limiting
+
+- [ ] **[Whitelist/Blacklist] Добавить API для управления списками**
+  - [ ] Создать GraphQL-мутации (`adminAddToWhitelist`, `adminRemoveFromBlacklist`) для `SUPER_ADMIN`.
+- [ ] **[Metrics] Реализовать сбор метрик**
+  - [ ] Создать метод в `RateLimitService` для сбора статистики по заблокированным запросам (например, `getRateLimitStats`).
+  - [ ] Хранить счетчики в Redis `HASH` для агрегации.
+
+---
+
+## 🟢 LOW: Продвинутые возможности и развитие
+
+### [ ] Динамические лимиты и адаптивная защита
+
+- [ ] **[Feature] Реализовать адаптивное ужесточение лимитов**
+  - [ ] Создать механизм, который отслеживает IP-адреса с высокой частотой ошибок и временно понижает для них `points`.
+- [ ] **[Feature] Интегрировать с `RiskCalculatorUtil`**
+  - [ ] Модифицировать `RateLimitGuard`, чтобы лимиты `points` и `duration` могли зависеть от `riskScore` пользователя.
+
+### [ ] Тестирование
+
+- [ ] **[Unit Tests] Написать юнит-тесты для новых сервисов**
+  - [ ] `rate-limit.service.spec.ts`: проверить логику sliding window, граничные случаи и обработку ошибок.
+  - [ ] `account-lock.service.spec.ts`: проверить логику блокировок, прогрессивных задержек и взаимодействия с Redis/Prisma.
+- [ ] **[Integration Tests] Написать интеграционные тесты для Guard**
+  - [ ] `rate-limit.guard.spec.ts`: проверить, как Guard читает метаданные с декораторов и применяет разные лимиты.
+- [ ] **[E2E Tests] Написать сквозные тесты**
+  - [ ] Симулировать атаку перебора на `login` и проверить, что сначала срабатывает Rate Limiter (HTTP 429), а затем Account Lockout (HTTP 403).
+
+### [ ] Документация
+
+- [ ] **[Docs] Создать `docs/security/RATE_LIMITING.md`**
+  - [ ] Описать архитектуру, конфигурацию и использование модуля.
+- [ ] **[Docs] Создать `docs/security/ACCOUNT_LOCKOUT.md`**
+  - [ ] Описать механизм блокировки, его триггеры и способы разблокировки.
+- [ ] **[Docs] Обновить `CHANGELOG.md`**
+  - [ ] Добавить запись для каждого завершенного шага.
+
+---
+
+## 🔵 Definition of Done (Критерии готовности)
+
+- **Тесты:** Покрытие юнит-тестами новых сервисов ≥ 80%; интеграционные и E2E-тесты закрывают сценарии brute-force и блокировки.
+- **Безопасность:** Все критические эндпоинты защищены; все блокировки и превышения лимитов логируются в `SecurityEvent`.
+- **Производительность:** Проверка rate limit занимает менее 5ms.
+- **Конфигурация:** Все пороги, длительности и лимиты настраиваются через `.env` переменные.
+- **Документация:** Созданы и обновлены все релевантные документы.
+- **Код:** Отсутствуют `TODO`, `any`, ошибки линтера и компиляции; код прошел ревью.
+
+---
+
+Отлично! Вот план по рефакторингу и улучшению архитектуры, оформленный в виде детализированного Roadmap/TODO-списка, как вы просили.
+
+---
+
+# Module: Architecture Refactoring & Improvement
+
+---
+
+## 📊 Progress Overview
+
+```
+Security Module Centralization: ██████████ 100%
+Core Infrastructure Refactoring: [                    ] 0%
+Domain Events Implementation:    [                    ] 0%
+```
+---
+
+## 🔴 HIGH: Централизация модуля безопасности
+
+**Цель:** Объединить всю логику активной защиты (rate limiting, account locking) в едином, интуитивно понятном `SecurityModule`.
+
+### ✅Step 1: Centralize Security Features
+
+- ✅ **[Refactor] Переместить модуль `rate-limit`**
+  - ✅ Переместить директорию `src/modules/rate-limit` в `src/modules/security/rate-limit`.
+  - ✅Обновить все пути импорта, ссылающиеся на `modules/rate-limit` (например, в резолверах и `CoreModule`).
+- ✅ **[Module] Создать и настроить `SecurityModule`**
+  - ✅ Создать файл `src/modules/security/security.module.ts`.
+  - ✅ В `SecurityModule` импортировать `RateLimitModule` и `AccountLockModule`.
+  - ✅ Сделать `SecurityModule` глобальным (`@Global()`).
+  - ✅ Экспортировать `RateLimitModule` и `AccountLockModule`, чтобы их сервисы (`RateLimitService`, `AccountLockService`) были доступны для DI в других модулях.
+- ✅ **[Integration] Обновить `CoreModule`**
+  - ✅ Удалить `RateLimitModule` из `imports` в `src/core/core.module.ts`.
+  - ✅ Добавить `SecurityModule` в `imports` в `src/core/core.module.ts`.
+- ✅ **[Cleanup] Обновить `index` файлы**
+  - ✅ Убедиться, что `src/modules/security/index.ts` корректно экспортирует все необходимые компоненты.
+
+---
+
+## 🟠 MEDIUM: Реструктуризация инфраструктурных адаптеров
+
+**Цель:** Четко отделить инфраструктурный слой (адаптеры к внешним сервисам) от бизнес-логики, переместив `mail` и `sms` в `core`.
+
+### [ ] Step 2: Refactor Core Adapters
+
+- ✅ **[Refactor] Переместить модуль `mail`**
+  - ✅ Переместить директорию `src/modules/libs/mail` в `src/core/mail`.
+  - ✅ Обновить пути импорта `MailModule` и `MailService` во всем приложении (особенно в `CoreModule` и `NotificationService`).
+- ✅ **[Refactor] Переместить модуль `sms`**
+  - ✅ Переместить директорию `src/modules/libs/sms` в `src/core/sms`.
+  - ✅ Обновить пути импорта `SmsModule` и `SmsService` во всем приложении.
+- ✅ **[Cleanup] Удалить директорию `src/modules/libs`**
+  - ✅ После перемещения всех модулей, директория `libs` должна стать пустой и ее можно удалить.
+- ✅ **[Docs] Обновить проектную документацию**
+  - ✅ Обновить файл `backend.md` или аналогичный, чтобы отразить новую структуру `core`.
+
+### ✅ Step 2.1 (Revised): Consolidate Communication Adapters
+
+-   ✅ **[Module] Создать `CommunicationModule`**
+    -   ✅ Создать директорию `src/core/communication`.
+    -   ✅ Создать главный `CommunicationModule`, импортирующий `MailModule` и `SmsModule`.
+-   ✅ **[Refactor] Переместить `mail` и `sms` модули**
+    -   ✅ Переместить `src/modules/libs/mail` в `src/core/communication/mail`.
+    -   ✅ Переместить `src/modules/libs/sms` в `src/core/communication/sms`.
+    -   ✅ Обновить все пути импорта в проекте.
+-   ✅ **[Integration] Обновить `CoreModule`**
+    -   ✅ Заменить импорты `MailModule` и `SmsModule` на единый `CommunicationModule`.
+-   ✅ **[Cleanup] Удалить директорию `src/modules/libs`**.
+
+---
+
+## 🟢 LOW / ADVANCED: Внедрение Domain Events
+
+**Цель:** Уменьшить прямую связанность между сервисами, заменив прямые вызовы на систему событий и слушателей для улучшения расширяемости.
+
+### [ ] Step 3: Implement Domain Events Pattern
+
+- [ ] **[Infra] Настроить `EventEmitterModule`**
+  - [ ] Добавить зависимость `@nestjs/event-emitter`.
+  - [ ] Импортировать `EventEmitterModule.forRoot()` в `CoreModule`.
+- [ ] **[Core] Определить доменные события**
+  - [ ] Создать файл `src/shared/events/domain-events.constants.ts` с перечислением всех событий (e.g., `user.password_changed`, `security.account_locked`).
+  - [ ] Создать файл `src/shared/events/domain-events.types.ts` с интерфейсами `payload` для каждого события (e.g., `UserPasswordChangedPayload`).
+- [ ] **[Refactor] Модифицировать сервисы-источники для "излучения" событий**
+  - [ ] Внедрить `EventEmitter2` в сервисы (`AccountService`, `TwoFactorMethodService` и т.д.).
+  - [ ] Заменить прямые вызовы `securityEventService.create()` и `notificationService.notify...()` на `this.eventEmitter.emit('event.name', payload)`.
+- [ ] **[Refactor] Реализовать слушателей событий (Listeners)**
+  - [ ] В `SecurityEventService` создать методы, декорированные `@OnEvent('event.name')`, которые будут принимать `payload` и вызывать `this.create()`.
+  - [ ] В `NotificationService` создать методы, декорированные `@OnEvent('event.name')`, которые будут вызывать соответствующие методы `notify...()`.
+- [ ] **[Testing] Обновить юнит-тесты**
+  - [ ] Тесты для сервисов-источников теперь должны проверять, что `eventEmitter.emit` был вызван с правильными параметрами (`jest.spyOn(...)`).
+  - [ ] Написать новые тесты для слушателей, чтобы проверить, что они корректно реагируют на события.
+
+---

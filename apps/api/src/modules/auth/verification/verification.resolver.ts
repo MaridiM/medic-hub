@@ -1,4 +1,6 @@
+import { RATE_LIMIT_VERIFICATION_EMAIL_POINTS, RATE_LIMIT_VERIFICATION_EMAIL_WINDOW_MS } from '@/core/config'
 import { Lang, Language } from '@/core/i18n'
+import { RateLimit } from '@/modules/security'
 import { UserAgent } from '@/shared/decorators'
 import type { GqlContext } from '@/shared/types'
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql'
@@ -14,6 +16,7 @@ export class VerificationResolver {
 	 * Send a verification email with a one-time token.
 	 * The token is persisted and can be used to confirm the account.
 	 */
+	@RateLimit({ points: RATE_LIMIT_VERIFICATION_EMAIL_POINTS, duration: RATE_LIMIT_VERIFICATION_EMAIL_WINDOW_MS }) // ✅ 5 attempts per hour
 	@Mutation(() => VerificationResponse, {
 		name: 'verificationEmail',
 		description: 'Send a verification email with a one-time token and return delivery/meta info.',

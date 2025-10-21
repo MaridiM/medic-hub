@@ -29,23 +29,34 @@
     - [Step 2.1: Cron Service Type Fixes](#step-21-cron-service-type-fixes)
     - [Step 3: WebAuthn/Passkeys Implementation](#step-3-webauthnpasskeys-implementation)
     - [Step 3.1: WebAuthn TypeScript Fixes](#step-31-webauthn-typescript-fixes)
-- [Changelog](#changelog-1)
   - [Module: Account \& Session Modules Migration](#module-account--session-modules-migration)
     - [Step 1: Prisma Schema Migration \& Model Updates](#step-1-prisma-schema-migration--model-updates)
-    - [Step 1: Prisma Schema Migration \& Model Updates](#step-1-prisma-schema-migration--model-updates-1)
+    - [Step 1.1: Prisma Schema Migration \& Model Updates](#step-11-prisma-schema-migration--model-updates)
     - [Step 2: WebAuthn GraphQL Schema Fix](#step-2-webauthn-graphql-schema-fix)
     - [Step 2.1: WebAuthn GraphQL Schema Fix](#step-21-webauthn-graphql-schema-fix)
     - [Step 2.2: WebAuthn GraphQL Schema Fix](#step-22-webauthn-graphql-schema-fix)
-- [Module: 2FA System Modernization \& RBAC Foundation](#module-2fa-system-modernization--rbac-foundation-1)
+  - [Module: 2FA System Modernization \& RBAC Foundation](#module-2fa-system-modernization--rbac-foundation-1)
     - [Step 1: Core Infrastructure Updates for Notifications](#step-1-core-infrastructure-updates-for-notifications)
     - [Step 2: Notification Module Foundation](#step-2-notification-module-foundation)
     - [Step 3: Email Templates \& MailService Integration](#step-3-email-templates--mailservice-integration)
     - [Step 4: i18n Nested Paths Support](#step-4-i18n-nested-paths-support)
-  - [**✅ CHECKLIST**](#-checklist)
     - [Step 5: Template \& i18n Corrections](#step-5-template--i18n-corrections)
     - [Step 6: Integration of NotificationService](#step-6-integration-of-notificationservice)
     - [Step 7: 2FA Code Verification Implementation](#step-7-2fa-code-verification-implementation)
     - [Step 7.1: Access Modifier and Method Naming Correction](#step-71-access-modifier-and-method-naming-correction)
+  - [Module: Password Management \& Security Event System](#module-password-management--security-event-system)
+    - [Step 1: Security Event Service Foundation (Global Module)](#step-1-security-event-service-foundation-global-module)
+    - [Step 2: Session Invalidation \& Password Change Enhancement](#step-2-session-invalidation--password-change-enhancement)
+    - [Step 3: Email Notifications for Password Operations (React Email)](#step-3-email-notifications-for-password-operations-react-email)
+    - [Step 4: Password Reset Template \& Recovery Service Testing](#step-4-password-reset-template--recovery-service-testing)
+  - [Module: Rate Limiting \& Security Hardening](#module-rate-limiting--security-hardening)
+    - [Step 1: Rate Limiting Module Foundation](#step-1-rate-limiting-module-foundation)
+    - [Step 2: Account Lockout \& Progressive Delays](#step-2-account-lockout--progressive-delays)
+    - [Step 3: Security Headers Middleware](#step-3-security-headers-middleware)
+    - [Step 4: Brute-Force Protection Integration](#step-4-brute-force-protection-integration)
+  - [Module: Architecture Refactoring](#module-architecture-refactoring)
+    - [Step 1: Centralize Security Module](#step-1-centralize-security-module)
+    - [Step 2 (Revised): Consolidate Communication Adapters](#step-2-revised-consolidate-communication-adapters)
 
 ---
 
@@ -55,7 +66,7 @@
 
 ### Step 1: Prisma Schema Enhancement 
 
-:calendar: `2025-11-10`
+:calendar: `2025-10-11`
 
 **Added**
 
@@ -85,7 +96,7 @@
 
 ### Step 2: Core Types & Constants 
 
-:calendar: `2025-11-10`
+:calendar: `2025-10-11`
 
 **Added**
 
@@ -120,7 +131,7 @@
 
 ### Step 2.1: Fixes & Utilities Creation
 
-:calendar: `2025-11-10`
+:calendar: `2025-10-11`
 
 **Fixed**
 
@@ -141,7 +152,7 @@
 
 ###  Step 2.2: Refactor Utils to Use Existing Infrastructure
 
-:calendar: `2025-12-10`
+:calendar: `2025-10-12`
 
 **Changed**
 
@@ -159,7 +170,7 @@
 
 ### Step 3: Core 2FA Services
 
-:calendar: `2025-12-10`
+:calendar: `2025-10-12`
 
 **Added**
 
@@ -186,7 +197,7 @@
 
 ### Step 3.1: Main 2FA Method Service & DTOs
 
-:calendar: `2025-12-10`
+:calendar: `2025-10-12`
 
 **Added**
 
@@ -214,7 +225,7 @@
 
 ### Step 4: GraphQL API & Module Integration
 
-:calendar: `2025-12-10`
+:calendar: `2025-10-12`
 
 **Added**
 
@@ -459,7 +470,7 @@
 
 ### Step 0: RBAC Foundation Implementation
 
-:calendar: `2025.10.15`
+:calendar: `2025-10-15`
 
 **Added**
 
@@ -507,7 +518,7 @@
 
 ### Step 0.1: TypeScript & Session Typing Refinement
 
-:calendar: `2025.10.15`
+:calendar: `2025-10-15`
 
 **Added**
 
@@ -761,13 +772,9 @@
 
 ---
 
-# Changelog
-
-All notable changes to this project will be documented in this file.
+## Module: Account & Session Modules Migration
 
 ---
-
-## Module: Account & Session Modules Migration
 
 ### Step 1: Prisma Schema Migration & Model Updates
 
@@ -840,7 +847,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-### Step 1: Prisma Schema Migration & Model Updates
+### Step 1.1: Prisma Schema Migration & Model Updates
 
 :calendar: `2025-10-19`
 
@@ -981,11 +988,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-# Module: 2FA System Modernization & RBAC Foundation
+## Module: 2FA System Modernization & RBAC Foundation
+
+---
 
 ### Step 1: Core Infrastructure Updates for Notifications
 
-:calendar: `2025.10.19`
+:calendar: `2025-10-19`
 
 **Added**
 
@@ -1011,7 +1020,7 @@ All notable changes to this project will be documented in this file.
 
 ### Step 2: Notification Module Foundation
 
-:calendar: `2025.10.19`
+:calendar: `2025-10-19`
 
 **Added**
 
@@ -1058,7 +1067,7 @@ All notable changes to this project will be documented in this file.
 
 ### Step 3: Email Templates & MailService Integration
 
-:calendar: `2025.10.19`
+:calendar: `2025-10-19`
 
 **Added**
 
@@ -1131,7 +1140,7 @@ All notable changes to this project will be documented in this file.
 
 ### Step 4: i18n Nested Paths Support
 
-:calendar: `2025.10.19`
+:calendar: `2025-10-19`
 
 **Added**
 
@@ -1165,36 +1174,9 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ---
 
-## **✅ CHECKLIST**
-
-- [x] Добавлен `NestedPaths<T>` для генерации вложенных путей
-- [x] Добавлен `RelativeValue<T, P>` для извлечения значения по пути
-- [x] Обновлен `ScopedT` с новой перегрузкой для вложенных путей
-- [x] Runtime уже поддерживает вложенные пути (не требует изменений)
-- [x] Changelog Step 5.4 создан
-- [x] Все варианты вызовов работают:
-  - `t('title')` ✅
-  - `t('details.title')` ✅ NEW
-  - `t('details')('title')` ✅
-  - `t('warning.message', { params })` ✅
-
----
-
-**Теперь ваши email templates будут работать с вложенными путями!** 🎯
-
-```typescript
-// ✅ ВСЕ ЭТО ТЕПЕРЬ РАБОТАЕТ:
-{t('details.title') || 'Method Details:'}
-{t('details.type', { type: methodType }) || `🔑 Type: ${methodType}`}
-{t('warning.message') || "If you didn't make this change..."}
-{t('details.timestamp', { time: timestamp })}
-```
-
----
-
 ### Step 5: Template & i18n Corrections
 
-:calendar: `2025.10.19`
+:calendar: `2025-10-19`
 
 **Fixed**
 
@@ -1217,7 +1199,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 6: Integration of NotificationService
 
-:calendar: `2025.10.19`
+:calendar: `2025-10-19`
 
 **Added**
 
@@ -1249,7 +1231,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 7: 2FA Code Verification Implementation
 
-:calendar: `2025.10.20`
+:calendar: `2025-10-20`
 
 **Added**
 
@@ -1274,7 +1256,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 7.1: Access Modifier and Method Naming Correction
 
-:calendar: `2025.10.20`
+:calendar: `2025-10-20`
 
 **Fixed**
 
@@ -1290,5 +1272,372 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 -   `src/modules/auth/2fa/services/2fa-method.service.ts`
 -   `src/modules/auth/2fa/resolvers/2fa.resolver.ts`
+
+---
+
+## Module: Password Management & Security Event System
+
+---
+
+### Step 1: Security Event Service Foundation (Global Module)
+
+:calendar: `2025-10-20`
+
+**Added**
+
+- ✅ Created **global** `SecurityEventService` for platform-wide security event tracking.
+- ✅ Added `create()` method for creating security events with full metadata (IP, location, device, risk analysis).
+- ✅ Added `findByUser()` method with advanced filtering (event type, severity, resolution status, pagination).
+- ✅ Added `resolve()` method for marking events as resolved by administrators.
+- ✅ Added `calculateRiskScore()` utility method for risk factor aggregation.
+- ✅ Created `CreateSecurityEventInput` interface for type-safe event creation.
+- ✅ Created `RiskFactor` interface for structured risk analysis data.
+- ✅ Full JSDoc documentation for all public methods (English).
+- ✅ Unit test suite for `SecurityEventService` with 100% coverage of core methods.
+- ✅ Marked module as `@Global()` for automatic availability across all modules.
+
+**Changed**
+
+- ✅ Moved `SecurityEventModule` from `src/modules/auth/security-event/` to `src/modules/security-event/` (root level).
+- ✅ Updated JSDoc to reflect platform-wide usage (not auth-specific).
+- ✅ Simplified imports in `AccountModule`, `SessionModule`, `RecoveryModule` (no explicit SecurityEventModule import needed due to @Global decorator).
+
+**Files Created**
+
+- `src/modules/security-event/security-event.service.ts`
+- `src/modules/security-event/security-event.service.spec.ts`
+- `src/modules/security-event/security-event.module.ts`
+- `src/modules/security-event/index.ts`
+
+**Files Modified**
+
+- `src/modules/auth/account/account.module.ts`
+- `src/modules/auth/session/session.module.ts`
+- `src/modules/auth/recovery/recovery.module.ts`
+
+**Removed**
+
+- ❌ Removed explicit `SecurityEventModule` imports from auth modules (now using @Global decorator).
+
+---
+
+### Step 2: Session Invalidation & Password Change Enhancement
+
+:calendar: `2025-10-20`
+
+**Added**
+
+- ✅ Added `invalidateUserSessions(userId, excludeSessionId?)` method to `SessionService` for bulk session removal.
+- ✅ Integrated `SessionService` and `SecurityEventService` into `AccountService`.
+- ✅ Enhanced `changePassword()` method with enterprise security features:
+  - Invalidates all user sessions except current one (logout from other devices)
+  - Creates `SecurityEvent` with type `PASSWORD_CHANGED`
+  - Calculates risk score based on factors (password change activity, multiple sessions)
+  - Determines severity dynamically (LOW/MEDIUM/HIGH) based on risk score
+  - Returns number of invalidated sessions to client
+- ✅ Created `ChangePasswordResponse` GraphQL type with `success` and `sessionsInvalidated` fields.
+- ✅ Added comprehensive unit tests for `invalidateUserSessions()` in `SessionService`.
+- ✅ Added comprehensive unit tests for enhanced `changePassword()` in `AccountService`.
+- ✅ Full JSDoc documentation for all new methods (English).
+
+**Changed**
+
+- ✅ Updated `AccountService.changePassword()` signature to accept `Request` object and `userAgent`.
+- ✅ Updated `AccountResolver.changePassword()` mutation to return `ChangePasswordResponse` instead of `Boolean`.
+- ✅ Updated `AccountModule` to provide `SessionService`.
+- ✅ Enhanced session invalidation logic to handle invalid JSON gracefully.
+- ✅ Improved risk factor calculation with multi-session detection.
+
+**Fixed**
+
+- ✅ Fixed edge case where invalid session data could crash `invalidateUserSessions()`.
+
+**Files Created**
+
+- `src/modules/auth/account/account.service.spec.ts`
+- `src/modules/auth/session/session.service.spec.ts`
+
+**Files Modified**
+
+- `src/modules/auth/session/session.service.ts`
+- `src/modules/auth/account/account.service.ts`
+- `src/modules/auth/account/account.resolver.ts`
+- `src/modules/auth/account/account.module.ts`
+
+---
+
+### Step 3: Email Notifications for Password Operations (React Email)
+
+:calendar: `2025-10-20`
+
+**Added**
+
+- ✅ Created `PasswordChangedTemplate` React Email component for password change alerts.
+- ✅ Created `PasswordResetConfirmationTemplate` React Email component for password reset confirmations.
+- ✅ Added `sendPasswordChangedNotification()` method to `MailService`.
+- ✅ Added `sendPasswordResetConfirmation()` method to `MailService`.
+- ✅ Integrated email notifications into `AccountService.changePassword()` (non-blocking).
+- ✅ Integrated email notifications into `RecoveryService.newPassword()` (non-blocking).
+- ✅ Added security event logging for `PASSWORD_RESET_REQUESTED` in `RecoveryService`.
+- ✅ Added security event logging for `PASSWORD_RESET_COMPLETED` in `RecoveryService`.
+- ✅ Implemented email enumeration protection in `resetPassword()` (always returns true).
+- ✅ Enhanced email templates with:
+  - Security metadata (IP, location, device, timestamp)
+  - Action buttons (View Security Activity, Contact Support, Enable 2FA)
+  - Security recommendations with styled lists
+  - Warning banners for unauthorized changes
+  - Localized content (EN/RU) via i18n
+  - Responsive Tailwind CSS styling
+- ✅ Added comprehensive i18n translations for password email templates (EN/RU).
+
+**Changed**
+
+- ✅ Migrated from Handlebars to React Email (@react-email/components) for modern template rendering.
+- ✅ Updated `RecoveryService.resetPassword()` to log security events for both existing and non-existing users.
+- ✅ Updated `RecoveryService.newPassword()` signature to accept `Request` and `userAgent` for metadata extraction.
+- ✅ Updated `RecoveryResolver.newPassword()` to pass request context to service.
+- ✅ Updated `AccountModule` to provide `MailService`.
+- ✅ Updated `RecoveryModule` to provide `MailService`.
+- ✅ Enhanced JSDoc documentation for all updated methods.
+- ✅ Improved template structure with TemplateWrapper for consistent branding.
+
+**Fixed**
+
+- ✅ Fixed email enumeration vulnerability in `resetPassword()` (now always returns success).
+- ✅ Fixed missing metadata in password reset security events.
+
+**Removed**
+
+- ❌ Removed Handlebars template files (replaced with React Email components).
+- ❌ Removed Handlebars dependency for email rendering.
+
+**Files Created**
+
+- `src/modules/libs/mail/templates/password-changed.template.tsx`
+- `src/modules/libs/mail/templates/password-reset-confirmation.template.tsx`
+
+**Files Modified**
+
+- `src/modules/libs/mail/mail.service.ts`
+- `src/modules/libs/mail/templates/index.ts`
+- `src/modules/auth/account/account.service.ts`
+- `src/modules/auth/account/account.module.ts`
+- `src/modules/auth/recovery/recovery.service.ts`
+- `src/modules/auth/recovery/recovery.resolver.ts`
+- `src/modules/auth/recovery/recovery.module.ts`
+- `src/core/i18n/locales/en.json`
+- `src/core/i18n/locales/ru.json`
+
+---
+
+### Step 4: Password Reset Template & Recovery Service Testing
+
+:calendar: `2025-10-21`
+
+**Added**
+
+- ✅ Created `ResetPasswordTemplate` React Email component for password reset requests.
+- ✅ Added comprehensive unit tests for `RecoveryService`:
+  - `resetPassword()` with email enumeration protection tests
+  - `newPassword()` with token validation tests
+  - Email sending failure resilience tests
+  - Security event creation tests
+- ✅ Enhanced `sendPasswordResetToken()` in `MailService` to use React Email template.
+- ✅ Added non-blocking error handling with logging for reset email sending.
+
+**Changed**
+
+- ✅ Replaced placeholder HTML in `sendPasswordResetToken()` with proper `ResetPasswordTemplate`.
+- ✅ Updated `ResetPasswordTemplate` to include:
+  - Security metadata display (IP, location, device, timestamp)
+  - Main CTA button with reset link
+  - Link fallback for email clients that block buttons
+  - Warning banner for unauthorized requests
+  - Token expiration notice (1 hour)
+  - Request details box with full metadata
+- ✅ Enhanced JSDoc documentation for `sendPasswordResetToken()`.
+- ✅ Reverted `newPassword()` signature to original (2 parameters) - method is called without authentication.
+- ✅ Updated security event logging in `newPassword()` to use 'unknown' for IP/userAgent (no request context).
+
+**Fixed**
+
+- ✅ Fixed missing React Email template for password reset flow (was using HTML string).
+- ✅ Fixed error handling in `sendPasswordResetToken()` to properly log and re-throw.
+- ✅ Fixed TypeScript errors in `RecoveryService` tests (incorrect method signature).
+- ✅ Fixed unsafe `any` type assertion in argon2 mock.
+
+**Files Created**
+
+- `src/modules/libs/mail/templates/reset-password.template.tsx`
+- `src/modules/auth/recovery/recovery.service.spec.ts`
+
+**Files Modified**
+
+- `src/modules/libs/mail/mail.service.ts`
+- `src/modules/libs/mail/templates/index.ts`
+- `src/modules/auth/recovery/recovery.service.ts`
+- `src/modules/auth/recovery/recovery.resolver.ts`
+
+**Testing**
+
+- ✅ Added 8 unit tests for `RecoveryService`:
+  - ✅ `resetPassword` sends email for existing user
+  - ✅ `resetPassword` returns true for non-existent user (enumeration protection)
+  - ✅ `resetPassword` doesn't fail if email sending fails
+  - ✅ `newPassword` resets password with valid token
+  - ✅ `newPassword` throws NotFoundException for invalid token
+  - ✅ `newPassword` throws NotFoundException for wrong token type
+  - ✅ `newPassword` throws BadRequestException for expired token
+  - ✅ `newPassword` doesn't fail if confirmation email fails
+
+---
+
+## Module: Rate Limiting & Security Hardening
+
+---
+
+### Step 1: Rate Limiting Module Foundation
+
+:calendar: `2025-10-21`
+
+**Added**
+
+- ✅ **`RateLimitModule`**: Создан новый модуль для управления ограничением запросов.
+- ✅ **`RateLimitService`**: Реализован сервис на базе Redis с алгоритмом **sliding window** (`ZSET`).
+- ✅ **`RateLimitGuard`**: Создан глобальный `APP_GUARD` для автоматической защиты всех эндпоинтов (по IP или `userId`).
+- ✅ **`@RateLimit()` & `@SkipRateLimit()` Decorators**: Созданы декораторы для гибкой настройки и исключения лимитов.
+- ✅ **Security Auditing**: При превышении лимита логируется событие `BRUTE_FORCE_DETECTED`.
+- ✅ **Whitelist/Blacklist Support**: Реализованы методы для управления списками доверенных и заблокированных IP.
+- ✅ **Fail-Open Strategy**: При ошибках Redis запросы разрешаются для обеспечения доступности сервиса.
+
+**Changed**
+
+- ✅ **`CoreModule`**: `RateLimitGuard` зарегистрирован как глобальный страж.
+- ✅ **`RedisService`**: Расширен методами для работы с `SET` и `ZSET`.
+- ✅ **`.env.example`**: Добавлены переменные для глобальных лимитов.
+
+**Fixed**
+
+- ✅ Устранены ошибки типизации клиента `redis` v4, обеспечив корректную работу с транзакциями и командами `sIsMember`.
+
+**Files Created**
+
+- `src/modules/security/rate-limit/*`
+
+---
+
+### Step 2: Account Lockout & Progressive Delays
+
+:calendar: `2025-10-21`
+
+**Added**
+
+- ✅ **`AccountLockModule`**: Создан модуль для инкапсуляции логики блокировки аккаунтов.
+- ✅ **`AccountLockService`**: Реализован сервис для отслеживания неудачных попыток входа и применения блокировок.
+- ✅ **Progressive Delays**: Внедрены искусственные задержки ответа (1-2 секунды) после 3-й и 4-й неудачных попыток.
+- ✅ **Persistent Locking**: При достижении порога неудач создается запись в таблице `AccountLock` в PostgreSQL.
+- ✅ **`SecurityEvent` Integration**: При блокировке аккаунта логируется критическое событие `ACCOUNT_LOCKED`.
+
+**Changed**
+
+- ✅ **`SessionService`**: Метод `login()` теперь полностью интегрирован с `AccountLockService` для проверки и отслеживания попыток входа.
+- ✅ **`SessionModule`**: Импортирован `AccountLockModule` для внедрения зависимостей.
+
+**Files Created**
+
+- `src/modules/security/account-lock/*`
+
+---
+
+### Step 3: Security Headers Middleware
+
+:calendar: `2025-10-21`
+
+**Added**
+
+- ✅ **Security Headers**: Приложение теперь отправляет набор HTTP-заголовков для усиления безопасности с помощью библиотеки `helmet`.
+- ✅ **Content Security Policy (CSP)**: Настроена строгая политика, разрешающая контент только с доверенных источников (`self`, `Cloudinary`, `Google Fonts`).
+- ✅ **HSTS, Clickjacking, MIME Sniffing Protection**: Включены и настроены все стандартные защитные заголовки.
+
+**Changed**
+
+- ✅ **`main.ts`**: `helmet` интегрирован как глобальный middleware, который применяется одним из первых в конвейере обработки запросов.
+
+**Fixed**
+
+- ✅ Устранены ошибки типизации `HelmetOptions`, обеспечив совместимость конфигурации с установленной версией `helmet`.
+
+**Files Created**
+
+- `src/modules/security/config/helmet.config.ts`
+
+---
+
+### Step 4: Brute-Force Protection Integration
+
+:calendar: `2025-10-21`
+
+**Added**
+
+- ✅ **Endpoint-specific Rate Limiting**: Критически важные эндпоинты теперь защищены индивидуальными, более строгими лимитами с помощью декоратора `@RateLimit`.
+
+**Changed**
+
+- ✅ **`SessionResolver`**: Мутация `login` защищена лимитом в 5 попыток за 15 минут.
+- ✅ **`RecoveryResolver`**: Мутации `resetPassword` и `newPassword` защищены от спама и перебора токенов.
+- ✅ **`TwoFactorResolver`**: Мутация `verify2FA` защищена от перебора кодов.
+- ✅ **`AccountResolver`**: Мутация `changePassword` защищена от перебора старого пароля.
+- ✅ **`VerificationResolver`**: Мутация `verifyEmail` защищена от перебора токенов.
+
+**Files Modified**
+
+- Все соответствующие файлы резолверов в `src/modules/auth/`.
+
+---
+
+## Module: Architecture Refactoring
+
+---
+
+### Step 1: Centralize Security Module
+
+:calendar: `2025-10-21`
+
+**Added**
+
+- ✅ **`SecurityModule`**: Создан новый главный модуль (`@Global()`) в `src/modules/security`, который объединяет `RateLimitModule` и `AccountLockModule`.
+
+**Changed**
+
+- ✅ **Структура проекта**: Модуль `RateLimitModule` был перемещен из корня `modules` в `modules/security/rate-limit`.
+- ✅ **`CoreModule`**: Упрощен путем замены импорта `RateLimitModule` на единый `SecurityModule`.
+
+**Fixed**
+
+- ✅ **Циклические зависимости**: Устранена ошибка `UnknownDependenciesException` путем разрыва цикла между `CoreModule` и `SecurityModule`.
+
+**Removed**
+
+- ❌ Удалена директория `src/modules/rate-limit` (ее содержимое теперь находится в `src/modules/security/rate-limit`).
+
+---
+
+### Step 2 (Revised): Consolidate Communication Adapters
+
+:calendar: `2025-10-21`
+
+**Added**
+
+- ✅ **`CommunicationModule`**: Создан новый глобальный модуль в `src/core/communication`, который объединяет `MailModule` и `SmsModule`.
+
+**Changed**
+
+- ✅ **Структура проекта**: Модули-адаптеры `MailModule` и `SmsModule` были перемещены из `src/modules/libs` в `src/core/communication`.
+- ✅ **`CoreModule`**: Упрощен путем замены импортов `MailModule` и `SmsModule` на единый `CommunicationModule`.
+- ✅ **Пути импорта**: Обновлены все пути импорта для `MailService` и `SmsService` во всем приложении.
+
+**Removed**
+
+- ❌ **Директория `src/modules/libs`**: Эта директория была удалена.
 
 ---

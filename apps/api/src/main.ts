@@ -3,13 +3,14 @@ import * as dotenv from 'dotenv'
 import dotenvExpand from 'dotenv-expand'
 import { json, type NextFunction, type Request, Response } from 'express'
 import { graphqlUploadExpress } from 'graphql-upload-minimal'
+import helmet, { HelmetOptions } from 'helmet'
 import i18nextMiddleware from 'i18next-http-middleware'
 
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 
-import { i18n, initI18n, sessionConfig } from './core/config'
+import { helmetConfig, i18n, initI18n, sessionConfig } from './core/config'
 import { CoreModule } from './core/core.module'
 import { DEFAULT_LANGUAGE } from './core/i18n'
 import { RedisService } from './core/redis'
@@ -24,6 +25,9 @@ async function bootstrap() {
 
 	const config = app.get(ConfigService)
 	const redis = app.get(RedisService)
+
+	// ✅ Security Headers (Helmet) - apply first!
+	app.use(helmet(helmetConfig as Readonly<HelmetOptions>))
 
 	// ✅ i18n middleware (добавляет req.i18n, req.language)
 	app.use(i18nextMiddleware.handle(i18n))

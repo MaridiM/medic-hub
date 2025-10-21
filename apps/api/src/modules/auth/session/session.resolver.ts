@@ -1,4 +1,6 @@
+import { RATE_LIMIT_LOGIN_POINTS, RATE_LIMIT_LOGIN_WINDOW_MS } from '@/core/config'
 import { Lang, Language } from '@/core/i18n'
+import { RateLimit } from '@/modules/security'
 import { Authorization, UserAgent } from '@/shared/decorators'
 import type { GqlContext } from '@/shared/types'
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql'
@@ -14,6 +16,11 @@ export class SessionResolver {
 	/**
 	 * Authenticate the user and create a server session.
 	 */
+	@RateLimit({
+		points: RATE_LIMIT_LOGIN_POINTS,
+		duration: RATE_LIMIT_LOGIN_WINDOW_MS,
+		errorMessage: `Too many login attempts. Please try again in ${RATE_LIMIT_LOGIN_WINDOW_MS / 1000 / 60} minutes.`,
+	}) // ✅ 5 attempts per 15 minutes
 	@Mutation(() => LoginResponse, {
 		name: 'login',
 		description:

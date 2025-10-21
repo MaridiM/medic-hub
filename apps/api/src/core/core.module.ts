@@ -1,14 +1,15 @@
 import 'module-alias/register'
 
 import { AccountModule, RecoveryModule, SessionModule, TwoFactorModule, VerificationModule } from '@/modules/auth'
-import { MailModule, SmsModule } from '@/modules/libs'
 import { NotificationModule } from '@/modules/notification'
 import { RbacModule } from '@/modules/rbac'
+import { RateLimitGuard, SecurityModule } from '@/modules/security'
+import { SecurityEventModule } from '@/modules/security-event'
 import { IS_DEV_ENV } from '@/shared/utils'
 import { ApolloDriver } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { APP_PIPE } from '@nestjs/core'
+import { APP_GUARD, APP_PIPE } from '@nestjs/core'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ScheduleModule } from '@nestjs/schedule'
 
@@ -16,6 +17,7 @@ import { getGraphQLConfig } from './config'
 import { I18nValidationPipe } from './i18n'
 import { I18nModule } from './i18n/i18n.module'
 import { PrismaModule } from './prisma'
+import { ProviderModule } from './provider'
 import { RedisModule } from './redis'
 
 @Module({
@@ -37,12 +39,11 @@ import { RedisModule } from './redis'
 		I18nModule,
 		RedisModule,
 		PrismaModule,
-
-		// Libs
-		SmsModule,
-		MailModule,
+		ProviderModule,
 
 		// Modules
+		SecurityModule,
+
 		// Auth
 		AccountModule,
 		RecoveryModule,
@@ -53,12 +54,16 @@ import { RedisModule } from './redis'
 		// Notification
 		NotificationModule,
 
+		// Security Event
+		SecurityEventModule,
+
 		// RBAC
 		RbacModule,
 	],
 	providers: [
 		I18nValidationPipe, // регистрируем сам пайп
 		{ provide: APP_PIPE, useExisting: I18nValidationPipe },
+		{ provide: APP_GUARD, useClass: RateLimitGuard },
 	],
 })
 export class CoreModule {}

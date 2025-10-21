@@ -34,7 +34,7 @@ export class AdminTwoFactorService extends CoreService {
 		private readonly deviceTrustService: DeviceTrustService,
 		private readonly notificationService: NotificationService,
 	) {
-		super(i18n, prisma, redis)
+		super({ i18n, prisma, redis })
 	}
 
 	/**

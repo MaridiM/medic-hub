@@ -6,6 +6,13 @@ import { LeafKeys, Res, StrOptions } from './i18n/types'
 import { PrismaService } from './prisma'
 import { RedisService } from './redis'
 
+export interface CoreServiceDependencies {
+	i18n?: I18nService
+	prisma?: PrismaService
+	redis?: RedisService
+	config?: ConfigService
+}
+
 /**
  * Base application service with shared dependencies and helpers.
  * Extend this class in your feature services to get typed access
@@ -13,12 +20,23 @@ import { RedisService } from './redis'
  */
 @Injectable()
 export abstract class CoreService {
-	constructor(
-		protected readonly i18n?: I18nService,
-		protected readonly prisma?: PrismaService,
-		protected readonly redis?: RedisService,
-		protected readonly config?: ConfigService,
-	) {}
+	protected readonly i18n?: I18nService
+	protected readonly prisma?: PrismaService
+	protected readonly redis?: RedisService
+	protected readonly config?: ConfigService
+
+	constructor(dependencies: CoreServiceDependencies) {
+		this.i18n = dependencies.i18n
+		this.prisma = dependencies.prisma
+		this.redis = dependencies.redis
+		this.config = dependencies.config
+	}
+	// constructor(
+	// 	protected readonly i18n?: I18nService,
+	// 	protected readonly prisma?: PrismaService,
+	// 	protected readonly redis?: RedisService,
+	// 	protected readonly config?: ConfigService,
+	// ) {}
 
 	/**
 	 * Safe translate with fallback: returns translated string if available,
@@ -172,5 +190,22 @@ export abstract class CoreService {
 	 */
 	protected async rExpire(key: string, ttlSec: number): Promise<boolean> {
 		return (await this.redis?.expire(key, ttlSec)) ?? false
+	}
+
+	// ===== ХЕЛПЕРЫ ДЛЯ REDIS SETS И ZSETS =====
+
+	/** Add one or more members to a Redis set */
+	protected async rSAdd(key: string, members: string | string[]): Promise<number> {
+		return (await this.redis?.sAdd(key, members)) ?? 0
+	}
+
+	/** Remove one or more members from a Redis set */
+	protected async rSRem(key: string, members: string | string[]): Promise<number> {
+		return (await this.redis?.sRem(key, members)) ?? 0
+	}
+
+	/** Check if a member exists in a Redis set */
+	protected async rSIsMember(key: string, member: string): Promise<boolean> {
+		return (await this.redis?.sIsMember(key, member)) ?? false
 	}
 }

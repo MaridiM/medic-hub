@@ -40,7 +40,7 @@ export class WebAuthnService extends CoreService {
 		private readonly backupCodeService: BackupCodeService,
 		private readonly securityEventService: SecurityEventService,
 	) {
-		super(i18n, prisma, redis)
+		super({ i18n, prisma, redis })
 	}
 
 	/**

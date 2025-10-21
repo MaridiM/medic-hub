@@ -1,10 +1,31 @@
+import { RATE_LIMIT_CHANGE_PASSWORD_POINTS, RATE_LIMIT_CHANGE_PASSWORD_WINDOW_MS } from '@/core/config'
 import { Lang, Language } from '@/core/i18n'
-import { Authorization, Authorized } from '@/shared/decorators'
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
+import { RateLimit } from '@/modules/security'
+import { Authorization, Authorized, UserAgent } from '@/shared/decorators'
+import type { GqlContext } from '@/shared/types'
+import { Args, Context, Field, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql'
 
 import { AccountService } from './account.service'
 import { ChangeEmailInput, ChangePasswordInput, CreateAccountInput } from './dtos'
 import { User } from './models'
+
+/**
+ * Response type for password change operation
+ */
+@ObjectType('ChangePasswordResponse', {
+	description: 'Response after successful password change',
+})
+export class ChangePasswordResponse {
+	@Field({
+		description: 'Whether the password change was successful',
+	})
+	success: boolean
+
+	@Field({
+		description: 'Number of other sessions invalidated (logged out from other devices)',
+	})
+	sessionsInvalidated: number
+}
 
 @Resolver(() => User)
 export class AccountResolver {
@@ -51,18 +72,23 @@ export class AccountResolver {
 	}
 
 	/**
-	 * Changes the password of the authenticated user after validating the old password.
+	 * Changes the password of the authenticated user with enterprise security features.
+	 * Invalidates all other sessions and logs security event.
 	 */
+	@RateLimit({ points: RATE_LIMIT_CHANGE_PASSWORD_POINTS, duration: RATE_LIMIT_CHANGE_PASSWORD_WINDOW_MS }) // ✅ 5 attempts per hour
 	@Authorization()
-	@Mutation(() => Boolean, {
+	@Mutation(() => ChangePasswordResponse, {
 		name: 'changePassword',
-		description: 'Change current user password. Verifies old password, updates passwordChangedAt timestamp.',
+		description:
+			'Change current user password. Verifies old password, invalidates all other sessions, logs security event, and updates passwordChangedAt timestamp.',
 	})
 	async changePassword(
+		@Context() { req }: GqlContext,
 		@Authorized() user: User,
 		@Args('data') input: ChangePasswordInput,
+		@UserAgent() userAgent: string,
 		@Lang() lng: Language,
-	): Promise<boolean> {
-		return this.accountService.changePassword(user, input, lng)
+	): Promise<ChangePasswordResponse> {
+		return this.accountService.changePassword(req, user, input, userAgent, lng)
 	}
 }

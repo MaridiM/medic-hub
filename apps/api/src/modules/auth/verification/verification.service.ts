@@ -3,7 +3,7 @@ import { Request } from 'express'
 import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
-import { MailService, SmsService } from '@/modules/libs'
+import { MailService, SmsService } from '@/core/provider'
 import { generateToken, getSessionMetadata, saveSession } from '@/shared/utils'
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { ETokenType, User } from '@prisma/__generated__'
@@ -18,7 +18,7 @@ export class VerificationService extends CoreService {
 		private readonly mail: MailService,
 		private readonly sms: SmsService,
 	) {
-		super(i18n, prisma)
+		super({ i18n, prisma })
 	}
 
 	/**

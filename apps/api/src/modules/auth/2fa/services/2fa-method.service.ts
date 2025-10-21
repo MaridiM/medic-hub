@@ -7,8 +7,8 @@ import { APP_NAME } from '@/core/config'
 import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
+import { MailService, SmsService } from '@/core/provider'
 import { RedisService } from '@/core/redis'
-import { MailService, SmsService } from '@/modules/libs'
 import { NotificationService } from '@/modules/notification'
 import { HashUtil } from '@/shared/utils'
 import {
@@ -54,7 +54,7 @@ export class TwoFactorMethodService extends CoreService {
 		private readonly smsService: SmsService,
 		private readonly notificationService: NotificationService,
 	) {
-		super(i18n, prisma, redis)
+		super({ i18n, prisma, redis })
 	}
 
 	// ==================== TOTP Methods ====================

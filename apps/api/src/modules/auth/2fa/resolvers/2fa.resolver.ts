@@ -1,5 +1,7 @@
+import { RATE_LIMIT_2FA_POINTS, RATE_LIMIT_2FA_WINDOW_MS } from '@/core/config'
 import { I18nService, Lang, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
+import { RateLimit } from '@/modules/security'
 import { Authorization, Authorized } from '@/shared/decorators'
 import type { GqlContext } from '@/shared/types'
 import { getSessionMetadata } from '@/shared/utils'
@@ -160,6 +162,7 @@ export class TwoFactorResolver {
 	 * Verify 2FA code (works for TOTP, OTP, or backup codes)
 	 * Used during login or for sensitive operations
 	 */
+	@RateLimit({ points: RATE_LIMIT_2FA_POINTS, duration: RATE_LIMIT_2FA_WINDOW_MS }) // ✅ 5 attempts per 5 minutes
 	@Authorization()
 	@Mutation(() => TwoFactorSuccessModel, {
 		name: 'verify2FA',

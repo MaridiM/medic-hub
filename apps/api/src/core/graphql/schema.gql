@@ -59,6 +59,15 @@ input ChangePasswordInput {
   oldPassword: String!
 }
 
+"""Response after successful password change"""
+type ChangePasswordResponse {
+  """Number of other sessions invalidated (logged out from other devices)"""
+  sessionsInvalidated: Float!
+
+  """Whether the password change was successful"""
+  success: Boolean!
+}
+
 input CompleteTotpSetupInput {
   """6-digit TOTP code for verification"""
   code: String!
@@ -247,9 +256,9 @@ type Mutation {
   changeEmail(data: ChangeEmailInput!): Boolean!
 
   """
-  Change current user password. Verifies old password, updates passwordChangedAt timestamp.
+  Change current user password. Verifies old password, invalidates all other sessions, logs security event, and updates passwordChangedAt timestamp.
   """
-  changePassword(data: ChangePasswordInput!): Boolean!
+  changePassword(data: ChangePasswordInput!): ChangePasswordResponse!
 
   """Clear session cookie from client (does not invalidate Redis session)."""
   clearSessionCookie: Boolean!
@@ -277,7 +286,7 @@ type Mutation {
   logout: Boolean!
 
   """
-  Complete password reset: validate token, set a new password, and consume the token.
+  Complete password reset: validate token, set a new password, consume the token, and send confirmation email.
   """
   newPassword(
     """Payload with the reset token and the new password."""
@@ -297,7 +306,7 @@ type Mutation {
   removeWebAuthnCredential(data: RemoveWebAuthnCredentialInput!): TwoFactorSuccess!
 
   """
-  Initiate password reset: generate a one-time token and send a reset link to the user’s email.
+  Initiate password reset: generate a one-time token and send a reset link to the user's email. Always returns true to prevent email enumeration.
   """
   resetPassword(
     """Payload with the email address that requests a password reset."""

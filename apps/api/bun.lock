@@ -46,6 +46,7 @@
         "graphql-subscriptions": "^3.0.0",
         "graphql-type-json": "^0.3.2",
         "graphql-upload-minimal": "^1.6.1",
+        "helmet": "^8.1.0",
         "i18n-iso-countries": "^7.14.0",
         "i18next": "^25.3.2",
         "i18next-fs-backend": "^2.6.0",
@@ -1934,6 +1935,8 @@
     "hbo-dnsd": ["hbo-dnsd@0.9.8", "", { "dependencies": { "defaultable": "~0.7.2", "optimist": "~0.3.4" } }, "sha512-mIj4V7OicuAlnSfvTXopd401Ba7eFFSL2L3EmM1NqlIWe1pJ/x9dyHqfnKXnJr5qSbNFLnadXvwNd3kURNy+ug=="],
 
     "he": ["he@1.2.0", "", { "bin": { "he": "bin/he" } }, "sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw=="],
+
+    "helmet": ["helmet@8.1.0", "", {}, "sha512-jOiHyAZsmnr8LqoPGmCjYAaiuWwjAPLgY8ZX2XrmHawt99/u1y6RgrZMTeoPfpUbV96HOalYgz1qzkRbw54Pmg=="],
 
     "hoek": ["hoek@0.7.6", "", {}, "sha512-z75muWk69yyjWn6nNzJP0pnfgcewtSTs7uBolGUA7kWNdCYZukzHn3sYqUirhXul7qp9WBUwNT/7ieJZNveJqg=="],
 

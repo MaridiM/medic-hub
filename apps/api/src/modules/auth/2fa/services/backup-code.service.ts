@@ -25,7 +25,7 @@ export class BackupCodeService extends CoreService {
 		redis: RedisService,
 		private readonly notificationService: NotificationService,
 	) {
-		super(i18n, prisma, redis)
+		super({ i18n, prisma, redis })
 	}
 
 	/**

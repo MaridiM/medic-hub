@@ -1,5 +1,6 @@
 export * from './app.config'
 export * from './graphql.config'
+export * from './helmet.config'
 export * from './i18n.config'
 export * from './mailer.config'
 export * from './paths.config'

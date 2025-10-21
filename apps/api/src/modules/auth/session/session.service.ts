@@ -4,11 +4,13 @@ import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
+import { AccountLockService } from '@/modules/security'
 import { destroySession, getSessionMetadata, saveSession } from '@/shared/utils'
 import { HashUtil } from '@/shared/utils/hash.util'
 import {
 	BadRequestException,
 	ConflictException,
+	ForbiddenException,
 	Injectable,
 	InternalServerErrorException,
 	NotFoundException,
@@ -28,6 +30,7 @@ import { Session } from './models'
  * - Session reading and listing
  * - Session removal
  * - Cookie management
+ * - Bulk session invalidation (for security events like password changes)
  *
  * Enterprise features:
  * - Tracks lastLoginAt and lastLoginIp
@@ -48,8 +51,9 @@ export class SessionService extends CoreService {
 		i18n: I18nService,
 		config: ConfigService,
 		private readonly verification: VerificationService,
+		private readonly accountLockService: AccountLockService,
 	) {
-		super(i18n, prisma, redis, config)
+		super({ i18n, prisma, redis, config })
 		this.prefix = this.config.get<string>('SESSION_FOLDER') ?? 'session:'
 		this.cookieName = this.config.get<string>('SESSION_COOKIE') ?? 'connect.sid'
 	}
@@ -83,18 +87,36 @@ export class SessionService extends CoreService {
 			where: { email: data.email },
 		})
 
+		const meta = getSessionMetadata(req, userAgent)
+
 		if (!user) {
 			throw new NotFoundException(
 				this.i18n.t('auth.errors.user.not_found', { lng, defaultValue: 'User not found' }),
 			)
 		}
 
+		// ✅ 1. Check if account is locked BEFORE attempting password verification
+		const isLocked = await this.accountLockService.isAccountLocked(user.id)
+		if (isLocked) {
+			throw new ForbiddenException(
+				this.i18n.t('auth.errors.account.locked', {
+					lng,
+					defaultValue: 'Account is locked. Please try again later or reset your password.',
+				}),
+			)
+		}
+
 		const ok = await HashUtil.verify(user.password, data.password)
 		if (!ok) {
+			// ✅ 2. Increment failed attempts on password mismatch
+			await this.accountLockService.incrementFailedAttempts(user, meta.ip, userAgent, lng)
 			throw new NotFoundException(
 				this.i18n.t('auth.errors.password.invalid', { lng, defaultValue: 'Invalid password' }),
 			)
 		}
+
+		// ✅ 3. Clear failed attempts counter on successful login
+		await this.accountLockService.clearFailedAttempts(user.id)
 
 		if (!user.isEmailVerified) {
 			// Resend verification email (non-blocking)
@@ -109,7 +131,6 @@ export class SessionService extends CoreService {
 		}
 
 		// Update last login tracking
-		const meta = getSessionMetadata(req, userAgent)
 		await this.prisma.user.update({
 			where: { id: user.id },
 			data: {
@@ -233,5 +254,61 @@ export class SessionService extends CoreService {
 				this.i18n.t('common.errors.unexpected', { lng, defaultValue: 'Unexpected error' }),
 			)
 		}
+	}
+
+	/**
+	 * Invalidate all sessions for a specific user.
+	 * Used for security operations like password changes or account compromise.
+	 *
+	 * @param userId - User ID whose sessions should be invalidated
+	 * @param excludeSessionId - Optional session ID to keep active (e.g., current session)
+	 * @returns Number of sessions invalidated
+	 *
+	 * @example
+	 * ```typescript
+	 * // Invalidate all sessions except current one after password change
+	 * const count = await sessionService.invalidateUserSessions(
+	 *   user.id,
+	 *   req.session.id
+	 * )
+	 * // Returns: 3 (if user had 3 other active sessions)
+	 * ```
+	 */
+	async invalidateUserSessions(userId: string, excludeSessionId?: string): Promise<number> {
+		// Get all session keys
+		const keys = await this.redis.keys(`${this.prefix}*`)
+		if (keys.length === 0) return 0
+
+		// Bulk read session data
+		const raw = (await this.redis.getClient().mGet(keys)) as (string | null)[]
+
+		// Find sessions belonging to this user
+		const sessionsToDelete: string[] = []
+
+		keys.forEach((key, i) => {
+			const s = raw[i]
+			if (!s) return
+
+			try {
+				const parsed = JSON.parse(s) as Session
+				if (parsed?.userId !== userId) return
+
+				const sessionId = key.slice(this.prefix.length)
+
+				// Skip excluded session (usually current session)
+				if (excludeSessionId && sessionId === excludeSessionId) return
+
+				sessionsToDelete.push(key)
+			} catch {
+				// Skip invalid session data
+			}
+		})
+
+		// Delete sessions in bulk
+		if (sessionsToDelete.length > 0) {
+			await this.redis.getClient().del(sessionsToDelete)
+		}
+
+		return sessionsToDelete.length
 	}
 }

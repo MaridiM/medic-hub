@@ -1,0 +1,5 @@
+export * from './otp-code.template'
+export * from './password-changed.template'
+export * from './password-reset-confirmation.template'
+export * from './reset-password.template'
+export * from './verification-email.template'

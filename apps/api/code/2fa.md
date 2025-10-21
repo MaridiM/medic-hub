@@ -3011,7 +3011,7 @@ import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
-import { MailService, SmsService } from '@/modules/libs'
+import { MailService, SmsService } from '@/core/provider'
 import { NotificationService } from '@/modules/notification'
 import { HashUtil } from '@/shared/utils'
 import {
