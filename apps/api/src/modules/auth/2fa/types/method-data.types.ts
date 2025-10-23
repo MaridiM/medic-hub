@@ -5,6 +5,7 @@ import { E2FAMethod } from '@prisma/__generated__'
  * All method-specific data extends this
  */
 export interface I2FAMethodDataBase {
+	[key: string]: unknown
 	/** ISO timestamp of creation */
 	createdAt: string
 	/** ISO timestamp of last update */

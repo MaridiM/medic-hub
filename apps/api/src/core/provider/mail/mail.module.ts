@@ -1,4 +1,5 @@
 import { getMailerConfig } from '@/core/config'
+import { UrlService } from '@/shared/utils'
 import { MailerModule } from '@nestjs-modules/mailer'
 import { Global, Module, Provider } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -34,7 +35,7 @@ const emailProviderFactory: Provider = {
 			inject: [ConfigService],
 		}),
 	],
-	providers: [MailService, SmtpService, emailProviderFactory, BrevoService, SendgridService],
+	providers: [MailService, SmtpService, emailProviderFactory, BrevoService, SendgridService, UrlService],
 	exports: [MailService, emailProviderFactory],
 })
 export class MailModule {}

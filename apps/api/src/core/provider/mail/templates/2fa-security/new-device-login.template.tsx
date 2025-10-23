@@ -1,6 +1,6 @@
 import { APP_NAME } from '@/core/config'
 import type { I18nService } from '@/core/i18n'
-import type { ISessionMetadata } from '@/shared/types'
+import type { ISessionMetadataDTO } from '@/shared/types'
 import { Button, Heading, Link, Section, Tailwind, Text } from '@react-email/components'
 
 import { TemplateWrapper } from '../components'
@@ -9,7 +9,7 @@ interface IProps {
 	securityUrl: string
 	i18n?: I18nService
 	lng?: string
-	metadata: ISessionMetadata
+	metadata: ISessionMetadataDTO
 	timestamp: string
 }
 

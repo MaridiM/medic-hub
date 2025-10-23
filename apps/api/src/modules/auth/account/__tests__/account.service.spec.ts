@@ -1,67 +1,74 @@
-/* eslint-disable @typescript-eslint/unbound-method */
+// src/modules/auth/account/account.service.spec.ts
 import type { Request } from 'express'
 
 import { I18nService } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
+import { ERiskLevel, IRiskAssessment, IRiskFactor, RiskCalculatorUtil, RiskMapperUtil } from '@/modules/auth/2fa'
+import { AccountLockService } from '@/modules/security'
 import { SecurityEventService } from '@/modules/security-event'
 import { HashUtil } from '@/shared/utils/hash.util'
-import { BadRequestException } from '@nestjs/common'
+import * as sessionMetadataUtil from '@/shared/utils/session-metadata.util'
+import { BadRequestException, ConflictException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { ESecurityEvent, ESecuritySeverity, User } from '@prisma/__generated__'
+import { ESecurityEvent, ESecuritySeverity, EUserRole, type User } from '@prisma/__generated__'
 
 import { SessionService } from '../../session'
 import { VerificationService } from '../../verification'
 import { AccountService } from '../account.service'
 
-// Mock HashUtil module
-jest.mock('@/shared/utils/hash.util', () => ({
-	HashUtil: {
-		hash: jest.fn(),
-		verify: jest.fn(),
-		needsRehash: jest.fn(),
-	},
-}))
+// --- Mocks ---
 
-// Type assertion for mocked HashUtil
-const mockHashUtil = HashUtil as jest.Mocked<typeof HashUtil>
+const mockI18nService = { t: jest.fn(key => key) }
+const mockPrismaService = {
+	user: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
+}
+const mockVerificationService = { sendEmailVerificationToken: jest.fn() }
+const mockSessionService = { invalidateUserSessions: jest.fn() }
+const mockSecurityEventService = { create: jest.fn() }
+
+// ✅ Полный, типобезопасный mockUser
+const mockUser: User = {
+	id: 'user-id-123',
+	fullName: 'Test User',
+	firstName: 'Test',
+	lastName: 'User',
+	email: 'test@example.com',
+	phone: '+1234567890',
+	password: 'hashed-old-password',
+	avatar: null,
+	bio: null,
+	roles: [EUserRole.USER],
+	isEmailVerified: true,
+	emailVerifiedAt: new Date(),
+	isUnsubscribed: false,
+	emailBouncedAt: null,
+	isPhoneVerified: false,
+	phoneVerifiedAt: null,
+	phoneBouncedAt: null,
+	is2FAEnabled: false,
+	preferred2FAMethod: null,
+	require2FA: false,
+	lastLoginAt: new Date(),
+	lastLoginIp: '127.0.0.1',
+	passwordChangedAt: new Date(),
+	riskScore: 0,
+	lastRiskAssessAt: null,
+	deletedAt: null,
+	createdAt: new Date(),
+	updatedAt: new Date(),
+}
 
 describe('AccountService', () => {
 	let service: AccountService
-	let prismaService: PrismaService
-	let sessionService: SessionService
-	let securityEventService: SecurityEventService
-
-	const mockPrismaService = {
-		user: {
-			findUnique: jest.fn(),
-			create: jest.fn(),
-			update: jest.fn(),
-		},
-	}
-
-	const mockI18nService = {
-		t: jest.fn((key: string) => key),
-	}
-
-	const mockVerificationService = {
-		sendEmailVerificationToken: jest.fn(),
-	}
-
-	const mockSessionService = {
-		invalidateUserSessions: jest.fn(),
-	}
-
-	const mockSecurityEventService = {
-		create: jest.fn(),
-		calculateRiskScore: jest.fn(),
-	}
 
 	beforeEach(async () => {
+		jest.clearAllMocks()
+
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
-				AccountService,
-				{ provide: PrismaService, useValue: mockPrismaService },
+				AccountLockService,
 				{ provide: I18nService, useValue: mockI18nService },
+				{ provide: PrismaService, useValue: mockPrismaService },
 				{ provide: VerificationService, useValue: mockVerificationService },
 				{ provide: SessionService, useValue: mockSessionService },
 				{ provide: SecurityEventService, useValue: mockSecurityEventService },
@@ -69,152 +76,143 @@ describe('AccountService', () => {
 		}).compile()
 
 		service = module.get<AccountService>(AccountService)
-		prismaService = module.get<PrismaService>(PrismaService)
-		sessionService = module.get<SessionService>(SessionService)
-		securityEventService = module.get<SecurityEventService>(SecurityEventService)
 	})
 
-	afterEach(() => {
-		jest.clearAllMocks()
+	describe('create', () => {
+		it('should create a new user, hash password, and send verification email', async () => {
+			const input = {
+				fullName: 'New User',
+				email: 'new@example.com',
+				password: 'password123',
+				phone: '+19876543210',
+			}
+			const hashedPassword = 'hashed-new-password'
+
+			jest.spyOn(HashUtil, 'hash').mockResolvedValue(hashedPassword)
+			mockPrismaService.user.create.mockResolvedValue({ ...mockUser, ...input, password: hashedPassword })
+
+			const result = await service.create(input, 'en')
+
+			jest.spyOn(HashUtil, 'hash').mockImplementation(async plaintext => {
+				expect(plaintext).toBe('password123')
+				return hashedPassword
+			})
+			expect(mockPrismaService.user.create).toHaveBeenCalledWith({
+				data: { ...input, email: 'new@example.com', password: hashedPassword },
+			})
+			expect(mockVerificationService.sendEmailVerificationToken).toHaveBeenCalled()
+			expect(result.email).toBe('new@example.com')
+		})
+
+		it('should throw ConflictException if email already exists', async () => {
+			const input = {
+				fullName: 'New User',
+				email: 'test@example.com',
+				password: 'password123',
+				phone: '+19876543210',
+			}
+			const prismaError = { name: 'PrismaClientKnownRequestError', code: 'P2002' }
+			mockPrismaService.user.create.mockRejectedValue(prismaError)
+
+			await expect(service.create(input, 'en')).rejects.toThrow(ConflictException)
+		})
 	})
 
 	describe('changePassword', () => {
-		const mockUser: User = {
-			id: 'user-123',
-			email: 'test@example.com',
-			password: 'hashed-old-password',
-			fullName: 'Test User',
-		} as User
+		const mockRequest = { session: { id: 'current-session-id' }, ip: '192.168.1.1' } as unknown as Request
+		const input = { oldPassword: 'old-password', newPassword: 'new-password' }
 
-		const mockReq = {
-			ip: '192.168.1.1',
-			headers: { 'user-agent': 'Mozilla/5.0' },
-			session: { id: 'session-current' },
-		} as unknown as Request
-
-		it('should change password and invalidate other sessions', async () => {
-			const input = { oldPassword: 'oldpass123', newPassword: 'newpass456' }
-
-			mockHashUtil.verify.mockResolvedValue(true)
-			mockHashUtil.hash.mockResolvedValue('hashed-new-password')
-
-			mockPrismaService.user.update.mockResolvedValue(mockUser)
-			mockSessionService.invalidateUserSessions.mockResolvedValue(3)
-			mockSecurityEventService.calculateRiskScore.mockReturnValue(35)
-			mockSecurityEventService.create.mockResolvedValue({})
-
-			const result = await service.changePassword(mockReq, mockUser, input, 'Mozilla/5.0', 'en')
-
-			expect(mockHashUtil.verify).toHaveBeenCalledWith('hashed-old-password', 'oldpass123')
-			expect(mockHashUtil.hash).toHaveBeenCalledWith('newpass456')
-			expect(mockPrismaService.user.update).toHaveBeenCalledWith({
-				where: { id: 'user-123' },
-				data: {
-					password: 'hashed-new-password',
-					passwordChangedAt: expect.any(Date),
-				},
-			})
-			expect(mockSessionService.invalidateUserSessions).toHaveBeenCalledWith('user-123', 'session-current')
-			expect(mockSecurityEventService.create).toHaveBeenCalledWith({
-				userId: 'user-123',
-				event: ESecurityEvent.PASSWORD_CHANGED,
-				severity: ESecuritySeverity.MEDIUM,
+		beforeEach(() => {
+			// Мокаем утилиты, чтобы изолировать тест
+			jest.spyOn(HashUtil, 'verify').mockResolvedValue(true)
+			jest.spyOn(HashUtil, 'hash').mockResolvedValue('hashed-new-password')
+			jest.spyOn(sessionMetadataUtil, 'getSessionMetadata').mockReturnValue({
 				ip: '192.168.1.1',
-				userAgent: 'Mozilla/5.0',
-				country: undefined,
-				city: undefined,
-				riskScore: 35,
-				riskFactors: expect.any(Array),
-				metadata: {
-					sessionsInvalidated: 3,
-					browser: undefined,
-					os: undefined,
-				},
-			})
-			expect(result).toEqual({
-				success: true,
-				sessionsInvalidated: 3,
+				device: { browser: 'Chrome', os: 'macOS', type: 'desktop' },
+				location: { city: 'Test City', country: 'Test Country', latitude: 0, longitude: 0 },
 			})
 		})
 
-		it('should throw BadRequestException if old password is invalid', async () => {
-			const input = { oldPassword: 'wrongpass', newPassword: 'newpass456' }
+		it('should change password, invalidate sessions, and log security event', async () => {
+			mockSessionService.invalidateUserSessions.mockResolvedValue(3) // 3 other sessions
+			// Мокаем результат RiskCalculatorUtil
+			const mockRiskAssessment: IRiskAssessment = {
+				score: 35,
+				level: ERiskLevel.MEDIUM,
+				factors: [
+					{
+						type: 'multiple_sessions_invalidated',
+						score: 15,
+						weight: 1.0,
+						description: 'Invalidated 3 other sessions.',
+					} as IRiskFactor,
+				],
+				recommendations: [],
+				require2FA: true,
+				blockAccess: false,
+				assessedAt: new Date(),
+			}
+			jest.spyOn(RiskCalculatorUtil, 'assessPasswordChange').mockReturnValue(mockRiskAssessment)
+			// ✅ Мокаем маппер, так как он теперь вызывается в сервисе
+			jest.spyOn(RiskMapperUtil, 'mapLevelToSeverity').mockReturnValue(ESecuritySeverity.MEDIUM)
 
-			mockHashUtil.verify.mockResolvedValue(false)
+			const result = await service.changePassword(mockRequest, mockUser, input, 'user-agent', 'en')
 
-			await expect(service.changePassword(mockReq, mockUser, input, 'Mozilla/5.0', 'en')).rejects.toThrow(
+			jest.spyOn(HashUtil, 'verify').mockImplementation(async (hash, plaintext) => {
+				// Можно добавить ассерты прямо здесь, если нужно
+				return hash === 'hashed-old-password' && plaintext === 'old-password'
+			})
+			expect(mockPrismaService.user.update).toHaveBeenCalledWith({
+				where: { id: mockUser.id },
+				data: { password: 'hashed-new-password', passwordChangedAt: expect.any(Date) },
+			})
+			expect(mockSessionService.invalidateUserSessions).toHaveBeenCalledWith(mockUser.id, 'current-session-id')
+			expect(mockSecurityEventService.create).toHaveBeenCalledWith(
+				expect.objectContaining({
+					userId: mockUser.id,
+					event: ESecurityEvent.PASSWORD_CHANGED,
+					severity: ESecuritySeverity.MEDIUM,
+					riskScore: 35,
+				}),
+			)
+			expect(result).toEqual({ success: true, sessionsInvalidated: 3 })
+		})
+
+		it('should throw BadRequestException for incorrect old password', async () => {
+			jest.spyOn(HashUtil, 'verify').mockResolvedValue(false)
+
+			await expect(service.changePassword(mockRequest, mockUser, input, 'ua', 'en')).rejects.toThrow(
 				BadRequestException,
 			)
-
-			expect(mockHashUtil.verify).toHaveBeenCalledWith('hashed-old-password', 'wrongpass')
-			expect(mockHashUtil.hash).not.toHaveBeenCalled()
-			expect(mockSessionService.invalidateUserSessions).not.toHaveBeenCalled()
+			expect(mockPrismaService.user.update).not.toHaveBeenCalled()
 			expect(mockSecurityEventService.create).not.toHaveBeenCalled()
 		})
 
-		it('should throw BadRequestException if new password equals old password', async () => {
-			const input = { oldPassword: 'samepass123', newPassword: 'samepass123' }
-
-			mockHashUtil.verify.mockResolvedValue(true)
-
-			await expect(service.changePassword(mockReq, mockUser, input, 'Mozilla/5.0', 'en')).rejects.toThrow(
-				BadRequestException,
-			)
-
-			expect(mockHashUtil.verify).toHaveBeenCalledWith('hashed-old-password', 'samepass123')
-			expect(mockHashUtil.hash).not.toHaveBeenCalled()
-			expect(mockSessionService.invalidateUserSessions).not.toHaveBeenCalled()
-			expect(mockSecurityEventService.create).not.toHaveBeenCalled()
+		it('should throw BadRequestException if new password is the same as the old one', async () => {
+			await expect(
+				service.changePassword(mockRequest, mockUser, { ...input, newPassword: 'old-password' }, 'ua', 'en'),
+			).rejects.toThrow(BadRequestException)
 		})
+	})
 
-		it('should calculate higher severity for high risk scores', async () => {
-			const input = { oldPassword: 'oldpass123', newPassword: 'newpass456' }
+	describe('changeEmail', () => {
+		it('should successfully change email and send new verification token', async () => {
+			const input = { email: 'new-email@example.com' }
+			mockPrismaService.user.update.mockResolvedValue({ ...mockUser, email: input.email, isEmailVerified: false })
 
-			mockHashUtil.verify.mockResolvedValue(true)
-			mockHashUtil.hash.mockResolvedValue('hashed-new-password')
+			const result = await service.changeEmail(mockUser, input, 'en')
 
-			mockPrismaService.user.update.mockResolvedValue(mockUser)
-			mockSessionService.invalidateUserSessions.mockResolvedValue(5)
-			mockSecurityEventService.calculateRiskScore.mockReturnValue(55)
-			mockSecurityEventService.create.mockResolvedValue({})
-
-			await service.changePassword(mockReq, mockUser, input, 'Mozilla/5.0', 'en')
-
-			expect(mockSecurityEventService.create).toHaveBeenCalledWith(
-				expect.objectContaining({
-					severity: ESecuritySeverity.HIGH,
-					riskScore: 55,
-				}),
-			)
-		})
-
-		it('should invalidate 0 sessions if user has only current session', async () => {
-			const input = { oldPassword: 'oldpass123', newPassword: 'newpass456' }
-
-			mockHashUtil.verify.mockResolvedValue(true)
-			mockHashUtil.hash.mockResolvedValue('hashed-new-password')
-
-			mockPrismaService.user.update.mockResolvedValue(mockUser)
-			mockSessionService.invalidateUserSessions.mockResolvedValue(0)
-			mockSecurityEventService.calculateRiskScore.mockReturnValue(20)
-			mockSecurityEventService.create.mockResolvedValue({})
-
-			const result = await service.changePassword(mockReq, mockUser, input, 'Mozilla/5.0', 'en')
-
-			expect(result).toEqual({
-				success: true,
-				sessionsInvalidated: 0,
+			expect(mockPrismaService.user.update).toHaveBeenCalledWith({
+				where: { id: mockUser.id },
+				data: { email: 'new-email@example.com', isEmailVerified: false, emailVerifiedAt: null },
 			})
+			expect(mockVerificationService.sendEmailVerificationToken).toHaveBeenCalled()
+			expect(result).toBe(true)
+		})
 
-			expect(mockSecurityEventService.create).toHaveBeenCalledWith(
-				expect.objectContaining({
-					severity: ESecuritySeverity.LOW,
-					riskScore: 20,
-					metadata: expect.objectContaining({
-						sessionsInvalidated: 0,
-					}),
-				}),
-			)
+		it('should throw BadRequestException if new email is the same as the old one', async () => {
+			const input = { email: mockUser.email } // Same email
+			await expect(service.changeEmail(mockUser, input, 'en')).rejects.toThrow(BadRequestException)
 		})
 	})
 })

@@ -1,4 +1,4 @@
-import type { ISessionMetadata } from '@/shared/types'
+import type { ISessionMetadataDTO } from '@/shared/types'
 
 /**
  * Device fingerprint components
@@ -50,12 +50,12 @@ export interface IDeviceFingerprint {
  * Re-export session metadata from shared types
  * This is what we get from getSessionMetadata()
  */
-export type { ISessionMetadata }
+export type { ISessionMetadataDTO }
 
 /**
  * Extended device metadata with fingerprint
  */
-export interface IDeviceMetadata extends ISessionMetadata {
+export interface IDeviceMetadata extends ISessionMetadataDTO {
 	/** Unique device ID generated from fingerprint */
 	deviceId: string
 	/** Full fingerprint data */

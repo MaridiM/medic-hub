@@ -3,7 +3,7 @@ import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
 import { NotificationService } from '@/modules/notification'
-import type { ISessionMetadata } from '@/shared/types'
+import type { ISessionMetadataDTO } from '@/shared/types'
 import { Injectable, Logger } from '@nestjs/common'
 import { EAuditCategory, ESecurityEvent, ESecuritySeverity, type Prisma } from '@prisma/__generated__'
 
@@ -79,7 +79,7 @@ export class SecurityEventService extends CoreService {
 	/**
 	 * Log successful login
 	 */
-	async logLoginSuccess(userId: string, session: ISessionMetadata, riskScore?: number): Promise<void> {
+	async logLoginSuccess(userId: string, session: ISessionMetadataDTO, riskScore?: number): Promise<void> {
 		await this.logEvent({
 			userId,
 			event: ESecurityEvent.LOGIN_SUCCESS,
@@ -98,7 +98,7 @@ export class SecurityEventService extends CoreService {
 	/**
 	 * Log failed login attempt
 	 */
-	async logLoginFailed(userId: string, session: ISessionMetadata, reason: string, riskScore?: number): Promise<void> {
+	async logLoginFailed(userId: string, session: ISessionMetadataDTO, reason: string, riskScore?: number): Promise<void> {
 		await this.logEvent({
 			userId,
 			event: ESecurityEvent.LOGIN_FAILED,
@@ -118,7 +118,7 @@ export class SecurityEventService extends CoreService {
 	/**
 	 * Log 2FA verification success
 	 */
-	async log2FASuccess(userId: string, methodType: string, session: ISessionMetadata): Promise<void> {
+	async log2FASuccess(userId: string, methodType: string, session: ISessionMetadataDTO): Promise<void> {
 		await this.logEvent({
 			userId,
 			event: ESecurityEvent.TWO_FA_VERIFIED,
@@ -137,7 +137,7 @@ export class SecurityEventService extends CoreService {
 	/**
 	 * Log 2FA verification failure
 	 */
-	async log2FAFailed(userId: string, methodType: string, session: ISessionMetadata, attempts: number): Promise<void> {
+	async log2FAFailed(userId: string, methodType: string, session: ISessionMetadataDTO, attempts: number): Promise<void> {
 		const severity = attempts >= 3 ? ESecuritySeverity.HIGH : ESecuritySeverity.MEDIUM
 
 		await this.logEvent({
@@ -161,7 +161,7 @@ export class SecurityEventService extends CoreService {
 	 */
 	async logSuspiciousActivity(
 		userId: string,
-		session: ISessionMetadata,
+		session: ISessionMetadataDTO,
 		reason: string,
 		riskScore: number,
 		lng: Language,

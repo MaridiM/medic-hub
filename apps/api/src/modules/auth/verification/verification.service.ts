@@ -5,13 +5,21 @@ import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { MailService, SmsService } from '@/core/provider'
 import { generateToken, getSessionMetadata, saveSession } from '@/shared/utils'
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
+import {
+	BadRequestException,
+	Injectable,
+	InternalServerErrorException,
+	Logger,
+	NotFoundException,
+} from '@nestjs/common'
 import { ETokenType, User } from '@prisma/__generated__'
 
 import { VerificationInput, VerificationResponse } from './dtos'
 
 @Injectable()
 export class VerificationService extends CoreService {
+	private readonly logger = new Logger(VerificationService.name)
+
 	constructor(
 		i18n: I18nService,
 		prisma: PrismaService,
@@ -30,7 +38,7 @@ export class VerificationService extends CoreService {
 	 * 3) Build session metadata and persist session (cookie/redis).
 	 *
 	 * @param req Express request (to save session/cookies)
-	 * @param input GraphQL input containing the token
+	 * @param input GraphQL input containing the tokenqqqqqqqqq
 	 * @param userAgent Raw User-Agent header (for session metadata)
 	 * @param lng Language code for i18n
 	 * @returns VerificationResponse (session info)
@@ -98,20 +106,7 @@ export class VerificationService extends CoreService {
 	 * @throws InternalServerErrorException if sending email fails
 	 */
 	async sendEmailVerificationToken(user: User, lng: Language): Promise<boolean> {
-		const verificationToken = await generateToken(this.prisma, user, ETokenType.EMAIL_VERIFY)
-
-		try {
-			await this.mail.sendVerificationEmailToken(user.email, verificationToken.token, lng)
-			return true
-		} catch {
-			// If mailer fails — surface a clear error (you may log internally as well)
-			throw new InternalServerErrorException(
-				this.i18n.t('mail.errors.message_send_failed', {
-					lng,
-					defaultValue: 'Failed to send the message.',
-				}),
-			)
-		}
+		return this.sendVerificationToken(user, 'email', 'link', lng)
 	}
 
 	/**
@@ -123,20 +118,7 @@ export class VerificationService extends CoreService {
 	 * @throws InternalServerErrorException if sending email fails
 	 */
 	async sendEmailVerificationOtpToken(user: User, lng: Language): Promise<boolean> {
-		const verificationOtpToken = await generateToken(this.prisma, user, ETokenType.EMAIL_VERIFY, false)
-
-		try {
-			await this.mail.sendOtpCodeEmail(user.email, verificationOtpToken.token, lng)
-			return true
-		} catch {
-			// If mailer fails — surface a clear error (you may log internally as well)
-			throw new InternalServerErrorException(
-				this.i18n.t('mail.errors.message_send_failed', {
-					lng,
-					defaultValue: 'Failed to send the message.',
-				}),
-			)
-		}
+		return this.sendVerificationToken(user, 'email', 'code', lng)
 	}
 
 	/**
@@ -148,15 +130,60 @@ export class VerificationService extends CoreService {
 	 * @throws InternalServerErrorException if sending email fails
 	 */
 	async sendSmsVerificationOtpToken(user: User, lng: Language): Promise<boolean> {
-		const verificationOtpToken = await generateToken(this.prisma, user, ETokenType.EMAIL_VERIFY, false)
+		return this.sendVerificationToken(user, 'sms', 'code', lng)
+	}
+
+	/**
+	 * Universal method to generate and send a verification token.
+	 *
+	 * @param user - The target user
+	 * @param channel - 'email' or 'sms'
+	 * @param type - 'link' (UUID) or 'code' (numeric)
+	 * @param lng - Language for notifications
+	 * @returns true on success
+	 * @throws InternalServerErrorException on sending failure
+	 */
+	private async sendVerificationToken(
+		user: User,
+		channel: 'email' | 'sms',
+		type: 'link' | 'code',
+		lng: Language,
+	): Promise<boolean> {
+		const isUUID = type === 'link'
+		const tokenType = ETokenType.EMAIL_VERIFY
+
+		const token = await generateToken(this.prisma, user, tokenType, isUUID)
+
+		if (channel === 'sms' && !user.phone) {
+			throw new BadRequestException(
+				this.i18n.t('sms.errors.no_phone_for_sms', {
+					lng,
+					userId: user.id,
+					defaultValue: `User ${user.id} has no phone number for SMS verification.`,
+				}),
+			)
+		}
 
 		try {
-			await this.sms.sendOtpSMS(user.email, verificationOtpToken.token, lng)
+			if (channel === 'email') {
+				if (type === 'link') {
+					await this.mail.sendVerificationEmailToken(user.email, token.token, lng)
+				} else {
+					await this.mail.sendOtpCodeEmail(user.email, token.token, lng)
+				}
+			} else {
+				// Если ссылки по SMS не поддерживаем — здесь можно добавить явный запрет
+				// if (type === 'link') { throw new BadRequestException('Links over SMS are not supported'); }
+				await this.sms.sendOtpSMS(user.phone, token.token, lng)
+			}
 			return true
-		} catch {
-			// If mailer fails — surface a clear error (you may log internally as well)
+		} catch (error) {
+			this.logger.error(
+				`Failed to send verification token for user ${user.id} via ${channel}`,
+				(error as Error)?.stack,
+			)
 			throw new InternalServerErrorException(
-				this.i18n.t('sms.errors.message_send_failed', {
+				this.i18n.t('mail.errors.message_send_failed', {
 					lng,
 					defaultValue: 'Failed to send the message.',
 				}),

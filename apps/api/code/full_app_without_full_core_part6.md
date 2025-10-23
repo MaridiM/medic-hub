@@ -1,7 +1,350 @@
-# Full App Code (excluding imports, tests, i18n, extra core) - Part 8 of 8
+# Full App Code (excluding imports, tests, i18n) - Part 6 of 6
+
+`src/modules/security/rate-limit/types/rate-limit.types.ts`
+
+```typescript
+/**
+ * Rate limit options for configuring endpoint-specific limits
+ */
+export interface RateLimitOptions {
+	/** Maximum number of requests allowed in the time window */
+	points: number
+
+	/** Time window duration in seconds */
+	duration: number
+
+	/** Custom error message when limit is exceeded */
+	errorMessage?: string
+
+	/** Custom key prefix for Redis storage */
+	keyPrefix?: string
+}
+
+/**
+ * Rate limit check result
+ */
+export interface RateLimitResponse {
+	/** Whether the request is allowed */
+	isAllowed: boolean
+
+	/** Number of requests remaining in current window */
+	remaining: number
+
+	/** Milliseconds until next request is allowed */
+	msBeforeNext: number
+
+	/** Total points consumed in current window */
+	consumed: number
+}
+
+/**
+ * Rate limit key type (IP-based or User-based)
+ */
+export enum RateLimitKeyType {
+	IP = 'ip',
+	USER = 'user',
+}
+```
+
+
+`src/modules/security/security.module.ts`
+
+```typescript
+/**
+ * Main Security Module (Global)
+ *
+ * This module bundles all security-related features, making them available
+ * application-wide. It includes:
+ * - RateLimitModule: For request throttling and brute-force protection.
+ * - AccountLockModule: For account lockout mechanisms.
+ *
+ * Being global, its providers (like services and guards) are available for
+ * dependency injection in any other module without needing to import SecurityModule.
+ */
+@Global()
+@Module({
+	imports: [RateLimitModule, AccountLockModule],
+	exports: [RateLimitModule, AccountLockModule],
+})
+export class SecurityModule {}
+```
+
+
+`src/shared/decorators/auth.decorator.ts`
+
+```typescript
+export function Authorization() {
+	return applyDecorators(UseGuards(GqlAuthGuard))
+}
+```
+
+
+`src/shared/decorators/authorized.decorator.ts`
+
+```typescript
+export const Authorized = createParamDecorator((data: keyof User, ctx: ExecutionContext) => {
+	let user: User
+
+	if (ctx.getType() === 'http') {
+		const req = ctx.switchToHttp().getRequest<{ user: User }>()
+		user = req.user
+	} else {
+		const context = GqlExecutionContext.create(ctx)
+		const gqlContext = context.getContext<{ req: { user: User } }>()
+		user = gqlContext.req.user
+
+		if (!user) return null
+	}
+
+	return data ? user[data] : user
+})
+```
+
+
+`src/shared/decorators/index.ts`
+
+```typescript
+export * from './auth.decorator'
+export * from './authorized.decorator'
+export * from './user-agent.decorator'
+```
+
+
+`src/shared/decorators/user-agent.decorator.ts`
+
+```typescript
+export const UserAgent = createParamDecorator((data: unknown, context: ExecutionContext) => {
+	if (context.getType() === 'http') {
+		const request = context.switchToHttp().getRequest<Request>()
+
+		return request.headers['user-agent']
+	} else {
+		const ctx = GqlExecutionContext.create(context)
+		const gqlContext = ctx.getContext<{ req?: Request }>()
+
+		return gqlContext.req?.headers['user-agent'] ?? null
+	}
+})
+```
+
+
+`src/shared/guards/gql-auth.guard.ts`
+
+```typescript
+@Injectable()
+export class GqlAuthGuard implements CanActivate {
+	constructor(
+		private readonly prismaService: PrismaService,
+		private readonly i18n: I18nService,
+	) {}
+
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const ctx = GqlExecutionContext.create(context)
+		const gqlContext = ctx.getContext<{ req: { session: { userId?: string }; language?: string; user?: any } }>()
+		const request = gqlContext.req
+		const lang = request.language || DEFAULT_LANGUAGE
+
+		const user_not_authorized: string =
+			this.i18n.t('common.errors.auth.user_not_authorized', { lng: lang }) || 'User not authorized'
+
+		if (typeof request.session.userId === 'undefined') {
+			throw new UnauthorizedException(user_not_authorized)
+		}
+
+		const user = await this.prismaService.user.findUnique({
+			where: { id: request.session.userId },
+		})
+
+		if (!user) {
+			throw new UnauthorizedException(user_not_authorized)
+		}
+
+		request.user = user
+
+		return true
+	}
+}
+```
+
+
+`src/shared/guards/index.ts`
+
+```typescript
+export * from './gql-auth.guard'
+```
+
+
+`src/shared/middlewares/index.ts`
+
+```typescript
+export * from './raw-body.middleware'
+```
+
+
+`src/shared/middlewares/raw-body.middleware.ts`
+
+```typescript
+@Injectable()
+export class RawBodyMiddleware implements NestMiddleware {
+	constructor(private readonly i18n: I18nService) {}
+	use(req: Request, res: Response, next: NextFunction) {
+		const lang = req.language || DEFAULT_LANGUAGE
+		if (!req.readable) {
+			const message =
+				this.i18n.t('common.errors.request.invalid_data', { lng: lang }) || 'Invalid data from request'
+			return next(new BadRequestException(message))
+		}
+
+		getRawBody(req, { encoding: 'utf-8' })
+			.then(rawBody => {
+				req.body = rawBody
+				next()
+			})
+			.catch(() => {
+				const message =
+					this.i18n.t('common.errors.request.error_getting_raw_body', { lng: lang }) ||
+					'Error getting raw body'
+				return next(new InternalServerErrorException(message))
+			})
+	}
+}
+```
+
+
+`src/shared/pipes/file-validation.pipe.ts`
+
+```typescript
+/** Минимальный контракт GraphQL Upload (graphql-upload) */
+export type GqlUpload = {
+	filename: string
+	mimetype?: string
+	encoding?: string
+	createReadStream: () => Readable
+}
+
+/** Тайп-гарда для аплоада */
+function isGqlUpload(x: unknown): x is GqlUpload {
+	if (typeof x !== 'object' || x === null) return false
+	const o = x as Record<string, unknown>
+	if (!('filename' in o) || !('createReadStream' in o)) return false
+
+	const filename = o.filename
+	const createReadStream = o.createReadStream
+
+	return typeof filename === 'string' && typeof createReadStream === 'function'
+}
+
+/** Расширенный тип: тот же объект, но с «переписанным» createReadStream на буфер */
+export type BufferedUpload = Omit<GqlUpload, 'createReadStream'> & {
+	createReadStream: () => Readable
+}
+
+@Injectable()
+export class FileValidationPipe implements PipeTransform {
+	constructor(private readonly i18n: I18nService) {}
+
+	async transform(value: unknown, _metadata: ArgumentMetadata): Promise<BufferedUpload> {
+		// 1) Проверяем форму входа
+		if (!isGqlUpload(value)) {
+			const message =
+				this.i18n.t('common.errors.file.not_loaded', { lng: DEFAULT_LANGUAGE }) ??
+				'File not loaded or invalid structure'
+			throw new BadRequestException(message)
+		}
+
+		const { filename, createReadStream } = value
+
+		// 2) Проверяем формат по расширению (или можно по mimetype, если он приходит)
+		const allowedExt: Array<'jpg' | 'jpeg' | 'png' | 'webp' | 'gif'> = ['jpg', 'jpeg', 'png', 'webp', 'gif']
+		const okFormat = validateFileFormat(filename, allowedExt)
+		if (!okFormat) {
+			const message =
+				this.i18n.t('common.errors.file.unsupported_format', { lng: DEFAULT_LANGUAGE }) ??
+				'Unsupported file format'
+			throw new BadRequestException(message)
+		}
+
+		// 3) Считываем в буфер и проверяем размер
+		const originalStream = createReadStream()
+		const fileBuffer = await streamToBuffer(originalStream)
+
+		const MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10 MB
+		if (fileBuffer.length > MAX_SIZE_BYTES) {
+			const message =
+				this.i18n.t('common.errors.file.size_exceeded_10mb', { lng: DEFAULT_LANGUAGE }) ??
+				'File size exceeds 10 MB'
+			throw new BadRequestException(message)
+		}
+
+		// 4) Подменяем stream на «буферный» (чтобы можно было читать повторно)
+		const buffered: BufferedUpload = {
+			...value,
+			createReadStream: () => bufferToStream(fileBuffer),
+		}
+
+		return buffered
+	}
+}
+
+// import { DEFAULT_LANGUAGE, I18nService } from '@/core'
+// import { type ArgumentMetadata, BadRequestException, Injectable, type PipeTransform } from '@nestjs/common'
+
+// import { bufferToStream, streamToBuffer, validateFileFormat } from '../utils'
+
+// @Injectable()
+// export class FileValidationPipe implements PipeTransform {
+// 	constructor(private readonly i18n: I18nService) {}
+
+// 	async transform(value: any, _metadata: ArgumentMetadata) {
+// 		if (!value?.filename || typeof value.createReadStream !== 'function') {
+// 			// Преобразуем текущий контекст в ArgumentsHost
+
+// 			// Пытаемся получить язык (если его явно не передали — fallback)
+// 			const message =
+// 				this.i18n.t('common.errors.file.not_loaded', { lng: DEFAULT_LANGUAGE }) ||
+// 				'File not loaded or invalid structure'
+// 			throw new BadRequestException(message)
+// 		}
+
+// 		const { filename, createReadStream } = value
+
+// 		const allowedFormats = ['jpg', 'jpeg', 'png', 'webp', 'gif']
+// 		const isFileFormatValid = validateFileFormat(filename, allowedFormats)
+// 		if (!isFileFormatValid) {
+// 			const message =
+// 				this.i18n.t('common.errors.file.unsupported_format', { lng: DEFAULT_LANGUAGE }) ||
+// 				'Unsupported file format'
+// 			throw new BadRequestException(message)
+// 		}
+
+// 		const originalStream = createReadStream()
+// 		const fileBuffer = await streamToBuffer(originalStream)
+
+// 		// Check file size (less 10 MB)
+// 		const maxSize = 10 * 1024 * 1024
+// 		if (fileBuffer.length > maxSize) {
+// 			const message =
+// 				this.i18n.t('common.errors.file.size_exceeded_10mb', { lng: DEFAULT_LANGUAGE }) ||
+// 				'File size exceeds 10 MB'
+// 			throw new BadRequestException(message)
+// 		}
+
+// 		value.createReadStream = () => bufferToStream(fileBuffer)
+
+// 		return value
+// 	}
+// }
+```
+
+
+`src/shared/pipes/index.ts`
+
+```typescript
+export * from './file-validation.pipe'
+```
+
 
 `src/shared/types/express-session.d.ts`
-
 
 ```typescript
 // Предполагается, что этот тип существует. Если нет, замените на `any` или создайте его.
@@ -32,14 +375,10 @@ declare module 'express-session' {
 }
 
 export {}
-
 ```
 
 
-
-
 `src/shared/types/express.d.ts`
-
 
 ```typescript
 declare global {
@@ -52,14 +391,10 @@ declare global {
 		}
 	}
 }
-
 ```
 
 
-
-
 `src/shared/types/gql-context.types.ts`
-
 
 ```typescript
 /**
@@ -93,26 +428,18 @@ export interface GqlContext {
 	req: AuthenticatedRequest
 	res: Response
 }
-
 ```
-
-
 
 
 `src/shared/types/index.ts`
 
-
 ```typescript
 export * from './gql-context.types'
 export * from './session-metadata.types'
-
 ```
 
 
-
-
 `src/shared/types/session-metadata.types.ts`
-
 
 ```typescript
 export interface ILocation {
@@ -133,14 +460,10 @@ export interface ISessionMetadata {
 	device: IDevice
 	ip: string
 }
-
 ```
 
 
-
-
 `src/shared/utils/errors/error.ts`
-
 
 ```typescript
 /**
@@ -260,28 +583,20 @@ export function safeStringify(x: unknown): string {
 	}
 	return objectTag(x) // ← строго string
 }
-
 ```
 
 
-
-
 `src/shared/utils/errors/index.ts`
-
 
 ```typescript
 export * from './error'
 export * from './log'
 export * from './prisma-errors'
 export * from './tag'
-
 ```
 
 
-
-
 `src/shared/utils/errors/log.ts`
-
 
 ```typescript
 /**
@@ -319,28 +634,20 @@ export function logUnknownError(logger: Logger, prefix: string, err: unknown, co
 		logger.error(`${prefix}: ${safeStringify(err)}`, undefined, context)
 	}
 }
-
 ```
 
 
-
-
 `src/shared/utils/errors/prisma-errors.ts`
-
 
 ```typescript
 export function isPrismaError(e: unknown, code?: string): e is Prisma.PrismaClientKnownRequestError {
 	const err = e as Prisma.PrismaClientKnownRequestError
 	return !!err && err.name === 'PrismaClientKnownRequestError' && (code ? err.code === code : true)
 }
-
 ```
 
 
-
-
 `src/shared/utils/errors/tag.ts`
-
 
 ```typescript
 /**
@@ -357,14 +664,10 @@ export const objectTag = (v: unknown): string => {
 	const s = Object.prototype.toString.call(v) as string
 	return s
 }
-
 ```
 
 
-
-
 `src/shared/utils/file.util.ts`
-
 
 ```typescript
 /**
@@ -414,14 +717,10 @@ export function bufferToStream(buffer: Buffer): Readable {
 	readable.push(null) // Signifies the end of the stream
 	return readable
 }
-
 ```
 
 
-
-
 `src/shared/utils/generate-token.util.ts`
-
 
 ```typescript
 const TOKEN_TTL_MS = 5 * 60 * 1000 // 5 минут
@@ -471,14 +770,10 @@ function generateNumericCode(length: number): string {
 	// randomInt(min, max + 1) — включительно сверху
 	return String(randomInt(min, max + 1))
 }
-
 ```
 
 
-
-
 `src/shared/utils/hash.util.ts`
-
 
 ```typescript
 /**
@@ -549,14 +844,10 @@ export class HashUtil {
 		}
 	}
 }
-
 ```
 
 
-
-
 `src/shared/utils/index.ts`
-
 
 ```typescript
 export * from './errors'
@@ -568,14 +859,10 @@ export * from './session.util'
 export * from './generate-token.util'
 export * from './file.util'
 export * from './hash.util'
-
 ```
 
 
-
-
 `src/shared/utils/is-dev.util.ts`
-
 
 ```typescript
 dotenv.config()
@@ -583,14 +870,10 @@ dotenv.config()
 export const isDev = (configService: ConfigService) => configService.getOrThrow<string>('NODE_ENV') === 'development'
 
 export const IS_DEV_ENV = process.env.NODE_ENV === 'development'
-
 ```
 
 
-
-
 `src/shared/utils/ms.util.ts`
-
 
 ```typescript
 // Определение констант для различных единиц времени
@@ -719,14 +1002,10 @@ export function ms(str: StringValue): number {
 			)
 	}
 }
-
 ```
 
 
-
-
 `src/shared/utils/parse-boolean.util.ts`
-
 
 ```typescript
 /**
@@ -766,14 +1045,10 @@ export function parseBoolean(value: string): boolean {
 
 	throw new Error(`Не удалось преобразовать значение "${value}" в логическое значение.`)
 }
-
 ```
 
 
-
-
 `src/shared/utils/session.util.ts`
-
 
 ```typescript
 /**
@@ -783,7 +1058,7 @@ export function parseBoolean(value: string): boolean {
  * @param metadata - user's metadata
  * @returns - user
  */
-export function saveSession(req: Request, user: User, metadata: ISessionMetadata) {
+export function saveSession(req: Request, user: User, metadata: ISessionMetadataDTO) {
 	const lang = req.language || DEFAULT_LANGUAGE
 
 	return new Promise<{ user: User }>((resolve, reject) => {
@@ -839,8 +1114,5 @@ export function destroySession(req: Request, configService: ConfigService): Prom
 		})
 	})
 }
-
 ```
-
-
 

@@ -1,4 +1,4 @@
-import type { ISessionMetadata } from '@/shared/types'
+import type { ISessionMetadataDTO } from '@/shared/types'
 
 /**
  * Risk level categories
@@ -19,9 +19,10 @@ export enum ERiskLevel {
 /**
  * Individual risk factor
  */
+// src/modules/auth/2fa/types/risk.types.ts
 export interface IRiskFactor {
-	/** Factor name */
-	name: string
+	/** Factor type (e.g., "new_device", "unusual_location") */
+	type: string
 	/** Risk score contribution (0-100) */
 	score: number
 	/** Factor weight in final calculation */
@@ -66,4 +67,4 @@ export interface IAnomaly {
 /**
  * Re-export session metadata for convenience
  */
-export type { ISessionMetadata }
+export type { ISessionMetadataDTO }

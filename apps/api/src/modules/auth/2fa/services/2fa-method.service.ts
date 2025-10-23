@@ -30,8 +30,8 @@ import type {
 	Update2FAMethodInput,
 	VerifyOtpSetupInput,
 } from '../dtos'
-import type { IOtpEmailMethodData, IOtpSmsMethodData, ITotpMethodData } from '../types'
-import { EncryptionUtil } from '../utils'
+import type { I2FAMethodDataBase, IOtpEmailMethodData, IOtpSmsMethodData, ITotpMethodData } from '../types'
+import { EncryptionUtil, validateMethodData } from '../utils'
 
 import { BackupCodeService } from './backup-code.service'
 import { SecurityEventService } from './security-event.service'
@@ -110,24 +110,27 @@ export class TwoFactorMethodService extends CoreService {
 
 		if (cached.secret !== input.secret) {
 			throw new BadRequestException(
-				this.i18n.t('auth.errors.2fa.invalid_secret', { lng, defaultValue: 'Invalid TOTP secret' }),
+				this.i18n.t('auth.errors.2fa.invalid_secret', {
+					lng,
+					defaultValue: 'Invalid TOTP secret.',
+				}),
 			)
 		}
 
 		// Verify code
-		const isValid = this.verifyTotpCode(user.email, input.secret, input.code)
+		const isValid = this.verifyTotpCodeDirect(user.email, input.secret, input.code)
 		if (!isValid) {
 			throw new BadRequestException(
-				this.i18n.t('auth.errors.2fa.invalid_code', { lng, defaultValue: 'Invalid verification code' }),
+				this.i18n.t('auth.errors.2fa.invalid_code', {
+					lng,
+					defaultValue: 'Invalid verification code.',
+				}),
 			)
 		}
 
-		// Encrypt secret
-		const encryptedSecret = EncryptionUtil.encrypt(input.secret)
-
-		// Prepare method data
+		// Encrypt full ITotpMethodData object
 		const methodData: ITotpMethodData = {
-			secret: encryptedSecret,
+			secret: input.secret,
 			algorithm: TOTP_CONFIG.ALGORITHM,
 			digits: TOTP_CONFIG.DIGITS,
 			period: TOTP_CONFIG.PERIOD,
@@ -137,27 +140,31 @@ export class TwoFactorMethodService extends CoreService {
 			updatedAt: new Date().toISOString(),
 		}
 
+		const encryptedData = this.encryptMethodData(methodData)
+
 		// Create method and backup codes in transaction
 		const result = await this.prisma.$transaction(async tx => {
-			// Check if this should be primary (first method)
 			const existingMethods = await tx.authenticationMethod.count({
 				where: { userId: user.id, isActive: true },
 			})
 			const isPrimary = existingMethods === 0
 
-			// Create authentication method
+			const defaultTotpName = this.i18n.t('auth.labels.2fa.method_name.totp', {
+				lng,
+				defaultValue: 'TOTP Authenticator',
+			})
+
 			const method = await tx.authenticationMethod.create({
 				data: {
 					userId: user.id,
 					method: E2FAMethod.TOTP,
-					data: methodData as unknown as Prisma.JsonValue,
-					name: input.name || cached.name || 'TOTP Authenticator',
+					data: encryptedData,
+					name: input.name || cached.name || defaultTotpName,
 					isPrimary,
 					isActive: true,
 				},
 			})
 
-			// Enable 2FA on user if this is first method
 			if (isPrimary) {
 				await tx.user.update({
 					where: { id: user.id },
@@ -168,7 +175,6 @@ export class TwoFactorMethodService extends CoreService {
 				})
 			}
 
-			// Log audit
 			await tx.auditLog.create({
 				data: {
 					userId: user.id,
@@ -196,7 +202,7 @@ export class TwoFactorMethodService extends CoreService {
 			},
 		})
 
-		// ✅ NOTIFICATION CALL
+		// Notifications
 		await this.notificationService.notify2FAMethodAdded(user, E2FAMethod.TOTP, result.name, lng)
 
 		// Clear temp secret
@@ -226,13 +232,19 @@ export class TwoFactorMethodService extends CoreService {
 		// Validate input
 		if (input.method === E2FAMethod.OTP_EMAIL && !input.email && !user.email) {
 			throw new BadRequestException(
-				this.i18n.t('auth.errors.2fa.email_required', { lng, defaultValue: 'Email is required for OTP_EMAIL' }),
+				this.i18n.t('auth.errors.2fa.email_required', {
+					lng,
+					defaultValue: 'Email is required for email OTP.',
+				}),
 			)
 		}
 
 		if (input.method === E2FAMethod.OTP_SMS && !input.phone && !user.phone) {
 			throw new BadRequestException(
-				this.i18n.t('auth.errors.2fa.phone_required', { lng, defaultValue: 'Phone is required for OTP_SMS' }),
+				this.i18n.t('auth.errors.2fa.phone_required', {
+					lng,
+					defaultValue: 'Phone number is required for SMS OTP.',
+				}),
 			)
 		}
 
@@ -257,20 +269,25 @@ export class TwoFactorMethodService extends CoreService {
 			}
 		}
 
+		// Encrypting data before storing
+		const encryptedData = this.encryptMethodData(methodData)
+
 		// Create method
 		const existingMethods = await this.prisma.authenticationMethod.count({
 			where: { userId: user.id, isActive: true },
 		})
 		const isPrimary = existingMethods === 0
 
+		const methodDefaultName = this.getLocalizedMethodName(input.method, lng)
+
 		const method = await this.prisma.authenticationMethod.create({
 			data: {
 				userId: user.id,
 				method: input.method,
-				data: methodData as unknown as Prisma.JsonValue,
-				name: input.name || `${input.method === E2FAMethod.OTP_EMAIL ? 'Email' : 'SMS'} OTP`,
+				data: encryptedData,
+				name: input.name || methodDefaultName,
 				isPrimary,
-				isActive: false, // Inactive until verified
+				isActive: false,
 			},
 		})
 
@@ -318,7 +335,10 @@ export class TwoFactorMethodService extends CoreService {
 
 		if (!method) {
 			throw new BadRequestException(
-				this.i18n.t('auth.errors.2fa.method_not_found', { lng, defaultValue: 'OTP method not found' }),
+				this.i18n.t('auth.errors.2fa.method_not_found', {
+					lng,
+					defaultValue: '2FA method not found.',
+				}),
 			)
 		}
 
@@ -338,14 +358,13 @@ export class TwoFactorMethodService extends CoreService {
 			OTP_CONFIG.CODE_EXPIRY,
 		)
 
-		const methodData = method.data as unknown as IOtpEmailMethodData | IOtpSmsMethodData
+		// Decode method data
+		const methodData = this.decryptMethodData<IOtpEmailMethodData | IOtpSmsMethodData>(method.data)
 
 		try {
 			if (method.method === E2FAMethod.OTP_EMAIL) {
 				const data = methodData as IOtpEmailMethodData
-				// NOTE: We may need a new method in MailService to send a simple code.
-				// For now, we'll adapt an existing one or assume it exists.
-				await this.mailService.sendOtpCodeEmail(data.email, code, lng) // Assuming this method exists or will be created.
+				await this.mailService.sendOtpCodeEmail(data.email, code, lng)
 				this.logger.log(`OTP code sent to ${data.email}`)
 			} else {
 				const data = methodData as IOtpSmsMethodData
@@ -364,7 +383,10 @@ export class TwoFactorMethodService extends CoreService {
 
 		return {
 			success: true,
-			message: this.i18n.t('auth.success.2fa.otp_sent', { lng, defaultValue: 'OTP code sent successfully' }),
+			message: this.i18n.t('auth.success.2fa.otp_sent', {
+				lng,
+				defaultValue: 'OTP code sent successfully.',
+			}),
 		}
 	}
 
@@ -378,13 +400,19 @@ export class TwoFactorMethodService extends CoreService {
 
 		if (!cached) {
 			throw new BadRequestException(
-				this.i18n.t('auth.errors.2fa.code_expired', { lng, defaultValue: 'OTP code has expired' }),
+				this.i18n.t('auth.errors.2fa.code_expired', {
+					lng,
+					defaultValue: 'Verification code has expired.',
+				}),
 			)
 		}
 
 		if (cached.methodId !== input.methodId) {
 			throw new BadRequestException(
-				this.i18n.t('auth.errors.2fa.method_mismatch', { lng, defaultValue: 'Code does not match method' }),
+				this.i18n.t('auth.errors.2fa.method_mismatch', {
+					lng,
+					defaultValue: 'The code does not match the selected method.',
+				}),
 			)
 		}
 
@@ -392,7 +420,10 @@ export class TwoFactorMethodService extends CoreService {
 		const isValid = await HashUtil.verify(cached.code, input.code)
 		if (!isValid) {
 			throw new BadRequestException(
-				this.i18n.t('auth.errors.2fa.invalid_code', { lng, defaultValue: 'Invalid OTP code' }),
+				this.i18n.t('auth.errors.2fa.invalid_code', {
+					lng,
+					defaultValue: 'Invalid verification code.',
+				}),
 			)
 		}
 
@@ -438,7 +469,7 @@ export class TwoFactorMethodService extends CoreService {
 		const backupCodes = await this.backupCodeService.generateBackupCodes(user.id, result.method, result.id)
 		await this.rDel(codeKey)
 
-		// ✅ NOTIFICATION CALL
+		// Notifications
 		await this.notificationService.notify2FAMethodAdded(user, result.method, result.name, lng)
 
 		return {
@@ -447,7 +478,7 @@ export class TwoFactorMethodService extends CoreService {
 			backupCodes,
 			message: this.i18n.t('auth.setup.2fa.backup_codes_warning', {
 				lng,
-				defaultValue: 'Save these backup codes securely.',
+				defaultValue: 'Save these backup codes in a secure place. Each code can only be used once.',
 			}),
 		}
 	}
@@ -507,7 +538,10 @@ export class TwoFactorMethodService extends CoreService {
 
 		if (!method) {
 			throw new BadRequestException(
-				this.i18n.t('auth.errors.2fa.method_not_found', { lng, defaultValue: 'Method not found' }),
+				this.i18n.t('auth.errors.2fa.method_not_found', {
+					lng,
+					defaultValue: '2FA method not found.',
+				}),
 			)
 		}
 
@@ -539,7 +573,10 @@ export class TwoFactorMethodService extends CoreService {
 		const isPasswordValid = await HashUtil.verify(user.password, input.password)
 		if (!isPasswordValid) {
 			throw new UnauthorizedException(
-				this.i18n.t('auth.errors.password.invalid', { lng, defaultValue: 'Invalid password' }),
+				this.i18n.t('auth.errors.password.invalid', {
+					lng,
+					defaultValue: 'Invalid password.',
+				}),
 			)
 		}
 
@@ -549,7 +586,10 @@ export class TwoFactorMethodService extends CoreService {
 
 		if (!method) {
 			throw new BadRequestException(
-				this.i18n.t('auth.errors.2fa.method_not_found', { lng, defaultValue: 'Method not found' }),
+				this.i18n.t('auth.errors.2fa.method_not_found', {
+					lng,
+					defaultValue: '2FA method not found.',
+				}),
 			)
 		}
 
@@ -562,7 +602,7 @@ export class TwoFactorMethodService extends CoreService {
 			throw new BadRequestException(
 				this.i18n.t('auth.errors.2fa.last_method_code_required', {
 					lng,
-					defaultValue: 'Code required to remove last 2FA method',
+					defaultValue: 'A valid 2FA code is required to remove the last 2FA method.',
 				}),
 			)
 		}
@@ -597,9 +637,8 @@ export class TwoFactorMethodService extends CoreService {
 			metadata: { methodId: input.methodId, methodType: method.method, timestamp: new Date().toISOString() },
 		})
 
-		// ✅ NOTIFICATION CALL
+		// Notifications
 		if (activeMethods === 1) {
-			// Last method removed - 2FA completely disabled
 			await this.notificationService.notify2FADisabled(user, lng)
 		} else {
 			await this.notificationService.notify2FAMethodRemoved(user, method.method, method.name, lng)
@@ -616,7 +655,10 @@ export class TwoFactorMethodService extends CoreService {
 		const isPasswordValid = await HashUtil.verify(user.password, input.password)
 		if (!isPasswordValid) {
 			throw new UnauthorizedException(
-				this.i18n.t('auth.errors.password.invalid', { lng, defaultValue: 'Invalid password' }),
+				this.i18n.t('auth.errors.password.invalid', {
+					lng,
+					defaultValue: 'Invalid password.',
+				}),
 			)
 		}
 
@@ -629,7 +671,10 @@ export class TwoFactorMethodService extends CoreService {
 
 			if (!method) {
 				throw new BadRequestException(
-					this.i18n.t('auth.errors.2fa.method_not_found', { lng, defaultValue: 'Method not found' }),
+					this.i18n.t('auth.errors.2fa.method_not_found', {
+						lng,
+						defaultValue: '2FA method not found.',
+					}),
 				)
 			}
 
@@ -647,7 +692,7 @@ export class TwoFactorMethodService extends CoreService {
 			}
 		}
 
-		// ✅ NOTIFICATION CALL
+		// Notifications
 		await this.notificationService.notifyBackupCodesRegenerated(user, lng)
 
 		await this.securityEventService.logEvent({
@@ -666,28 +711,34 @@ export class TwoFactorMethodService extends CoreService {
 			backupCodes,
 			message: this.i18n.t('auth.setup.2fa.backup_codes_warning', {
 				lng,
-				defaultValue: 'Save these backup codes securely.',
+				defaultValue: 'Save these backup codes in a secure place. Each code can only be used once.',
 			}),
 		}
 	}
 
-	// ... (после regenerateBackupCodes)
-
-	// ==================== Method Verification ====================
+	// ==================== Private Helpers ====================
 
 	/**
-	 * Verifies a TOTP code against the encrypted secret.
-	 * This method is public to be accessible from the resolver.
-	 *
-	 * @param email - User's email (for TOTP label).
-	 * @param encryptedSecret - The encrypted secret from the database.
-	 * @param code - The 6-digit code from the user.
-	 * @returns {boolean} - True if the code is valid.
+	 * Verify TOTP code with plain-text secret (used only during initial setup).
 	 */
-	public verifyTotpCode(email: string, encryptedSecret: string, code: string): boolean {
+	private verifyTotpCodeDirect(email: string, plainSecret: string, code: string): boolean {
 		try {
-			const secret = EncryptionUtil.decrypt(encryptedSecret)
-			const totp = this.createTOTP(email, secret) // createTOTP остается private
+			const totp = this.createTOTP(email, plainSecret)
+			const delta = totp.validate({ token: code, window: TOTP_CONFIG.WINDOW })
+			return delta !== null
+		} catch (error) {
+			this.logger.error(`TOTP code verification failed: ${(error as Error).message}`)
+			return false
+		}
+	}
+
+	/**
+	 * Verifies a TOTP code against encrypted method data from the database.
+	 */
+	public verifyTotpCode(email: string, encryptedMethodData: string | Prisma.JsonValue, code: string): boolean {
+		try {
+			const methodData = this.decryptMethodData<ITotpMethodData>(encryptedMethodData, E2FAMethod.TOTP)
+			const totp = this.createTOTP(email, methodData.secret)
 			const delta = totp.validate({ token: code, window: TOTP_CONFIG.WINDOW })
 			return delta !== null
 		} catch (error) {
@@ -698,31 +749,21 @@ export class TwoFactorMethodService extends CoreService {
 
 	/**
 	 * Verifies a one-time code (Email/SMS) against the value stored in Redis.
-	 * This method is public to be accessible from the resolver.
-	 *
-	 * @param userId - The ID of the user.
-	 * @param methodId - The ID of the OTP method being verified.
-	 * @param code - The 6-digit code from the user.
-	 * @param lng - The language for error messages.
-	 * @returns {Promise<boolean>} - True if the code is valid.
 	 */
-	public async verifyOneTimeCode(userId: string, methodId: string, code: string, lng: Language): Promise<boolean> {
+	public async verifyOneTimeCode(userId: string, methodId: string, code: string, _lng: Language): Promise<boolean> {
 		const codeKey = REDIS_KEYS.OTP_CODE(userId)
 		const cached = await this.rGetJSON<{ code: string; methodId: string; expiresAt: number }>(codeKey)
 
 		if (!cached) {
-			// Не выбрасываем ошибку здесь, чтобы резолвер мог обработать это как "неверный код"
 			return false
 		}
 
-		// Проверяем, что код предназначен для этого метода
 		if (cached.methodId !== methodId) {
 			return false
 		}
 
 		const isValid = await HashUtil.verify(cached.code, code)
 		if (isValid) {
-			// Prevent code reuse by deleting it after successful verification.
 			await this.rDel(codeKey)
 		}
 		return isValid
@@ -739,7 +780,7 @@ export class TwoFactorMethodService extends CoreService {
 			throw new BadRequestException(
 				this.i18n.t('auth.errors.2fa.max_methods', {
 					lng,
-					defaultValue: `Maximum ${TWO_FA_CONFIG.MAX_METHODS_PER_USER} methods allowed`,
+					defaultValue: `Maximum ${TWO_FA_CONFIG.MAX_METHODS_PER_USER} 2FA methods allowed.`,
 					max: TWO_FA_CONFIG.MAX_METHODS_PER_USER,
 				}),
 			)
@@ -763,5 +804,91 @@ export class TwoFactorMethodService extends CoreService {
 
 	private generateOtpCode(): string {
 		return Math.floor(100000 + Math.random() * 900000).toString()
+	}
+
+	/** Return localized default method display name */
+	private getLocalizedMethodName(method: E2FAMethod, lng: Language): string {
+		if (method === E2FAMethod.OTP_EMAIL) {
+			return this.i18n.t('auth.labels.2fa.method_name.otp_email', {
+				lng,
+				defaultValue: 'Email OTP',
+			})
+		}
+		if (method === E2FAMethod.OTP_SMS) {
+			return this.i18n.t('auth.labels.2fa.method_name.otp_sms', {
+				lng,
+				defaultValue: 'SMS OTP',
+			})
+		}
+		// Fallback (should not happen for setupOtp)
+		return this.i18n.t('auth.labels.2fa.method_name.totp', {
+			lng,
+			defaultValue: 'TOTP Authenticator',
+		})
+	}
+
+	// ==================== Private Encryption Helpers ====================
+
+	private encryptMethodData<T extends I2FAMethodDataBase>(data: T): string {
+		try {
+			return EncryptionUtil.encryptJSON(data)
+		} catch (error) {
+			this.logger.error(`Failed to encrypt method data: ${(error as Error).message}`)
+			// no lng here; fallback to default locale
+			throw new InternalServerErrorException(
+				this.i18n.t('auth.errors.2fa.encryption_failed', {
+					defaultValue: 'Failed to secure method data.',
+				}),
+			)
+		}
+	}
+
+	private decryptMethodData<T extends I2FAMethodDataBase>(
+		encrypted: string | Prisma.JsonValue,
+		methodType?: E2FAMethod,
+	): T {
+		try {
+			// Handle legacy (unencrypted) data
+			if (typeof encrypted === 'object' && encrypted !== null) {
+				this.logger.warn('Method data is not encrypted (legacy format detected)')
+				if (methodType && !validateMethodData(encrypted, methodType)) {
+					throw new Error(
+						this.i18n.t('auth.errors.2fa.invalid_legacy_data', {
+							defaultValue: 'Invalid legacy data structure',
+						}),
+					)
+				}
+				return encrypted as unknown as T
+			}
+
+			if (typeof encrypted !== 'string') {
+				throw new Error(
+					this.i18n.t('auth.errors.2fa.invalid_encrypted_format', {
+						defaultValue: 'Invalid encrypted data format',
+					}),
+				)
+			}
+
+			const decrypted = EncryptionUtil.decryptJSON<T>(encrypted)
+
+			if (methodType && !validateMethodData(decrypted, methodType)) {
+				this.logger.error(`Decrypted data failed validation for method type: ${methodType}`)
+				throw new Error(
+					this.i18n.t('auth.errors.2fa.invalid_encrypted_data', {
+						defaultValue: 'Decrypted data structure is invalid',
+					}),
+				)
+			}
+
+			return decrypted
+		} catch (error) {
+			this.logger.error(`Failed to decrypt method data: ${(error as Error).message}`)
+			// no lng here; fallback to default locale
+			throw new BadRequestException(
+				this.i18n.t('auth.errors.2fa.corrupted_data', {
+					defaultValue: 'Corrupted method data.',
+				}),
+			)
+		}
 	}
 }

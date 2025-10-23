@@ -57,6 +57,38 @@
   - [Module: Architecture Refactoring](#module-architecture-refactoring)
     - [Step 1: Centralize Security Module](#step-1-centralize-security-module)
     - [Step 2 (Revised): Consolidate Communication Adapters](#step-2-revised-consolidate-communication-adapters)
+  - [Module: Code Quality \& Security Hardening](#module-code-quality--security-hardening)
+    - [Step 1.1: Add Private Encryption Wrappers](#step-11-add-private-encryption-wrappers)
+    - [Step 1.2: Fix OTP Setup Encryption](#step-12-fix-otp-setup-encryption)
+    - [Step 1.3: Fix Data Reading Decryption](#step-13-fix-data-reading-decryption)
+    - [Step 1.4: Migrate TOTP to Use JSON Encryption](#step-14-migrate-totp-to-use-json-encryption)
+    - [Step 1.5: TypeScript Compilation Fixes](#step-15-typescript-compilation-fixes)
+    - [Step 1.6: Unit Testing for Encryption](#step-16-unit-testing-for-encryption)
+    - [Step 1.6.1: Fix Test Type Safety](#step-161-fix-test-type-safety)
+    - [Step 1.7: Data Validation After Decryption](#step-17-data-validation-after-decryption)
+    - [Step 1.8: Security Documentation](#step-18-security-documentation)
+    - [Step 2: Consolidate OTP Sending Logic](#step-2-consolidate-otp-sending-logic)
+    - [Step 2.1: Add Unit Tests for VerificationService](#step-21-add-unit-tests-for-verificationservice)
+    - [Step 2.2: Fix Test Type Safety](#step-22-fix-test-type-safety)
+    - [Step 3: Centralize Risk Score Calculation Logic](#step-3-centralize-risk-score-calculation-logic)
+    - [Step 3.1: Align Risk \& Security Types](#step-31-align-risk--security-types)
+    - [Step 3.2: Add Unit Tests for RiskCalculatorUtil](#step-32-add-unit-tests-for-riskcalculatorutil)
+    - [Step 4: Refactor Email Template URL Handling](#step-4-refactor-email-template-url-handling)
+    - [Step 4.1: URL Unification \& Refactoring](#step-41-url-unification--refactoring)
+    - [Step 4.2: Finalize URL Refactoring](#step-42-finalize-url-refactoring)
+    - [Step 4.3: Fix `await` in MailService](#step-43-fix-await-in-mailservice)
+    - [Step 4.4: Fix Module Configuration Error](#step-44-fix-module-configuration-error)
+    - [Step 4.5: Fix `UnknownDependenciesException`](#step-45-fix-unknowndependenciesexception)
+    - [Step 4.6: Add Unit Tests for UrlService](#step-46-add-unit-tests-for-urlservice)
+    - [Step 5: Unify SessionMetadata Type Naming](#step-5-unify-sessionmetadata-type-naming)
+    - [Step 6: Improve Error Handling and Graceful Shutdown in Bootstrap](#step-6-improve-error-handling-and-graceful-shutdown-in-bootstrap)
+    - [Step 7.1: Add Unit Tests for AccountService](#step-71-add-unit-tests-for-accountservice)
+    - [Step 7.2: Fix Linting Errors in AccountService Tests](#step-72-fix-linting-errors-in-accountservice-tests)
+    - [Step 7.3: Fix Type Safety in RiskCalculatorUtil Mock](#step-73-fix-type-safety-in-riskcalculatorutil-mock)
+    - [Step 8: Add Unit Tests for AccountLockService](#step-8-add-unit-tests-for-accountlockservice)
+    - [Step 9.1: Add Unit Tests for RateLimitService](#step-91-add-unit-tests-for-ratelimitservice)
+    - [Step 9.2: Finalize Test Type Safety for RateLimitService](#step-92-finalize-test-type-safety-for-ratelimitservice)
+    - [Step 9.4: Final Linting Fix for RateLimitService Tests](#step-94-final-linting-fix-for-ratelimitservice-tests)
 
 ---
 
@@ -66,7 +98,7 @@
 
 ### Step 1: Prisma Schema Enhancement 
 
-:calendar: `2025-10-11`
+📅 `2025-10-11`
 
 **Added**
 
@@ -96,7 +128,7 @@
 
 ### Step 2: Core Types & Constants 
 
-:calendar: `2025-10-11`
+📅 `2025-10-11`
 
 **Added**
 
@@ -131,7 +163,7 @@
 
 ### Step 2.1: Fixes & Utilities Creation
 
-:calendar: `2025-10-11`
+📅 `2025-10-11`
 
 **Fixed**
 
@@ -152,7 +184,7 @@
 
 ###  Step 2.2: Refactor Utils to Use Existing Infrastructure
 
-:calendar: `2025-10-12`
+📅 `2025-10-12`
 
 **Changed**
 
@@ -170,7 +202,7 @@
 
 ### Step 3: Core 2FA Services
 
-:calendar: `2025-10-12`
+📅 `2025-10-12`
 
 **Added**
 
@@ -197,7 +229,7 @@
 
 ### Step 3.1: Main 2FA Method Service & DTOs
 
-:calendar: `2025-10-12`
+📅 `2025-10-12`
 
 **Added**
 
@@ -225,7 +257,7 @@
 
 ### Step 4: GraphQL API & Module Integration
 
-:calendar: `2025-10-12`
+📅 `2025-10-12`
 
 **Added**
 
@@ -254,7 +286,7 @@
 
 ### Step 5: Migration Documentation
 
-:calendar: `2025-10-12`
+📅 `2025-10-12`
 
 **Added**
 
@@ -272,7 +304,7 @@
 
 ### Step 6: Complete Documentation
 
-:calendar: `2025-10-12`
+📅 `2025-10-12`
 
 **Added**
 
@@ -295,7 +327,7 @@
 
 ### Step 7: Service Integration & Testing Foundation
 
-:calendar: `2025-10-12`
+📅 `2025-10-12`
 
 **Added**
 
@@ -329,7 +361,7 @@
 
 ### Step 8: Full Service Integration & Type Safety
 
-:calendar: `2025-10-12`
+📅 `2025-10-12`
 
 **Added**
 
@@ -352,7 +384,7 @@
 
 ### Step 9: Type Safety Refactoring for Security Events
 
-:calendar: `2025-10-12`
+📅 `2025-10-12`
 
 **Fixed**
 
@@ -373,7 +405,7 @@
 
 ### Step 10: Advanced Email Validation & Reputation
 
-:calendar: `2025-10-12`
+📅 `2025-10-12`
 
 **Added**
 
@@ -394,7 +426,7 @@
 
 ### Step 11: Correct Security Event Logging
 
-:calendar: `2025-10-13`
+📅 `2025-10-13`
 
 **Added**
 
@@ -413,7 +445,7 @@
 
 ### Step 12: Final Type Safety & Service Refactoring
 
-:calendar: `2025-10-13`
+📅 `2025-10-13`
 
 **Added**
 
@@ -441,7 +473,7 @@
 
 ### Step 12.1: Final Type Corrections & Logic Enhancements
 
-:calendar: `2025-10-13`
+📅 `2025-10-13`
 
 **Added**
 
@@ -470,7 +502,7 @@
 
 ### Step 0: RBAC Foundation Implementation
 
-:calendar: `2025-10-15`
+📅 `2025-10-15`
 
 **Added**
 
@@ -518,7 +550,7 @@
 
 ### Step 0.1: TypeScript & Session Typing Refinement
 
-:calendar: `2025-10-15`
+📅 `2025-10-15`
 
 **Added**
 
@@ -551,7 +583,7 @@
 
 ### Step 1: Admin 2FA Management Module
 
-:calendar: `2023-10-27`
+📅 `2025-10-17`
 
 **Added**
 
@@ -599,7 +631,7 @@
 
 ### Step 1.1: Admin Action Types Fix
 
-:calendar: `2023-10-27`
+📅 `2025-10-17`
 
 **Added**
 
@@ -622,7 +654,7 @@
 
 ### Step 2: Automated Maintenance (Cron Jobs)
 
-:calendar: `2023-10-27`
+📅 `2025-10-17`
 
 **Added**
 
@@ -673,7 +705,7 @@
 
 ### Step 2.1: Cron Service Type Fixes
 
-:calendar: `2023-10-27`
+📅 `2025-10-17`
 
 **Fixed**
 
@@ -689,7 +721,7 @@
 
 ### Step 3: WebAuthn/Passkeys Implementation
 
-:calendar: `2023-10-27`
+📅 `2025-10-17`
 
 **Added**
 
@@ -737,7 +769,7 @@
 
 ### Step 3.1: WebAuthn TypeScript Fixes
 
-:calendar: `2023-10-27`
+📅 `2025-10-17`
 
 **Fixed**
 
@@ -778,7 +810,7 @@
 
 ### Step 1: Prisma Schema Migration & Model Updates
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Added**
 
@@ -849,7 +881,7 @@
 
 ### Step 1.1: Prisma Schema Migration & Model Updates
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Added**
 
@@ -881,7 +913,7 @@
 
 ### Step 2: WebAuthn GraphQL Schema Fix
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Fixed**
 
@@ -915,7 +947,7 @@
 
 ### Step 2.1: WebAuthn GraphQL Schema Fix
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Fixed**
 
@@ -963,7 +995,7 @@
 
 ### Step 2.2: WebAuthn GraphQL Schema Fix
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Fixed**
 
@@ -994,7 +1026,7 @@
 
 ### Step 1: Core Infrastructure Updates for Notifications
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Added**
 
@@ -1020,7 +1052,7 @@
 
 ### Step 2: Notification Module Foundation
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Added**
 
@@ -1067,7 +1099,7 @@
 
 ### Step 3: Email Templates & MailService Integration
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Added**
 
@@ -1140,7 +1172,7 @@
 
 ### Step 4: i18n Nested Paths Support
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Added**
 
@@ -1176,7 +1208,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 5: Template & i18n Corrections
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Fixed**
 
@@ -1199,7 +1231,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 6: Integration of NotificationService
 
-:calendar: `2025-10-19`
+📅 `2025-10-19`
 
 **Added**
 
@@ -1231,7 +1263,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 7: 2FA Code Verification Implementation
 
-:calendar: `2025-10-20`
+📅 `2025-10-20`
 
 **Added**
 
@@ -1256,7 +1288,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 7.1: Access Modifier and Method Naming Correction
 
-:calendar: `2025-10-20`
+📅 `2025-10-20`
 
 **Fixed**
 
@@ -1281,7 +1313,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 1: Security Event Service Foundation (Global Module)
 
-:calendar: `2025-10-20`
+📅 `2025-10-20`
 
 **Added**
 
@@ -1323,7 +1355,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 2: Session Invalidation & Password Change Enhancement
 
-:calendar: `2025-10-20`
+📅 `2025-10-20`
 
 **Added**
 
@@ -1368,7 +1400,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 3: Email Notifications for Password Operations (React Email)
 
-:calendar: `2025-10-20`
+📅 `2025-10-20`
 
 **Added**
 
@@ -1432,7 +1464,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 4: Password Reset Template & Recovery Service Testing
 
-:calendar: `2025-10-21`
+📅 `2025-10-21`
 
 **Added**
 
@@ -1498,7 +1530,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 1: Rate Limiting Module Foundation
 
-:calendar: `2025-10-21`
+📅 `2025-10-21`
 
 **Added**
 
@@ -1528,7 +1560,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 2: Account Lockout & Progressive Delays
 
-:calendar: `2025-10-21`
+📅 `2025-10-21`
 
 **Added**
 
@@ -1551,7 +1583,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 3: Security Headers Middleware
 
-:calendar: `2025-10-21`
+📅 `2025-10-21`
 
 **Added**
 
@@ -1575,7 +1607,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 4: Brute-Force Protection Integration
 
-:calendar: `2025-10-21`
+📅 `2025-10-21`
 
 **Added**
 
@@ -1601,7 +1633,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 1: Centralize Security Module
 
-:calendar: `2025-10-21`
+📅 `2025-10-21`
 
 **Added**
 
@@ -1624,7 +1656,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 
 ### Step 2 (Revised): Consolidate Communication Adapters
 
-:calendar: `2025-10-21`
+📅 `2025-10-21`
 
 **Added**
 
@@ -1639,5 +1671,794 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 **Removed**
 
 - ❌ **Директория `src/modules/libs`**: Эта директория была удалена.
+
+---
+
+## Module: Code Quality & Security Hardening
+
+---
+
+### Step 1.1: Add Private Encryption Wrappers
+
+📅 `2025-10-21`
+
+**Added**
+
+- ✅ Created `private encryptMethodData<T>()` method for centralized encryption of all 2FA method data types
+- ✅ Created `private decryptMethodData<T>()` method for centralized decryption with error handling
+- ✅ Added backward compatibility check for legacy unencrypted data (migration safety)
+- ✅ Added comprehensive JSDoc documentation for both methods
+
+**Security**
+
+- ✅ Centralized encryption logic prevents inconsistent data handling
+- ✅ Added exception handling to prevent data corruption errors from crashing the application
+
+**Files Modified**
+
+- `src/modules/auth/2fa/services/2fa-method.service.ts`
+
+---
+
+### Step 1.2: Fix OTP Setup Encryption
+
+📅 `2025-10-21`
+
+**Fixed**
+
+- ✅ **CRITICAL SECURITY FIX:** OTP method data (email/phone) now encrypted before database storage
+- ✅ Fixed `setupOtp()` to use `encryptMethodData()` wrapper before Prisma write operation
+
+**Security**
+
+- ✅ OTP Email destinations no longer stored in plain text
+- ✅ OTP SMS phone numbers no longer stored in plain text
+- ✅ Mitigates risk of PII exposure in database dumps or SQL injection attacks
+
+**Changed**
+
+- ✅ Modified `setupOtp()` to call `this.encryptMethodData(methodData)` before database write
+- ✅ Changed Prisma `data` field from object to encrypted string
+
+**Files Modified**
+
+- `src/modules/auth/2fa/services/2fa-method.service.ts`
+
+---
+
+### Step 1.3: Fix Data Reading Decryption
+
+📅 `2025-10-21`
+
+**Fixed**
+
+- ✅ Fixed `sendOtpCode()` to decrypt method data before accessing email/phone
+- ✅ Prevents runtime errors when trying to access encrypted data as plain object
+
+**Changed**
+
+- ✅ Added `this.decryptMethodData<IOtpEmailMethodData | IOtpSmsMethodData>(method.data)` call
+- ✅ Replaced direct casting with proper decryption flow
+
+**Files Modified**
+
+- `src/modules/auth/2fa/services/2fa-method.service.ts`
+
+---
+
+### Step 1.4: Migrate TOTP to Use JSON Encryption
+
+📅 `2025-10-22`
+
+**Changed**
+
+- ✅ Refactored TOTP to encrypt entire `ITotpMethodData` object instead of just the secret field
+- ✅ Updated `completeTotpSetup()` to use `encryptMethodData()` for consistency with OTP methods
+- ✅ Updated `verifyTotpCode()` to decrypt full method data object
+- ✅ Created `verifyTotpCodeDirect()` helper for setup verification with plain-text secret
+
+**Improved**
+
+- ✅ Unified encryption approach across all 2FA method types (TOTP, OTP_EMAIL, OTP_SMS)
+- ✅ Simplified code maintenance - single encryption strategy for all methods
+
+**Files Modified**
+
+- `src/modules/auth/2fa/services/2fa-method.service.ts`
+
+---
+
+### Step 1.5: TypeScript Compilation Fixes
+
+📅 `2025-10-22`
+
+**Fixed**
+
+- ✅ Fixed unsafe type conversion in `decryptMethodData()` by adding intermediate cast through `unknown`
+- ✅ Added missing `verifyTotpCodeDirect()` private method declaration
+- ✅ Resolved TypeScript error: "Conversion of type 'JsonObject | JsonArray' to type 'T' may be a mistake"
+- ✅ Resolved TypeScript error: "Property 'verifyTotpCodeDirect' does not exist"
+
+**Files Modified**
+
+- `src/modules/auth/2fa/services/2fa-method.service.ts`
+
+---
+
+### Step 1.6: Unit Testing for Encryption
+
+📅 `2025-10-22`
+
+**Added**
+
+- ✅ Created comprehensive test suite for 2FA encryption (`2fa-method.service.spec.ts`)
+- ✅ **TOTP Tests:** Verify encryption is called when creating TOTP methods
+- ✅ **OTP Tests:** Verify encryption for both Email and SMS OTP methods
+- ✅ **Decryption Tests:** Verify decryption when reading TOTP and OTP data
+- ✅ **Error Handling Tests:** Verify graceful handling of corrupted encrypted data
+- ✅ **Legacy Compatibility Tests:** Verify backward compatibility with unencrypted data
+
+**Testing Coverage**
+
+- ✅ 8 test cases covering critical encryption/decryption paths
+- ✅ Spy-based testing to verify `EncryptionUtil` method calls
+- ✅ Mock-based isolation of external dependencies (Prisma, Redis, Mail, SMS)
+
+**Files Created**
+
+- `src/modules/auth/2fa/services/2fa-method.service.spec.ts`
+
+---
+
+### Step 1.6.1: Fix Test Type Safety
+
+📅 `2025-10-22`
+
+**Fixed**
+
+- ✅ Fixed ESLint error "Unsafe return of a value of type 'any'" in transaction mock
+- ✅ Added explicit type `PrismaTransactionClient` for transaction callback
+- ✅ Improved type safety in all test mocks
+
+**Changed**
+
+- ✅ Refactored `mockPrismaService.$transaction.mockImplementation` to use generic type parameter
+- ✅ Added explicit typing for mock transaction client structure
+
+**Files Modified**
+
+- `src/modules/auth/2fa/services/2fa-method.service.spec.ts`
+
+---
+
+### Step 1.7: Data Validation After Decryption
+
+📅 `2025-10-22`
+
+**Added**
+
+- ✅ Created `validation.util.ts` with type guards for all 2FA method data types
+- ✅ Added `isTotpMethodData()` validator for TOTP configuration
+- ✅ Added `isOtpEmailMethodData()` validator for Email OTP configuration
+- ✅ Added `isOtpSmsMethodData()` validator for SMS OTP configuration
+- ✅ Added `validateMethodData()` universal validator with method type detection
+
+**Security**
+
+- ✅ Added validation after decryption to detect corrupted/malicious data
+- ✅ Validates data structure even for legacy unencrypted data
+- ✅ Throws `BadRequestException` on validation failure
+- ✅ Logs validation errors for security monitoring
+
+**Changed**
+
+- ✅ Updated `decryptMethodData()` to accept optional `methodType` parameter
+- ✅ Updated `sendOtpCode()` to pass method type for validation
+- ✅ Updated `verifyTotpCode()` to pass method type for validation
+
+**Testing**
+
+- ✅ Added 12 validation test cases covering all data types
+- ✅ Tests for valid data structures
+- ✅ Tests for missing required fields
+- ✅ Tests for invalid field values
+- ✅ Tests for edge cases (negative numbers, wrong formats)
+
+**Files Created**
+
+- `src/modules/auth/2fa/utils/validation.util.ts`
+- `src/modules/auth/2fa/utils/validation.util.spec.ts`
+
+**Files Modified**
+
+- `src/modules/auth/2fa/services/2fa-method.service.ts`
+- `src/modules/auth/2fa/utils/index.ts`
+
+---
+
+### Step 1.8: Security Documentation
+
+📅 `2025-10-22`
+
+**Added**
+
+- ✅ Created comprehensive security documentation (`docs/2fa/SECURITY.md`)
+- ✅ Documented AES-256-GCM encryption architecture
+- ✅ Added encryption flow diagrams and examples
+- ✅ Documented data validation mechanisms
+- ✅ Added implementation guide with code examples
+- ✅ Documented best practices (DOs and DON'Ts)
+- ✅ Added compliance section (OWASP, GDPR, HIPAA)
+- ✅ Added troubleshooting guide
+- ✅ Added key rotation procedure
+
+**Documentation Coverage**
+
+- ✅ Architecture overview
+- ✅ Encryption algorithms and modes
+- ✅ Data protection mechanisms
+- ✅ Security features
+- ✅ Code examples (encryption/decryption)
+- ✅ Best practices
+- ✅ Compliance standards
+- ✅ Troubleshooting
+
+**Files Created**
+
+- `docs/2fa/SECURITY.md` (full security documentation)
+
+---
+
+### Step 2: Consolidate OTP Sending Logic
+
+📅 `2025-10-22`
+
+**Refactored**
+
+- ✅ Created a universal private method `sendVerificationToken()` to handle token generation and sending
+- ✅ Refactored `sendEmailVerificationToken()` to use the new universal method
+- ✅ Refactored `sendEmailVerificationOtpToken()` to use the new universal method
+- ✅ Refactored `sendSmsVerificationOtpToken()` to use the new universal method
+- ✅ Eliminated ~40 lines of duplicated code
+
+**Improved**
+
+- ✅ Centralized token generation and sending logic
+- ✅ Simplified maintenance and testing
+- ✅ Improved error handling and logging for sending failures
+
+**Files Modified**
+
+- `src/modules/auth/verification/verification.service.ts`
+
+---
+
+### Step 2.1: Add Unit Tests for VerificationService
+
+📅 `2025-10-23`
+
+**Added**
+
+- ✅ Created test suite `verification.service.spec.ts` for `VerificationService`.
+- ✅ **Test Coverage:** Added 9 unit tests covering:
+  - ✅ Correct mail/sms provider calls for different verification types.
+  - ✅ Correct parameters passed to `generateToken` utility.
+  - ✅ Error handling for users without a phone number.
+  - ✅ Successful token verification flow.
+  - ✅ Failure cases: token not found, expired token, wrong token type.
+
+**Testing**
+
+- ✅ Implemented mock-based testing for all external dependencies (`Prisma`, `Mail`, `SMS`, `I18n`).
+- ✅ Used `jest.spyOn` to verify calls to the `generateToken` utility.
+
+**Files Created**
+
+- `src/modules/auth/verification/verification.service.spec.ts`
+
+---
+
+### Step 2.2: Fix Test Type Safety
+
+📅 `2025-01-28`
+
+**Fixed**
+
+- ✅ **Type Safety:** Replaced incomplete `mockUser` with a fully typed object matching the `User` Prisma model, resolving `TS2740`.
+- ✅ **Type Safety:** Created a fully typed `mockToken` object and used it in `generateToken` spy, removing `as any` and fixing `no-unsafe-argument`.
+- ✅ **Type Safety:** Added an explicit `User` type to `userWithoutPhone` object to resolve implicit `any` error (`TS7018`).
+- ✅ **Type Safety:** Replaced `mockRequest: any` with a type-safe cast `as unknown as Request` for better test clarity.
+- ✅ **Assertion Fix:** Updated test assertion from `expect(result.user).toBe(mockUser)` to `toMatchObject({ user: mockUser })` to correctly handle objects modified by `saveSession`.
+
+**Improved**
+
+- ✅ **Test Reliability:** All tests in `verification.service.spec.ts` are now fully type-safe, preventing future regressions due to type changes.
+- ✅ **Code Quality:** Removed all instances of `any` from the test file, adhering to strict TypeScript rules.
+
+**Files Modified**
+
+- `src/modules/auth/verification/verification.service.spec.ts`
+
+---
+
+### Step 3: Centralize Risk Score Calculation Logic
+
+📅 `2025-10-22`
+
+**Added**
+
+- ✅ Created `RiskCalculatorUtil.assessPasswordChange()` to encapsulate risk assessment for password changes.
+- ✅ Added `PASSWORD_CHANGE` and `MULTIPLE_SESSIONS_INVALIDATED` to `RISK_WEIGHTS` constants.
+
+**Refactored**
+
+- ✅ Refactored `AccountService.changePassword()` to use the new centralized risk assessment method.
+- ✅ Removed "ad-hoc" risk calculation logic from `AccountService`.
+
+**Improved**
+
+- ✅ **Consistency:** All risk assessment logic is now managed by `RiskCalculatorUtil`.
+- ✅ **Maintainability:** Easier to update risk rules in one central place.
+- ✅ **Clarity:** Business logic in `AccountService` is now cleaner and more focused.
+
+**Files Modified**
+
+- `src/modules/auth/2fa/utils/risk-calculator.util.ts`
+- `src/modules/auth/2fa/constants/risk.constants.ts`
+- `src/modules/auth/account/account.service.ts`
+
+---
+
+### Step 3.1: Align Risk & Security Types
+
+📅 `2025-10-22`
+
+**Fixed**
+
+- ✅ **Type Mismatch:** Resolved `ERiskLevel` vs `ESecuritySeverity` conflict by creating a `RiskMapperUtil`.
+- ✅ **Type Mismatch:** Resolved `IRiskFactor` vs `RiskFactor` conflict by unifying the type definition across modules.
+- ✅ Fixed all related TypeScript compilation errors (`TS2322`).
+
+**Added**
+
+- ✅ Created `RiskMapperUtil` to decouple risk assessment logic from security event logging.
+- ✅ Added `risk-mapper.util.ts` to exports.
+
+**Changed**
+
+- ✅ Renamed `name` to `type` in `IRiskFactor` for consistency.
+- ✅ Updated `RiskCalculatorUtil` to use the new `IRiskFactor` structure.
+- ✅ Updated `SecurityEventService` to import and use `IRiskFactor`.
+- ✅ Updated `AccountService.changePassword` to use `RiskMapperUtil` for severity mapping.
+
+**Files Modified**
+
+- `src/modules/auth/account/account.service.ts`
+- `src/modules/auth/2fa/utils/risk-calculator.util.ts`
+- `src/modules/auth/2fa/utils/index.ts`
+- `src/modules/auth/2fa/types/risk.types.ts`
+- `src/modules/security-event/security-event.service.ts`
+
+**Files Created**
+
+- `src/modules/auth/2fa/utils/risk-mapper.util.ts`
+
+---
+
+### Step 3.2: Add Unit Tests for RiskCalculatorUtil
+
+📅 `2025-10-23`
+
+**Added**
+
+- ✅ Created test suite `risk-calculator.util.spec.ts` for `RiskCalculatorUtil`.
+- ✅ **Test Coverage:** Added 8 unit tests covering:
+  - ✅ **Scenarios:** Low, Medium, High, and Critical risk scenarios.
+  - ✅ **Factors:** Specific tests for impossible travel, new device, new country, failed attempts, and new account.
+  - ✅ **Edge Cases:** Verification that risk score is capped at 100 and is zero when no risk factors are present.
+- ✅ Created a `createMockContext` helper function to easily generate test data for different risk scenarios.
+
+**Testing**
+
+- ✅ Validated that the `assess()` method correctly identifies risk factors and assigns appropriate risk levels (`ERiskLevel`).
+- ✅ Ensured that high-impact factors like "impossible travel" correctly trigger a CRITICAL risk level and `blockAccess: true`.
+
+**Files Created**
+
+- `src/modules/auth/2fa/utils/risk-calculator.util.spec.ts`
+
+---
+
+### Step 4: Refactor Email Template URL Handling
+
+📅 `2025-10-23`
+
+**Added**
+
+- ✅ Created `UrlService` to centralize client-side URL generation.
+- ✅ Added methods like `getSecurityActivityUrl()`, `getResetPasswordUrl()` to `UrlService`.
+
+**Refactored**
+
+- ✅ Refactored all email templates (`PasswordChangedTemplate`, `ResetPasswordTemplate`, etc.) to accept URLs as props.
+- ✅ Removed hardcoded `process.env.CLIENT_URL` from all email templates.
+- ✅ Refactored `MailService` to use `UrlService` for URL generation and pass them to templates.
+
+**Improved**
+
+- ✅ **Testability:** Email templates are now pure components, easily testable without environment dependencies.
+- ✅ **Maintainability:** All client-side URLs are managed in one central place (`UrlService`).
+- ✅ **Clarity:** `MailService` now explicitly builds and passes all necessary data to templates.
+
+**Files Created**
+
+- `src/shared/utils/url.service.ts`
+
+**Files Modified**
+
+- `src/core/core.module.ts`
+- `src/core/provider/mail/mail.service.ts`
+- `src/core/provider/mail/templates/authentication/password-changed.template.tsx`
+- `src/core/provider/mail/templates/authentication/reset-password.template.tsx`
+- *... (все остальные шаблоны с URL)*
+
+---
+
+### Step 4.1: URL Unification & Refactoring
+
+📅 `2025-10-23`
+
+**Refactored**
+
+- ✅ **Unified URL Generation:** All client-side URL generation is now handled exclusively by `UrlService`.
+- ✅ **Refactored `MailService`:** All methods now use `UrlService` to build URLs for email templates, ensuring consistency.
+- ✅ **Refactored Email Templates:** All templates now receive fully-formed URLs as props, making them pure and testable.
+
+**Removed**
+
+- ✅ **Deprecated `paths.config.ts`:** Removed the obsolete config file to eliminate code duplication and a secondary source of truth for URLs.
+
+**Improved**
+
+- ✅ **Maintainability:** URLs are now managed in a single, dedicated service (`UrlService`), simplifying future updates.
+- ✅ **Consistency:** All parts of the application now generate URLs using the same logic.
+- ✅ **Testability:** Decoupled templates and services from global constants.
+
+**Files Modified**
+
+- `src/core/provider/mail/mail.service.ts`
+- `src/core/config/index.ts` (удален экспорт `paths.config`)
+- All email template files (`.tsx`) in `src/core/provider/mail/templates/`
+
+**Files Removed**
+
+- `src/core/config/paths.config.ts`
+
+---
+
+### Step 4.2: Finalize URL Refactoring
+
+📅 `2025-10-23`
+
+**Fixed**
+
+- ✅ **URL Consistency:** Исправлена и унифицирована логика генерации URL. Все URL, связанные с настройками безопасности, теперь используют префикс `/settings/security/*`.
+- ✅ **Service Logic:** Обновлен `MailService` для корректного вызова новых методов `UrlService` во всех 12 методах отправки email.
+
+**Changed**
+
+- ✅ **UrlService:** Обновлены и переименованы методы для большей ясности (`getSecuritySettingsUrl`, `getSecurityActivityUrl` и т.д.).
+- ✅ **MailService:** Все вызовы для получения URL заменены на соответствующие вызовы `this.urlService`.
+
+**Improved**
+
+- ✅ **UX & Architecture:** Установлена четкая и логичная иерархия URL для клиентского приложения, что улучшает навигацию и упрощает разработку фронтенда.
+
+**Files Modified**
+
+- `src/shared/utils/url.service.ts`
+- `src/core/provider/mail/mail.service.ts`
+
+---
+
+### Step 4.3: Fix `await` in MailService
+
+📅 `2025-10-23`
+
+**Fixed**
+
+- ✅ **CRITICAL BUG FIX:** Added missing `await` before all `render()` calls in `MailService`.
+- ✅ Resolved TypeScript error "Argument of type 'Promise<string>' is not assignable to parameter of type 'string' (TS2345)".
+- ✅ Ensured that email templates are fully rendered to HTML strings before being passed to the mail provider.
+
+**Files Modified**
+
+- `src/core/provider/mail/mail.service.ts`
+
+---
+
+### Step 4.4: Fix Module Configuration Error
+
+📅 `2025-10-23`
+
+**Fixed**
+
+- ✅ **CRITICAL BUG FIX:** Resolved `InvalidClassModuleException` by correctly configuring `UrlService`.
+- ✅ Moved `UrlService` from the `imports` array to the `providers` array in `CoreModule`.
+- ✅ (Recommended) Encapsulated `UrlService` into its own global `UrlModule` for better architecture.
+
+**Improved**
+
+- ✅ **Architecture:** Aligned service and module configuration with NestJS best practices.
+- ✅ **Stability:** The application now bootstraps correctly without runtime errors.
+
+**Files Modified**
+
+- `src/core/core.module.ts`
+- `src/shared/utils/index.ts`
+
+**Files Created**
+
+- `src/shared/utils/url.module.ts` (if recommended approach is taken)
+
+---
+
+### Step 4.5: Fix `UnknownDependenciesException`
+
+📅 `2025-10-23`
+
+**Added**
+
+- ✅ Created a dedicated, global `UrlModule` to provide `UrlService` across the application.
+
+**Fixed**
+
+- ✅ **CRITICAL BUG FIX:** Resolved `UnknownDependenciesException` for `MailService`.
+- ✅ Ensured `UrlService` is correctly provided and available for dependency injection in all modules.
+
+**Refactored**
+
+- ✅ Removed `UrlService` from the `providers` array of `CoreModule`.
+- ✅ Imported `UrlModule` into `CoreModule` to follow NestJS best practices for shared services.
+
+**Files Created**
+
+- `src/shared/utils/url.module.ts`
+
+**Files Modified**
+
+- `src/core/core.module.ts`
+- `src/shared/utils/index.ts`
+
+---
+
+### Step 4.6: Add Unit Tests for UrlService
+
+📅 `2025-01-28`
+
+**Added**
+
+- ✅ Created test suite `url.service.spec.ts` for `UrlService`.
+- ✅ **Test Coverage:** Added 13 unit tests covering:
+  - ✅ Base `build()` method functionality with and without query parameters.
+  - ✅ Correct handling of special characters in query parameters.
+  - ✅ Verification of every specific URL builder method (e.g., `getVerifyUrl`, `getResetPasswordUrl`).
+- ✅ Mocked `CLIENT_URL` constant to ensure tests are environment-independent.
+
+**Testing**
+
+- ✅ Validated that all URL generation logic is correct and predictable.
+- ✅ Ensured that the service produces well-formed and correctly encoded URLs.
+
+**Files Created**
+
+- `src/shared/utils/url.service.spec.ts`
+
+---
+
+### Step 5: Unify SessionMetadata Type Naming
+
+📅 `2025-10-23`
+
+**Refactored**
+
+- ✅ **Renamed DTOs:** Renamed internal interfaces to explicitly mark them as Data Transfer Objects (`ISessionMetadata` → `ISessionMetadataDTO`, `ILocation` → `ILocationDTO`, `IDevice` → `IDeviceDTO`).
+- ✅ **Updated Imports:** Updated all usages across the codebase to reflect the new DTO names (`MailService`, `RecoveryService`, `session-metadata.util.ts`, etc.).
+- ✅ **Decoupled API from DTO:** Clearly separated internal DTOs from GraphQL API models (`SessionMetadata`, `Location`, `Device`), which remain unchanged as part of the public API contract.
+
+**Improved**
+
+- ✅ **Clarity & Readability:** The distinction between internal data structures and public API models is now explicit, reducing potential developer confusion.
+- ✅ **Maintainability:** Easier to evolve internal DTOs without accidentally breaking the public GraphQL API schema.
+
+**Files Modified**
+
+- `src/shared/types/session-metadata.types.ts`
+- `src/shared/utils/session-metadata.util.ts`
+- `src/core/provider/mail/mail.service.ts`
+- `src/modules/auth/recovery/recovery.service.ts`
+- `src/shared/types/express-session.d.ts`
+- *и другие файлы, использующие эти типы.*
+
+---
+
+### Step 6: Improve Error Handling and Graceful Shutdown in Bootstrap
+
+📅 `2025-10-23`
+
+**Added**
+
+- ✅ **Graceful Shutdown:** Enabled shutdown hooks (`app.enableShutdownHooks()`) to ensure the application closes connections to databases, message queues, etc., before exiting. This improves reliability, especially in containerized environments (Docker, Kubernetes).
+- ✅ **Startup Logging:** Added informative logs on successful application startup, including the application URL and GraphQL Playground path.
+
+**Fixed**
+
+- ✅ **Error Handling:** Replaced `console.error` in `main.ts` with a dedicated `Logger` instance for consistent and structured logging of bootstrap errors.
+
+**Improved**
+
+- ✅ **Observability:** Bootstrap errors are now logged with a proper context (`[Bootstrap]`) and stack trace, making debugging easier.
+- ✅ **Reliability:** The application now handles `SIGTERM` and `SIGINT` signals correctly, preventing abrupt termination and potential data corruption.
+
+**Files Modified**
+
+- `src/main.ts`
+
+---
+
+### Step 7.1: Add Unit Tests for AccountService
+
+📅 `2025-10-23`
+
+**Added**
+
+- ✅ Completed test suite for `AccountService`, covering `create`, `changePassword`, and `changeEmail`.
+- ✅ Added tests for `create()` method, including success case and duplicate email conflict.
+- ✅ Added tests for `changeEmail()` method, including success case and same email validation.
+- ✅ Integrated and finalized tests from your provided code for `changePassword()`.
+
+**Fixed**
+
+- ✅ **Type Safety:** Replaced all partial mocks (`as User`, `as Request`) with fully typed objects, eliminating all type errors and `eslint-disable` comments.
+- ✅ **Isolation:** Added mock for `session-metadata.util` to ensure `AccountService` tests are fully isolated and do not depend on external utility implementations.
+- ✅ **Isolation:** Mocked `RiskCalculatorUtil.assessPasswordChange` to specifically test the logic within `AccountService` without depending on the calculator's internal implementation.
+
+**Improved**
+
+- ✅ **Test Structure:** Organized all tests into `describe` blocks for each public method, improving readability.
+- ✅ **Clarity:** Used `beforeEach` to set up mocks consistently for `changePassword` tests.
+
+**Files Modified**
+
+- `src/modules/auth/account/account.service.spec.ts` (заменен полностью)
+
+---
+
+### Step 7.2: Fix Linting Errors in AccountService Tests
+
+📅 `2025-10-23`
+
+**Fixed**
+
+- ✅ **Linting:** Resolved all `@typescript-eslint/unbound-method` errors by wrapping static method spies (`HashUtil.hash`, `HashUtil.verify`) in arrow functions.
+- ✅ **Code Quality:** Removed the need for `/* eslint-disable */` comments, making the test suite cleaner and compliant with project's linting rules.
+
+**Improved**
+
+- ✅ **Test Reliability:** The test setup is now more robust and less prone to potential `this` context issues, even if the underlying implementation of `HashUtil` were to change.
+
+**Files Modified**
+
+- `src/modules/auth/account/account.service.spec.ts`
+
+---
+
+### Step 7.3: Fix Type Safety in RiskCalculatorUtil Mock
+
+📅 `2025-10-23`
+
+**Fixed**
+
+- ✅ **Type Safety:** Replaced `as any` with a fully typed `IRiskAssessment` mock object in `AccountService` tests.
+- ✅ **Type Mismatch:** Corrected the `level` property in the mock to use `ERiskLevel` instead of `ESecuritySeverity`.
+- ✅ Resolved `no-unsafe-argument` linting error.
+
+**Testing**
+
+- ✅ Added a mock for `RiskMapperUtil.mapLevelToSeverity` to properly isolate the `changePassword` test.
+- ✅ Added an assertion to verify that `RiskMapperUtil` is called with the correct risk level.
+
+**Improved**
+
+- ✅ The test for `changePassword` is now fully type-safe and more accurately reflects the service's dependencies and logic.
+
+**Files Modified**
+
+- `src/modules/auth/account/account.service.spec.ts`
+
+---
+### Step 8: Add Unit Tests for AccountLockService
+
+📅 `2025-10-23`
+
+**Added**
+
+- ✅ Created test suite `account-lock.service.spec.ts` for `AccountLockService`.
+- ✅ **Test Coverage:** Added 7 unit tests covering:
+  - ✅ `isAccountLocked()`: correct status for active, missing, and expired locks.
+  - ✅ `clearFailedAttempts()`: correct Redis key deletion.
+  - ✅ `incrementFailedAttempts()`: simple increment, progressive delay logic, and full account lockout flow.
+- ✅ Used `jest.useFakeTimers()` to test progressive delay logic without actual waiting.
+
+**Testing**
+
+- ✅ Validated that reaching `MAX_FAILED_ATTEMPTS` correctly triggers database lock creation, security event logging, and Redis counter cleanup.
+- ✅ Ensured proper interaction with all dependencies (`Prisma`, `Redis`, `SecurityEventService`, `NotificationService`).
+
+**Files Created**
+
+- `src/modules/security/account-lock/account-lock.service.spec.ts`
+
+---
+
+### Step 9.1: Add Unit Tests for RateLimitService
+
+📅 `2025-10-23`
+
+**Added**
+
+- ✅ Created test suite `rate-limit.service.spec.ts` for `RateLimitService`.
+- ✅ **Test Coverage:** Added 8 unit tests covering:
+  - ✅ **`consume()`:** Success cases, blocking cases, sliding window logic, and fail-open strategy on Redis errors.
+  - ✅ **Whitelist/Blacklist:** Correct calls to Redis `sIsMember` and `sAdd` methods.
+
+**Testing**
+
+- ✅ Validated the core logic of the sliding window algorithm using mocked Redis client methods (`zCard`, `zAdd`, `zRemRangeByScore`).
+- ✅ Ensured that the service behaves predictably under normal and failure conditions.
+- ✅ Disabled logger output during tests to keep the test runner output clean.
+
+**Files Created**
+
+- `src/modules/security/rate-limit/rate-limit.service.spec.ts`
+
+---
+
+### Step 9.2: Finalize Test Type Safety for RateLimitService
+
+📅 `2025-10-23`
+
+**Fixed**
+
+- ✅ **Linting:** Resolved `unbound-method` error by spying on `Logger` static method `error` instead of the prototype.
+- ✅ **Type Safety:** Replaced `redisClient: any` with a fully typed `MockRedisClient` interface.
+- ✅ **Type Safety:** Ensured `mockRedisService.getClient()` returns a strictly typed object, resolving `no-unsafe-return` error.
+
+**Improved**
+
+- ✅ The test suite for `RateLimitService` is now fully type-safe and compliant with all linting rules.
+
+**Files Modified**
+
+- `src/modules/security/rate-limit/rate-limit.service.spec.ts`
+
+---
+
+### Step 9.4: Final Linting Fix for RateLimitService Tests
+
+📅 `2025-10-23`
+
+**Fixed**
+
+- ✅ **Linting:** Resolved the final `@typescript-eslint/unbound-method` error in `expect` calls by using a dedicated Jest spy (`loggerErrorSpy`) for `Logger.error`.
+
+**Improved**
+
+- ✅ **Test Practices:** Implemented `afterAll` hook to restore the original `Logger.error` implementation, ensuring test isolation.
+- ✅ The entire test suite is now 100% compliant with the project's strict linting and type-safety rules.
+
+**Files Modified**
+
+- `src/modules/security/rate-limit/rate-limit.service.spec.ts`
 
 ---

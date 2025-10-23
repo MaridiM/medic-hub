@@ -4,17 +4,19 @@ import { PrismaService } from '@/core/prisma'
 import { Injectable } from '@nestjs/common'
 import { ESecurityEvent, ESecuritySeverity, Prisma } from '@prisma/__generated__'
 
+import { IRiskFactor } from '../auth'
+
 /**
  * Risk factor data structure for security event analysis
  */
-export interface RiskFactor {
-	/** Risk factor type (e.g., "new_device", "unusual_location") */
-	type: string
-	/** Risk factor description */
-	description: string
-	/** Risk weight (0-100) */
-	weight: number
-}
+// export interface RiskFactor {
+// 	/** Risk factor type (e.g., "new_device", "unusual_location") */
+// 	type: string
+// 	/** Risk factor description */
+// 	description: string
+// 	/** Risk weight (0-100) */
+// 	weight: number
+// }
 
 /**
  * Input data for creating a security event
@@ -39,7 +41,7 @@ export interface CreateSecurityEventInput {
 	/** Calculated risk score (0-100) */
 	riskScore?: number
 	/** Array of risk factors contributing to the score */
-	riskFactors?: RiskFactor[]
+	riskFactors?: IRiskFactor[]
 	/** Additional metadata as JSON */
 	metadata?: Prisma.JsonValue
 }
@@ -230,7 +232,7 @@ export class SecurityEventService extends CoreService {
 	 * // Returns: 70
 	 * ```
 	 */
-	calculateRiskScore(factors: RiskFactor[]): number {
+	calculateRiskScore(factors: IRiskFactor[]): number {
 		const total = factors.reduce((sum, factor) => sum + factor.weight, 0)
 		return Math.min(total, 100) // Cap at 100
 	}

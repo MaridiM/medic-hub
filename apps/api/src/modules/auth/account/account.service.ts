@@ -3,6 +3,7 @@ import type { Request } from 'express'
 import { CoreService } from '@/core/core.service'
 import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
+import { RiskCalculatorUtil, RiskMapperUtil } from '@/modules/auth/2fa'
 import { SecurityEventService } from '@/modules/security-event'
 import { getSessionMetadata, isPrismaError } from '@/shared/utils'
 import { HashUtil } from '@/shared/utils/hash.util'
@@ -248,33 +249,13 @@ export class AccountService extends CoreService {
 			// Invalidate all sessions except current one (logout from other devices)
 			const sessionsInvalidated = await this.session.invalidateUserSessions(user.id, currentSessionId)
 
-			// Calculate risk score based on factors
-			const riskFactors = []
-
-			// Factor: Password change from new device
-			// TODO: Implement device trust checking
-			// For now, assign moderate risk
-			riskFactors.push({
-				type: 'password_change',
-				description: 'User-initiated password change',
-				weight: 20,
+			// Вызов централизованного метода оценки рисков
+			const riskAssessment = RiskCalculatorUtil.assessPasswordChange({
+				sessionsInvalidated,
+				isNewDevice: false, // TODO: Implement device trust checking
 			})
 
-			// Factor: Multiple sessions invalidated (potential compromise)
-			if (sessionsInvalidated > 2) {
-				riskFactors.push({
-					type: 'multiple_sessions',
-					description: `${sessionsInvalidated} sessions invalidated`,
-					weight: 15,
-				})
-			}
-
-			const riskScore = this.securityEvent.calculateRiskScore(riskFactors)
-
-			// Determine severity based on risk score
-			let severity: ESecuritySeverity = ESecuritySeverity.LOW
-			if (riskScore >= 50) severity = ESecuritySeverity.HIGH
-			else if (riskScore >= 30) severity = ESecuritySeverity.MEDIUM
+			const severity = RiskMapperUtil.mapLevelToSeverity(riskAssessment.level)
 
 			// Log security event
 			await this.securityEvent.create({
@@ -285,8 +266,8 @@ export class AccountService extends CoreService {
 				userAgent,
 				country: meta.location?.country,
 				city: meta.location?.city,
-				riskScore,
-				riskFactors,
+				riskScore: riskAssessment.score,
+				riskFactors: riskAssessment.factors,
 				metadata: {
 					sessionsInvalidated,
 					browser: meta.device?.browser,

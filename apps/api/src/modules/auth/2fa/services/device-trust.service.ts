@@ -5,7 +5,7 @@ import { I18nService, Language } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
 import { NotificationService } from '@/modules/notification'
-import type { ISessionMetadata } from '@/shared/types'
+import type { ISessionMetadataDTO } from '@/shared/types'
 import { Injectable, Logger } from '@nestjs/common'
 import { type Prisma } from '@prisma/__generated__'
 
@@ -41,7 +41,7 @@ export class DeviceTrustService extends CoreService {
 	 */
 	async registerDevice(
 		userId: string,
-		session: ISessionMetadata,
+		session: ISessionMetadataDTO,
 		lng: Language,
 		fingerprint?: IDeviceFingerprint,
 		name?: string,

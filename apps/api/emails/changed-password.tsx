@@ -1,16 +1,12 @@
 import {
   Body,
   Button,
-  Column,
-  Container,
   Head,
   Heading,
-  Hr,
   Html,
   Img,
   Link,
   Preview,
-  Row,
   Section,
   Tailwind,
   Text
@@ -26,9 +22,7 @@ const APP_NAME = 'DoctorLab'
 const COMPANY_NAME = 'MedicHub Inc.'
 const SUPPORT_EMAIL = "support@example.com"
 
-export default function verificationEmail({
-  url = "http://localhost:3000/auth/verify?token=exampletoken",
-}: verificationEmailProps) {
+export function VerificationEmailTemplate({ url }: verificationEmailProps) {
     return (
        <Html lang='en'>
             <Preview>{"Confirm your email to finish signing up."}</Preview>

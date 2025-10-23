@@ -1,21 +1,20 @@
 import { APP_NAME } from '@/core/config'
 import { type I18nService } from '@/core/i18n'
-import type { ISessionMetadata } from '@/shared/types'
+import type { ISessionMetadataDTO } from '@/shared/types'
 import { Button, Heading, Section, Tailwind, Text } from '@react-email/components'
 
 import { TemplateWrapper } from '../components'
 
 interface IPasswordChangedProps {
-	metadata: ISessionMetadata
+	metadata: ISessionMetadataDTO
 	i18n: I18nService
+	securityUrl: string
+	supportUrl: string
 	lng?: string
 }
 
-export function PasswordChangedTemplate({ metadata, i18n, lng = 'en' }: IPasswordChangedProps) {
+export function PasswordChangedTemplate({ metadata, i18n, securityUrl, supportUrl, lng = 'en' }: IPasswordChangedProps) {
 	const t = i18n.t('mail.password_changed', { lng })
-
-	const securityUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/security/activity`
-	const supportUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/support`
 
 	const timestamp = new Date().toLocaleString(lng === 'ru' ? 'ru-RU' : 'en-US', {
 		dateStyle: 'long',

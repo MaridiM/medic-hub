@@ -5,7 +5,8 @@ import { NotificationModule } from '@/modules/notification'
 import { RbacModule } from '@/modules/rbac'
 import { RateLimitGuard, SecurityModule } from '@/modules/security'
 import { SecurityEventModule } from '@/modules/security-event'
-import { IS_DEV_ENV } from '@/shared/utils'
+import { IS_DEV_ENV, UrlService } from '@/shared/utils'
+import { UrlModule } from '@/shared/utils/url'
 import { ApolloDriver } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -41,6 +42,9 @@ import { RedisModule } from './redis'
 		PrismaModule,
 		ProviderModule,
 
+		// Utils
+		UrlModule,
+
 		// Modules
 		SecurityModule,
 
@@ -61,7 +65,7 @@ import { RedisModule } from './redis'
 		RbacModule,
 	],
 	providers: [
-		I18nValidationPipe, // регистрируем сам пайп
+		I18nValidationPipe,
 		{ provide: APP_PIPE, useExisting: I18nValidationPipe },
 		{ provide: APP_GUARD, useClass: RateLimitGuard },
 	],

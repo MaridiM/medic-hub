@@ -2,7 +2,7 @@ import type { Request } from 'express'
 import { lookup } from 'geoip-lite'
 import * as countries from 'i18n-iso-countries'
 
-import type { ISessionMetadata } from '../types'
+import type { ISessionMetadataDTO } from '../types'
 
 import { IS_DEV_ENV } from './is-dev.util'
 
@@ -16,7 +16,7 @@ countries.registerLocale(require('i18n-iso-countries/langs/en.json'))
  * @param userAgent - user agent
  * @returns - location info, device info, ip address
  */
-export function getSessionMetadata(req: Request, userAgent: string): ISessionMetadata {
+export function getSessionMetadata(req: Request, userAgent: string): ISessionMetadataDTO {
 	const ip = IS_DEV_ENV
 		? '173.166.164.121'
 		: Array.isArray(req.headers['cf-connecting-ip'])

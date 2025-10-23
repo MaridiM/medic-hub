@@ -6,7 +6,7 @@ import { graphqlUploadExpress } from 'graphql-upload-minimal'
 import helmet, { HelmetOptions } from 'helmet'
 import i18nextMiddleware from 'i18next-http-middleware'
 
-import { ValidationPipe } from '@nestjs/common'
+import { Logger, ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 
@@ -19,6 +19,9 @@ const myEnv = dotenv.config({ path: 'backend/.env' })
 dotenvExpand.expand(myEnv)
 
 async function bootstrap() {
+	// ✅ Create a logger for the bootstrap process
+	const bootstrapLogger = new Logger('Bootstrap')
+
 	await initI18n()
 
 	const app = await NestFactory.create(CoreModule, { rawBody: true })
@@ -26,13 +29,16 @@ async function bootstrap() {
 	const config = app.get(ConfigService)
 	const redis = app.get(RedisService)
 
+	// ✅ Enable Graceful Shutdown
+	app.enableShutdownHooks()
+
 	// ✅ Security Headers (Helmet) - apply first!
 	app.use(helmet(helmetConfig as Readonly<HelmetOptions>))
 
-	// ✅ i18n middleware (добавляет req.i18n, req.language)
+	// ✅ i18n middleware (add req.i18n, req.language)
 	app.use(i18nextMiddleware.handle(i18n))
 
-	// ✅ JSON + выставляем язык, если вдруг отсутствует
+	// ✅ JSON + language detection fallback
 	app.use(json({ limit: '1mb', type: 'application/json' }))
 	app.use((req: Request, res: Response, next: NextFunction) => {
 		req.language =
@@ -48,7 +54,7 @@ async function bootstrap() {
 	app.use(config.get<string>('GRAPHQL_PREFIX') || '/graphql', graphqlUploadExpress())
 	app.useGlobalPipes(new ValidationPipe({ transform: true }))
 
-	// ✅ Сессии через Redis
+	// ✅ Redis-based sessions
 	app.use(sessionConfig(config, redis))
 
 	// ✅ CORS
@@ -59,13 +65,18 @@ async function bootstrap() {
 		exposedHeaders: ['set-cookie'],
 	})
 
-	// ✅ Старт
+	// ✅ Start server
 	const port = Number(config.get<string>('SERVER_PORT')) || 8000
 	await app.listen(port)
+
+	// ✅ Логируем успешный старт
+	const graphqlPath = config.get<string>('GRAPHQL_PREFIX') || 'graphql'
+	bootstrapLogger.log(`🚀 Application is running on: http://localhost:${port}`)
+	bootstrapLogger.log(`📊 GraphQL Playground available at: http://localhost:${port}/${graphqlPath}`)
 }
 
-bootstrap().catch(err => {
-	// Можно заменить на ваш логгер
-	console.error('Nest bootstrap failed:', err)
+const bootstrapLogger = new Logger('Bootstrap')
+bootstrap().catch(error => {
+	bootstrapLogger.error('❌ Application bootstrap failed!', error.stack)
 	process.exit(1)
 })

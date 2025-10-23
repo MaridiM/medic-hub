@@ -1,5 +1,5 @@
 import type { Language } from '@/core/i18n'
-import type { ISessionMetadata } from '@/shared/types'
+import type { ISessionMetadataDTO } from '@/shared/types'
 import type { E2FAMethod, User } from '@prisma/__generated__'
 
 /**
@@ -82,7 +82,7 @@ export interface I2FAMethodNotificationData extends ISecurityNotificationData {
  * Device login notification data
  */
 export interface IDeviceLoginNotificationData extends ISecurityNotificationData {
-	device: ISessionMetadata
+	device: ISessionMetadataDTO 
 }
 
 /**

@@ -1,6 +1,8 @@
 {
 	"errors": {
-		"message_send_failed": "Failed to send the message."
+		"message_send_failed": "Ошибка отправки сообщения",
+		"no_phone_for_sms": "У пользователя {{userId}} отсутствует номер телефона для SMS-верификации."
+		
 	},
 	"verification": {
 		"otp": "Ваш код верификации: {{code}}",

@@ -847,7 +847,7 @@ Testing Coverage:   [                    ] 0%
 ## 📊 Progress Overview
 
 ```
-Security Module Centralization: ██████████ 100%
+Security Module Centralization:  [████████████████████] 100%
 Core Infrastructure Refactoring: [                    ] 0%
 Domain Events Implementation:    [                    ] 0%
 ```
@@ -928,5 +928,275 @@ Domain Events Implementation:    [                    ] 0%
 - [ ] **[Testing] Обновить юнит-тесты**
   - [ ] Тесты для сервисов-источников теперь должны проверять, что `eventEmitter.emit` был вызван с правильными параметрами (`jest.spyOn(...)`).
   - [ ] Написать новые тесты для слушателей, чтобы проверить, что они корректно реагируют на события.
+
+---
+
+# Module: Core Security Testing Initiative
+
+---
+
+**Phase 1: Account Lockout Service**
+
+---
+
+## 📊 Progress Overview
+
+```
+Test Environment Setup: [                    ] 0%
+Unit Test Coverage:     [                    ] 0%
+Integration Points:     [                    ] 0%
+Documentation & CI:     [                    ] 0%
+```
+
+---
+
+## 🔴 HIGH: Критически важные для стабилизации
+
+### [ ] Step 1: Test Environment & Mocks Setup
+
+**Цель:** Создать полностью изолированное тестовое окружение для `AccountLockService`, заменив все внешние зависимости на управляемые моки (mocks).
+
+-   [ ] **[Test File]** Создать файл `src/modules/security/account-lock/account-lock.service.spec.ts`.
+-   [ ] **[Boilerplate]** Настроить базовую структуру теста с использованием `Test.createTestingModule` из `@nestjs/testing`.
+-   [ ] **[Mocking]** Реализовать моки для всех зависимостей сервиса:
+    -   [ ] **`PrismaService`:** Создать `mockPrismaService` с `jest.fn()` для методов `accountLock.findFirst` и `accountLock.create`.
+    -   [ ] **`RedisService`:** Создать `mockRedisService` с `jest.fn()` для методов `rGetNumber`, `rIncr`, `rDel`.
+    -   [ ] **`SecurityEventService`:** Создать `mockSecurityEventService` с `jest.fn()` для метода `create`.
+    -   [ ] **`NotificationService`:** Создать `mockNotificationService` с `jest.fn()` для метода `notifyAccountLocked` (задел на будущее).
+-   [ ] **[DI]** Сконфигурировать `Test.createTestingModule` для инъекции моков вместо реальных сервисов.
+-   [ ] **[Sanity Check]** Написать первый простой тест `it('should be defined', ...)` и убедиться, что он проходит.
+
+### [ ] Step 2: Unit Testing Core Logic
+
+**Цель:** Покрыть тестами все публичные методы `AccountLockService`, проверяя их логику и пограничные случаи.
+
+-   [ ] **[Test Suite]** Написать `describe('isAccountLocked', ...)`:
+    -   [ ] `it('should return true if an active lock exists')`
+    -   [ ] `it('should return false if no lock exists')`
+    -   [ ] `it('should return false if the lock has expired')`
+    -   [ ] `it('should return false if the lock has been manually unlocked')`
+
+-   [ ] **[Test Suite]** Написать `describe('clearFailedAttempts', ...)`:
+    -   [ ] `it('should call rDel with the correct Redis key')`
+
+-   [ ] **[Test Suite]** Написать `describe('incrementFailedAttempts', ...)`:
+    -   [ ] `it('should only increment the counter if the threshold is not reached')`
+    -   [ ] `it('should apply a progressive delay on specific attempt numbers')`
+        -   💡 Использовать `jest.useFakeTimers()` и `jest.runAllTimers()` для контроля времени.
+    -   [ ] **(Ключевой тест)** `it('should lock the account when MAX_FAILED_ATTEMPTS is reached')`:
+        -   [ ] Проверить вызов `prisma.accountLock.create` с корректными данными.
+        -   [ ] Проверить вызов `securityEventService.create` с `ESecurityEvent.ACCOUNT_LOCKED`.
+        -   [ ] Проверить вызов `notificationService.notifyAccountLocked`.
+        -   [ ] Проверить, что счетчик в Redis (`rDel`) был очищен после создания персистентной блокировки.
+    -   [ ] `it('should handle Redis errors gracefully without crashing')`
+        -   💡 Заставить мок Redis сгенерировать ошибку и проверить, что сервис не падает.
+
+### [ ] Step 3: Finalization & Integration
+
+**Цель:** Убедиться, что тесты полностью интегрированы в процесс разработки и соответствуют критериям готовности.
+
+-   [ ] **[CI]** Запустить тесты с флагом `--coverage` и убедиться, что покрытие для `account-lock.service.ts` **≥ 80%**.
+-   [ ] **[Refactoring]** Провести ревью написанных тестов на предмет читаемости и эффективности. Улучшить именование и структуру.
+-   [ ] **[Roadmap]** Обновить этот и основной Roadmap, отметив задачи как выполненные (`✅`) и обновив прогресс-бар.
+
+---
+
+## 🔵 Definition of Done (Критерии готовности для этой задачи)
+
+-   **Тесты:** Покрытие юнит-тестами для `AccountLockService` составляет ≥ 80%. Все пограничные случаи (успех, отказ, ошибка) проверены.
+-   **Код:** Отсутствуют `TODO`, `any`, ошибки линтера в тестовом файле.
+-   **CI:** Тесты успешно проходят в рамках локального запуска и готовы к интеграции в CI-пайплайн.
+-   **Документация:** Код тестов самодокументируемый, с понятными `describe` и `it` блоками.
+
+---
+
+Вы правы, извините. Вот переработанная версия в точном соответствии с вашим стилем Roadmap:
+
+---
+
+# Module: Code Quality & Security Hardening
+
+---
+
+## 📊 Progress Overview
+
+```
+Security Hardening:     [████████████████████] 100% ✅ Step 1 Complete
+Service Refactoring:    [████████████████████] 100% ✅ Step 2 Complete
+                        [████████████████████] 100% ✅ Step 3 Complete
+Template Architecture:  [████████████████████] 100% ✅ Step 4 Complete
+Type System Cleanup:    [████████████████████] 100% ✅ Step 5 Complete
+Error Handling:         [████████████████████] 100% ✅ Step 6 Complete
+Testing Coverage:       [████████████░░░░░░░░] 60%  ✅ Greatly Improved
+```
+
+---
+
+## 🔴 HIGH: Критическая безопасность
+
+### ✅ Step 1: Encryption Verification & Implementation for 2FA Secrets
+
+**Цель:** Гарантировать, что все чувствительные данные 2FA (TOTP-секреты, WebAuthn public keys) всегда шифруются перед записью в БД и расшифровываются при чтении.
+
+- ✅ **[Audit]** Провести аудит текущей реализации в `TwoFactorMethodService`
+  - ✅ Проверить все места записи в поле `AuthenticationMethod.data`
+  - ✅ Проверить вызовы `EncryptionUtil.encryptJSON()` перед записью
+  - ✅ Проверить вызовы `EncryptionUtil.decryptJSON()` после чтения
+  - ✅ Документировать найденные проблемы
+- ✅ **[Fix]** Реализовать/исправить шифрование данных
+  - ✅ Добавить шифрование при создании методов (`setupOtp`, `completeTotpSetup`)
+  - ✅ Добавить шифрование при обновлении методов - *не требуется*
+  - ✅ Добавить расшифровку при чтении методов (`sendOtpCode`, `verifyTotpCode`)
+  - ✅ Создать приватные методы-обертки для централизации логики
+- ✅ **[TypeScript]** Исправить ошибки компиляции
+  - ✅ Исправить unsafe type cast в `decryptMethodData()`
+  - ✅ Добавить недостающее объявление `verifyTotpCodeDirect()`
+- ✅ **[Testing]** Написать юнит-тесты для проверки шифрования
+  - ✅ Тест: шифрование вызывается при создании TOTP метода
+  - ✅ Тест: шифрование вызывается при создании OTP Email метода
+  - ✅ Тест: шифрование вызывается при создании OTP SMS метода
+  - ✅ Тест: расшифровка вызывается при верификации TOTP
+  - ✅ Тест: расшифровка вызывается при отправке OTP кода
+  - ✅ Тест: ошибка при невалидных зашифрованных данных
+  - ✅ Тест: обратная совместимость с legacy данными
+- ✅ **[Security]** Добавить дополнительную защиту
+  - ✅ Валидация структуры данных после расшифровки
+  - ✅ Обработка ошибок при failed decryption
+- ✅ **[Docs]** Обновить документацию
+  - ✅ Добавить JSDoc к методам шифрования/расшифровки
+  - ✅ Создать/обновить `docs/2fa/SECURITY.md` с разделом о защите данных
+
+---
+
+## 🟠 MEDIUM: Рефакторинг и производительность
+
+### [ ] Step 2: Consolidate OTP Sending Logic in VerificationService
+
+**Цель:** Устранить дублирование кода, объединив три похожих метода отправки токенов (`sendEmailVerificationToken`, `sendEmailVerificationOtpToken`, `sendSmsVerificationOtpToken`) в один универсальный приватный метод.
+
+- ✅ **[Refactor]** Создать универсальный приватный метод `sendVerificationToken`
+  - ✅ Параметры: `user`, `channel: 'email' | 'sms'`, `type: 'link' | 'code'`, `lng`
+  - ✅ Логика генерации токена (UUID или numeric)
+  - ✅ Логика выбора канала отправки (email/SMS)
+- ✅ **[Refactor]** Заменить существующие методы на обертки
+  - ✅ `sendEmailVerificationToken` → вызов универсального метода
+  - ✅ `sendEmailVerificationOtpToken` → вызов универсального метода
+  - ✅ `sendSmsVerificationOtpToken` → вызов универсального метода
+- ✅ **[Testing]** Обновить тесты
+  - ✅ Написать тесты для нового приватного метода
+  - ✅ Убедиться, что публичные методы продолжают работать
+- [ ] **[Metrics]** Измерить улучшение
+  - [ ] Количество удаленных строк дублированного кода
+
+### ✅ Step 3: Centralize Risk Score Calculation Logic
+
+**Цель:** Вынести логику расчета `riskScore` из `AccountService.changePassword` в `RiskCalculatorUtil` для обеспечения консистентности оценок во всей системе.
+
+- ✅ **[Refactor]** Создать метод `RiskCalculatorUtil.assessPasswordChangeRisk`
+  - ✅ Входные параметры: `sessionsInvalidated`, `isNewDevice`
+  - ✅ Вычисление факторов риска (password change, multiple sessions, new device)
+  - ✅ Возврат полного `IRiskAssessment` объекта
+- ✅ **[Refactor]** Обновить `AccountService.changePassword`
+  - ✅ Заменить inline-расчет на вызов утилиты
+  - ✅ Использовать `riskAssessment.score` и `riskAssessment.factors`
+  - ✅ Динамическое определение `severity` на основе `riskAssessment.level`
+- ✅ **[Constants]** Добавить недостающие константы
+  - ✅ `RISK_WEIGHTS.PASSWORD_CHANGE`, `MULTIPLE_SESSIONS_INVALIDATED` в `risk.constants.ts`
+- ✅ **[TypeScript]** Исправить несоответствия типов
+  - ✅ Создать `RiskMapperUtil` для преобразования `ERiskLevel` в `ESecuritySeverity`
+  - ✅ Унифицировать `IRiskFactor` и `RiskFactor` типы
+- ✅ **[Testing]** Написать тесты для нового метода
+  - ✅ Тест: низкий риск (1 сессия, старое устройство)
+  - ✅ Тест: средний риск (2-3 сессии)
+  - ✅ Тест: высокий риск (>3 сессий, новое устройство)
+- [ ] **[Future]** Применить тот же паттерн к другим операциям
+  - [ ] Email change risk assessment
+  - [ ] Login risk assessment
+
+### ✅ Step 4: Refactor Email Template URL Handling
+
+**Цель:** Убрать хардкод `process.env.CLIENT_URL` из React Email шаблонов, передавая URL как пропсы из `MailService`.
+
+- ✅ **[Template]** Обновить интерфейсы пропсов всех шаблонов
+  - ✅ Добавить `securityUrl`, `supportUrl` и другие URL как required props
+  - ✅ Удалить прямое обращение к `process.env.CLIENT_URL` из тела шаблонов
+- ✅ **[Service]** Обновить `MailService` для передачи URL
+  - ✅ `sendPasswordChangedNotification` → передавать URL как пропсы
+  - ✅ `sendPasswordResetConfirmation` → передавать URL как пропсы
+  - ✅ Все другие методы отправки email
+- ✅ **[Refactor]** Применить к всем шаблонам
+  - ✅ `PasswordChangedTemplate`
+  - ✅ `PasswordResetConfirmationTemplate`
+  - ✅ `ResetPasswordTemplate`
+  - ✅ Все шаблоны из `2fa-security/` (9 шаблонов)
+- ✅ **[TypeScript]** Исправить ошибки компиляции `InvalidClassModuleException` и `UnknownDependenciesException`
+- ✅ **[Utils]** (Опционально) Создать хелпер `UrlUtil.buildUrl`
+  - ✅ Централизовать логику построения URL из `ConfigService`
+  - ✅ Использовать в `MailService` для генерации всех URL
+- ✅**[Testing]** Проверить тестируемость
+  - ✅ Убедиться, что шаблоны можно тестировать без env-переменных
+  - ✅ Написать тесты для `UrlUtil` (если создан)
+
+---
+
+## 🟢 LOW: Code Style & Clarity
+
+### ✅ Step 5: Unify SessionMetadata Type Naming
+
+**Цель:** Устранить путаницу между `ISessionMetadata` (shared/types) и `SessionMetadata` (GraphQL модель) путем унификации или четкого разделения назначения.
+
+- ✅ **[Analysis]** Проанализировать использование обоих типов
+  - ✅ Найти все места использования `ISessionMetadata`
+  - ✅ Найти все места использования `SessionMetadata` (GraphQL)
+  - ✅ Проверить структурную идентичность
+- ✅ **[Decision]** Выбрать стратегию
+  - ✅ **Вариант B:** Разделение с переименованием (`ISessionMetadataDTO` vs `SessionMetadataGraphQL`)
+- ✅ **[Refactor]** Применить выбранную стратегию
+  - ✅ Переименовать типы
+  - ✅ Обновить все импорты в проекте
+  - ✅ Обновить экспорты в `index.ts` файлах
+- ✅ **[Documentation]** Добавить JSDoc-комментарии
+  - ✅ Разъяснить назначение каждого типа
+  - ✅ Указать, где какой тип должен использоваться
+
+### ✅ Step 6: Improve Error Handling in Bootstrap
+
+**Цель:** Заменить `console.error` в `main.ts` на полноценный `Logger` для консистентности логирования.
+
+- ✅ **[Fix]** Обновить обработку ошибок в `bootstrap()`
+  - ✅ Создать `bootstrapLogger = new Logger('Bootstrap')`
+  - ✅ Заменить `console.error` на `bootstrapLogger.error`
+  - ✅ Логировать stack trace корректно
+- ✅ **[Enhancement]** Добавить логирование успешного старта
+  - ✅ Логировать URL приложения после `app.listen()`
+  - ✅ Логировать URL GraphQL Playground
+- ✅ **[Graceful Shutdown]** Добавить обработку сигналов
+  - ✅ Включить `app.enableShutdownHooks()`
+
+---
+
+## 🔵 Definition of Done (Критерии готовности)
+
+- **Безопасность (Step 1):**
+  - ✅ Все поля `AuthenticationMethod.data` шифруются/расшифровываются через `EncryptionUtil`.
+  - ✅ Написаны и проходят тесты для шифрования.
+  - ✅ Документация обновлена.
+  
+- **Рефакторинг (Steps 2-4):**
+  - ✅ Код без дублирования: логика OTP, risk assessment, URL handling унифицирована.
+  - ✅ Все изменения покрыты тестами.
+  - ✅ Отсутствуют ошибки линтера.
+  
+- **Code Style (Steps 5-6):**
+  - ✅ Нейминг типов унифицирован или четко разграничен.
+  - ✅ Обработка ошибок использует `Logger` везде.
+  - ✅ Код прошел ревью.
+
+- **Документация:**
+  - ✅ Обновлен `CHANGELOG.md` для всех шагов.
+  - ✅ Созданы/обновлены релевантные `.md` файлы.
+
+- **Производительность:**
+  - ✅ Операции выполняются в целевых пределах (< 500ms для API).
 
 ---

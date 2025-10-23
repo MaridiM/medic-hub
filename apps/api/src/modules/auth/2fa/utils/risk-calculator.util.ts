@@ -1,6 +1,6 @@
 import { differenceInHours } from 'date-fns'
 
-import type { ISessionMetadata } from '@/shared/types'
+import type { ISessionMetadataDTO } from '@/shared/types'
 
 import { HIGH_RISK_INDICATORS, RISK_THRESHOLDS, RISK_WEIGHTS, VELOCITY_CONFIG } from '../constants'
 import type { IAnomaly, IRiskAssessment, IRiskFactor } from '../types'
@@ -12,7 +12,7 @@ import { ERiskLevel } from '../types'
  */
 export interface IRiskContext {
 	// Current session
-	session: ISessionMetadata
+	session: ISessionMetadataDTO
 
 	// User context
 	userId: string
@@ -110,7 +110,7 @@ export class RiskCalculatorUtil {
 			)
 		) {
 			factors.push({
-				name: 'high_risk_country',
+				type: 'high_risk_country',
 				score: RISK_WEIGHTS.HIGH_RISK_COUNTRY,
 				weight: 1.0,
 				description: 'Login from high-risk country',
@@ -122,7 +122,7 @@ export class RiskCalculatorUtil {
 		const isNewCountry = !context.previousLocations.some(loc => loc.country === currentCountry)
 		if (isNewCountry && context.previousLocations.length > 0) {
 			factors.push({
-				name: 'new_country',
+				type: 'new_country',
 				score: RISK_WEIGHTS.NEW_COUNTRY,
 				weight: 0.8,
 				description: 'First login from this country',
@@ -135,7 +135,7 @@ export class RiskCalculatorUtil {
 		const isNewCity = !context.previousLocations.some(loc => loc.city === currentCity)
 		if (isNewCity && context.previousLocations.length > 0 && !isNewCountry) {
 			factors.push({
-				name: 'new_city',
+				type: 'new_city',
 				score: RISK_WEIGHTS.NEW_CITY,
 				weight: 0.6,
 				description: 'First login from this city',
@@ -147,7 +147,7 @@ export class RiskCalculatorUtil {
 		const impossibleTravel = this.detectImpossibleTravel(context)
 		if (impossibleTravel) {
 			factors.push({
-				name: 'impossible_travel',
+				type: 'impossible_travel',
 				score: RISK_WEIGHTS.IMPOSSIBLE_TRAVEL,
 				weight: 1.2,
 				description: 'Impossible travel detected',
@@ -226,7 +226,7 @@ export class RiskCalculatorUtil {
 		// New device
 		if (context.isNewDevice) {
 			factors.push({
-				name: 'new_device',
+				type: 'new_device',
 				score: RISK_WEIGHTS.NEW_DEVICE,
 				weight: 0.9,
 				description: 'First login from this device',
@@ -236,7 +236,7 @@ export class RiskCalculatorUtil {
 		// Untrusted device
 		if (context.deviceTrustScore < 50) {
 			factors.push({
-				name: 'untrusted_device',
+				type: 'untrusted_device',
 				score: RISK_WEIGHTS.UNTRUSTED_DEVICE,
 				weight: 1.0,
 				description: 'Device has low trust score',
@@ -259,7 +259,7 @@ export class RiskCalculatorUtil {
 		const isSuspicious = HIGH_RISK_INDICATORS.SUSPICIOUS_UA_PATTERNS.some(pattern => pattern.test(deviceInfo))
 		if (isSuspicious) {
 			factors.push({
-				name: 'suspicious_user_agent',
+				type: 'suspicious_user_agent',
 				score: RISK_WEIGHTS.SUSPICIOUS_USER_AGENT,
 				weight: 1.1,
 				description: 'Suspicious user agent detected',
@@ -275,7 +275,7 @@ export class RiskCalculatorUtil {
 			const hour = context.loginTime.getHours()
 			if (!context.typicalLoginHours.includes(hour)) {
 				factors.push({
-					name: 'unusual_time',
+					type: 'unusual_time',
 					score: RISK_WEIGHTS.UNUSUAL_TIME,
 					weight: 0.5,
 					description: 'Login at unusual time',
@@ -289,7 +289,7 @@ export class RiskCalculatorUtil {
 			const day = context.loginTime.getDay()
 			if (!context.typicalLoginDays.includes(day)) {
 				factors.push({
-					name: 'unusual_day',
+					type: 'unusual_day',
 					score: RISK_WEIGHTS.UNUSUAL_DAY,
 					weight: 0.3,
 					description: 'Login on unusual day',
@@ -310,7 +310,7 @@ export class RiskCalculatorUtil {
 		// New account
 		if (context.accountAge < 7) {
 			factors.push({
-				name: 'new_account',
+				type: 'new_account',
 				score: RISK_WEIGHTS.NEW_ACCOUNT,
 				weight: 0.7,
 				description: 'Account is less than 7 days old',
@@ -318,7 +318,7 @@ export class RiskCalculatorUtil {
 			})
 		} else if (context.accountAge < 30) {
 			factors.push({
-				name: 'young_account',
+				type: 'young_account',
 				score: RISK_WEIGHTS.YOUNG_ACCOUNT,
 				weight: 0.4,
 				description: 'Account is less than 30 days old',
@@ -339,7 +339,7 @@ export class RiskCalculatorUtil {
 		if (context.failedAttemptsRecent > 0) {
 			const score = Math.min(RISK_WEIGHTS.MULTIPLE_FAILED_ATTEMPTS, context.failedAttemptsRecent * 10)
 			factors.push({
-				name: 'failed_attempts',
+				type: 'failed_attempts',
 				score,
 				weight: 1.0,
 				description: 'Recent failed login attempts',
@@ -432,5 +432,71 @@ export class RiskCalculatorUtil {
 		}
 
 		return recommendations
+	}
+
+	/**
+	 * Assesses risk for a password change event.
+	 *
+	 * @param context - Context containing event-specific data
+	 * @returns Complete risk assessment for the password change event
+	 */
+	static assessPasswordChange(context: {
+		sessionsInvalidated: number
+		isNewDevice?: boolean // опционально
+	}): IRiskAssessment {
+		const factors: IRiskFactor[] = []
+
+		// Base factor for any password change
+		factors.push({
+			type: 'password_change_initiated',
+			score: RISK_WEIGHTS.PASSWORD_CHANGE,
+			weight: 1.0,
+			description: 'User-initiated password change.',
+		})
+
+		// Factor for multiple sessions being invalidated (potential sign of account takeover)
+		if (context.sessionsInvalidated > 2) {
+			factors.push({
+				type: 'multiple_sessions_invalidated',
+				score: RISK_WEIGHTS.MULTIPLE_SESSIONS_INVALIDATED,
+				weight: 1.0,
+				description: `Invalidated ${context.sessionsInvalidated} other sessions.`,
+				details: { count: context.sessionsInvalidated },
+			})
+		}
+
+		// Factor for changing password from a new or untrusted device
+		if (context.isNewDevice) {
+			factors.push({
+				type: 'new_device_password_change',
+				score: RISK_WEIGHTS.NEW_DEVICE,
+				weight: 1.2, // Higher weight for this specific action
+				description: 'Password changed from a new device.',
+			})
+		}
+
+		const score = this.calculateScore(factors)
+		const level = this.getRiskLevel(score)
+		const anomalies: IAnomaly[] = []
+
+		if (level === ERiskLevel.HIGH || level === ERiskLevel.CRITICAL) {
+			anomalies.push({
+				type: 'behavior',
+				severity: 'high',
+				description: 'High-risk password change event detected.',
+				score: score,
+				details: { sessionsInvalidated: context.sessionsInvalidated, isNewDevice: context.isNewDevice },
+			})
+		}
+
+		return {
+			score,
+			level,
+			factors,
+			recommendations: this.generateRecommendations(level, anomalies),
+			require2FA: score >= RISK_THRESHOLDS[ERiskLevel.MEDIUM].min,
+			blockAccess: false, // Password change should not block access
+			assessedAt: new Date(),
+		}
 	}
 }

@@ -6,7 +6,7 @@ import { InternalServerErrorException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import type { User } from '@prisma/__generated__'
 
-import type { ISessionMetadata } from '../types'
+import type { ISessionMetadataDTO } from '../types'
 
 /**
  * Save user session and set userId, metadata, createdAt
@@ -15,7 +15,7 @@ import type { ISessionMetadata } from '../types'
  * @param metadata - user's metadata
  * @returns - user
  */
-export function saveSession(req: Request, user: User, metadata: ISessionMetadata) {
+export function saveSession(req: Request, user: User, metadata: ISessionMetadataDTO) {
 	const lang = req.language || DEFAULT_LANGUAGE
 
 	return new Promise<{ user: User }>((resolve, reject) => {
