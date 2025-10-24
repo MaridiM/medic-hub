@@ -1,3 +1,4 @@
+import { I18nService } from '@/core/i18n'
 import { PrismaService } from '@/core/prisma'
 import { RedisService } from '@/core/redis'
 import { NotificationService } from '@/modules/notification'
@@ -12,25 +13,72 @@ import { ACCOUNT_LOCK_CONFIG, PROGRESSIVE_DELAYS } from '../constants'
 const mockSecurityEventService = { create: jest.fn() }
 const mockNotificationService = { notifyAccountLocked: jest.fn() }
 const mockPrismaService = { accountLock: { findFirst: jest.fn(), create: jest.fn() } }
-// Для CoreService и его Redis-хелперов, мы будем мокать методы RedisService напрямую
 const mockRedisService = {
-	rGetNumber: jest.fn(),
-	rIncr: jest.fn(),
-	rDel: jest.fn(),
+	// Предоставляем полную реализацию мока для RedisService, чтобы избежать 'any'
+	getClient: jest.fn(),
+	get: jest.fn(),
+	set: jest.fn(),
+	del: jest.fn(),
+	expire: jest.fn(),
+	exists: jest.fn(),
+	ttl: jest.fn(),
+	incr: jest.fn(),
+	decr: jest.fn(),
+	incrWithExpire: jest.fn(),
+	setJSON: jest.fn(),
+	getJSON: jest.fn(),
+	keys: jest.fn(),
+	delPattern: jest.fn(),
+	setNX: jest.fn(),
+	getdel: jest.fn(),
+	sAdd: jest.fn(),
+	sRem: jest.fn(),
+	sIsMember: jest.fn(),
+	zAdd: jest.fn(),
+	zRemRangeByScore: jest.fn(),
+	zCard: jest.fn(),
+	zRange: jest.fn(),
 }
+
+const mockI18nService = { t: jest.fn((key: string): string => key) }
 
 const mockUser: User = {
 	id: 'user-id-123',
 	email: 'test@example.com',
-	// ... остальные поля
-} as User
+	fullName: 'Test User',
+	firstName: 'Test',
+	lastName: 'User',
+	phone: '+1234567890',
+	password: 'hashed-password',
+	avatar: null,
+	bio: null,
+	roles: [EUserRole.USER],
+	isEmailVerified: true,
+	emailVerifiedAt: new Date(),
+	isUnsubscribed: false,
+	emailBouncedAt: null,
+	isPhoneVerified: false,
+	phoneVerifiedAt: null,
+	phoneBouncedAt: null,
+	is2FAEnabled: false,
+	preferred2FAMethod: null,
+	require2FA: false,
+	lastLoginAt: new Date(),
+	lastLoginIp: '127.0.0.1',
+	passwordChangedAt: new Date(),
+	riskScore: 0,
+	lastRiskAssessAt: null,
+	deletedAt: null,
+	createdAt: new Date(),
+	updatedAt: new Date(),
+}
 
 describe('AccountLockService', () => {
 	let service: AccountLockService
+	let redisService: RedisService
 
 	beforeEach(async () => {
 		jest.clearAllMocks()
-		// Используем фейковые таймеры для контроля setTimeout
 		jest.useFakeTimers()
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -38,20 +86,14 @@ describe('AccountLockService', () => {
 				AccountLockService,
 				{ provide: SecurityEventService, useValue: mockSecurityEventService },
 				{ provide: NotificationService, useValue: mockNotificationService },
-				// CoreService зависимости
 				{ provide: PrismaService, useValue: mockPrismaService },
 				{ provide: RedisService, useValue: mockRedisService },
+				{ provide: I18nService, useValue: mockI18nService },
 			],
 		}).compile()
 
 		service = module.get<AccountLockService>(AccountLockService)
-
-		// Внедряем моки в CoreService-хелперы, которые использует AccountLockService
-		// Это более надежно, чем мокать сам CoreService
-		;(service as any).rGetNumber = mockRedisService.rGetNumber
-		;(service as any).rIncr = mockRedisService.rIncr
-		;(service as any).rDel = mockRedisService.rDel
-		;(service as any).prisma = mockPrismaService
+		redisService = module.get<RedisService>(RedisService)
 	})
 
 	afterEach(() => {
@@ -66,7 +108,18 @@ describe('AccountLockService', () => {
 		it('should return true if an active lock exists', async () => {
 			mockPrismaService.accountLock.findFirst.mockResolvedValue({
 				id: 'lock-1',
+				unlockedAt: null,
 				expiresAt: new Date(Date.now() + 100000),
+			})
+			const result = await service.isAccountLocked(mockUser.id)
+			expect(result).toBe(true)
+		})
+
+		it('should return true for a permanent lock (expiresAt is null)', async () => {
+			mockPrismaService.accountLock.findFirst.mockResolvedValue({
+				id: 'lock-perm',
+				unlockedAt: null,
+				expiresAt: null,
 			})
 			const result = await service.isAccountLocked(mockUser.id)
 			expect(result).toBe(true)
@@ -78,9 +131,13 @@ describe('AccountLockService', () => {
 			expect(result).toBe(false)
 		})
 
-		it('should return false if lock has expired', async () => {
-			// Чтобы тест был надежным, мы должны передать объект, который не пройдет проверку в Prisma
-			// Но так как мы мокаем, просто возвращаем null
+		it('should return false because the query itself filters out expired locks', async () => {
+			mockPrismaService.accountLock.findFirst.mockResolvedValue(null)
+			const result = await service.isAccountLocked(mockUser.id)
+			expect(result).toBe(false)
+		})
+
+		it('should return false if lock was manually unlocked (as query returns null)', async () => {
 			mockPrismaService.accountLock.findFirst.mockResolvedValue(null)
 			const result = await service.isAccountLocked(mockUser.id)
 			expect(result).toBe(false)
@@ -88,72 +145,77 @@ describe('AccountLockService', () => {
 	})
 
 	describe('clearFailedAttempts', () => {
-		it('should call rDel with the correct Redis key', async () => {
+		it('should call del with the correct Redis key', async () => {
+			const delSpy = jest.spyOn(redisService, 'del').mockResolvedValue(1)
 			await service.clearFailedAttempts(mockUser.id)
-			expect(mockRedisService.rDel).toHaveBeenCalledWith(`account-lock:attempts:${mockUser.id}`)
+			expect(delSpy).toHaveBeenCalledWith(`account-lock:attempts:${mockUser.id}`)
 		})
 	})
 
 	describe('incrementFailedAttempts', () => {
 		it('should just increment the counter if threshold is not reached', async () => {
-			mockRedisService.rGetNumber.mockResolvedValue(2)
-			mockRedisService.rIncr.mockResolvedValue(3)
+			jest.spyOn(redisService, 'get').mockResolvedValue('2')
+			const incrSpy = jest.spyOn(redisService, 'incr').mockResolvedValue(3)
 
 			await service.incrementFailedAttempts(mockUser, 'ip', 'ua', 'en')
 
-			expect(mockRedisService.rIncr).toHaveBeenCalledTimes(1)
+			expect(incrSpy).toHaveBeenCalledTimes(1)
 			expect(mockPrismaService.accountLock.create).not.toHaveBeenCalled()
 		})
 
 		it('should apply a progressive delay', async () => {
-			const delayConfig = PROGRESSIVE_DELAYS[0] // e.g., { attempts: 3, delayMs: 1000 }
-			mockRedisService.rGetNumber.mockResolvedValue(delayConfig.attempts - 1)
-			mockRedisService.rIncr.mockResolvedValue(delayConfig.attempts)
+			const delayConfig = PROGRESSIVE_DELAYS.find(d => d.attempts === 3)
+			if (!delayConfig) {
+				throw new Error('Test setup failed: Progressive delay config not found')
+			}
+
+			jest.spyOn(redisService, 'get').mockResolvedValue((delayConfig.attempts - 1).toString())
+			jest.spyOn(redisService, 'incr').mockResolvedValue(delayConfig.attempts)
 
 			const promise = service.incrementFailedAttempts(mockUser, 'ip', 'ua', 'en')
 
-			// Проверяем, что задержка была установлена
 			expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), delayConfig.delayMs)
 
-			// "Проматываем" время
 			await jest.runAllTimersAsync()
 			await promise
 		})
 
 		it('should lock the account when MAX_FAILED_ATTEMPTS is reached', async () => {
 			const maxAttempts = ACCOUNT_LOCK_CONFIG.MAX_FAILED_ATTEMPTS
-			mockRedisService.rGetNumber.mockResolvedValue(maxAttempts - 1)
-			mockRedisService.rIncr.mockResolvedValue(maxAttempts)
+			jest.spyOn(redisService, 'get').mockResolvedValue((maxAttempts - 1).toString())
+			jest.spyOn(redisService, 'incr').mockResolvedValue(maxAttempts)
+			const delSpy = jest.spyOn(redisService, 'del').mockResolvedValue(1)
 
-			await service.incrementFailedAttempts(mockUser, '1.2.3.4', 'Test-UA', 'en')
+			await service.incrementFailedAttempts(mockUser, '1.2.3.4', 'Test-UA-Lock', 'en')
 
-			// 1. Проверяем создание блокировки в БД
 			expect(mockPrismaService.accountLock.create).toHaveBeenCalledWith({
 				data: {
 					userId: mockUser.id,
-					reason: expect.any(String),
+					reason: `Exceeded ${maxAttempts} failed login attempts.`,
 					failedAttempts: maxAttempts,
 					expiresAt: expect.any(Date),
 					ip: '1.2.3.4',
-					userAgent: 'Test-UA',
+					userAgent: 'Test-UA-Lock',
 				},
 			})
-
-			// 2. Проверяем создание события безопасности
 			expect(mockSecurityEventService.create).toHaveBeenCalledWith({
 				userId: mockUser.id,
 				event: ESecurityEvent.ACCOUNT_LOCKED,
 				severity: ESecuritySeverity.CRITICAL,
 				ip: '1.2.3.4',
-				userAgent: 'Test-UA',
-				metadata: expect.any(Object),
+				userAgent: 'Test-UA-Lock',
+				metadata: {
+					reason: 'brute_force_protection',
+					failedAttempts: maxAttempts,
+					lockDuration: ACCOUNT_LOCK_CONFIG.LOCKOUT_DURATION_SECONDS,
+				},
 			})
+			expect(delSpy).toHaveBeenCalledWith(`account-lock:attempts:${mockUser.id}`)
+		})
 
-			// 3. Проверяем вызов уведомления (пока закомментирован в коде, но мок должен быть готов)
-			// expect(mockNotificationService.notifyAccountLocked).toHaveBeenCalledWith(mockUser, 'en');
-
-			// 4. Проверяем очистку счетчика в Redis
-			expect(mockRedisService.rDel).toHaveBeenCalledWith(`account-lock:attempts:${mockUser.id}`)
+		it('should handle Redis errors gracefully without crashing', async () => {
+			jest.spyOn(redisService, 'get').mockRejectedValue(new Error('Redis is down'))
+			await expect(service.incrementFailedAttempts(mockUser, '1.1.1.1', 'Test-UA', 'en')).resolves.not.toThrow()
 		})
 	})
 })

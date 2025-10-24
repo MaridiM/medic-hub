@@ -89,6 +89,8 @@
     - [Step 9.1: Add Unit Tests for RateLimitService](#step-91-add-unit-tests-for-ratelimitservice)
     - [Step 9.2: Finalize Test Type Safety for RateLimitService](#step-92-finalize-test-type-safety-for-ratelimitservice)
     - [Step 9.4: Final Linting Fix for RateLimitService Tests](#step-94-final-linting-fix-for-ratelimitservice-tests)
+  - [Module: Core Security Testing Initiative](#module-core-security-testing-initiative)
+    - [Step 1 (Testing): Setup Test Environment for AccountLockService](#step-1-testing-setup-test-environment-for-accountlockservice)
 
 ---
 
@@ -2377,6 +2379,7 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 - `src/modules/auth/account/account.service.spec.ts`
 
 ---
+
 ### Step 8: Add Unit Tests for AccountLockService
 
 📅 `2025-10-23`
@@ -2460,5 +2463,25 @@ t('intro', { app: 'MyApp', method: 'TOTP' })
 **Files Modified**
 
 - `src/modules/security/rate-limit/rate-limit.service.spec.ts`
+
+---
+
+## Module: Core Security Testing Initiative
+
+### Step 1 (Testing): Setup Test Environment for AccountLockService
+
+📅 `2025-10-24`
+
+**Added**
+
+- ✅ **Test File:** Created `account-lock.service.spec.ts` for the `AccountLockService` unit tests.
+- ✅ **Test Boilerplate:** Set up the initial test structure using NestJS's `Test.createTestingModule`.
+- ✅ **Dependency Mocks:** Implemented type-safe mocks for all external dependencies: `PrismaService`, `RedisService`, `SecurityEventService`, and `NotificationService`.
+- ✅ **DI Configuration:** Configured the testing module to correctly inject mocked providers.
+- ✅ **Sanity Check:** Added a basic `it('should be defined', ...)` test to ensure the service instance is created successfully.
+
+**Files Created**
+
+- `src/modules/security/account-lock/account-lock.service.spec.ts`
 
 ---
