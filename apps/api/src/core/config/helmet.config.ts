@@ -1,5 +1,7 @@
 import type { HelmetOptions } from 'helmet'
 
+const isDev = process.env.NODE_ENV !== 'production'
+
 /**
  * Helmet.js configuration for enhancing application security through HTTP headers.
  * This configuration sets up a strict Content Security Policy (CSP) and other
@@ -14,30 +16,36 @@ export const helmetConfig: HelmetOptions = {
 	 * This policy is strict by default and should be customized for your application's needs.
 	 */
 	contentSecurityPolicy: {
+		useDefaults: true,
 		directives: {
 			/** Default source for all content types */
 			defaultSrc: ["'self'"],
 
 			/** Defines valid sources for scripts */
-			scriptSrc: ["'self'", "'unsafe-inline'"], // 'unsafe-inline' is often needed for GraphQL Playground, remove for production if possible
+			scriptSrc: ["'self'", "'unsafe-inline'", ...(isDev ? ['https://cdn.jsdelivr.net'] : [])], // 'unsafe-inline' is often needed for GraphQL Playground, remove for production if possible
 
 			/** Defines valid sources for styles */
-			styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+			styleSrc: [
+				"'self'",
+				"'unsafe-inline'",
+				'https://fonts.googleapis.com',
+				...(isDev ? ['https://cdn.jsdelivr.net'] : []),
+			],
 
 			/** Defines valid sources for images */
-			imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'], // Allow self, data URIs, and Cloudinary
+			imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com', ...(isDev ? ['https://cdn.jsdelivr.net'] : [])], // Allow self, data URIs, and Cloudinary
 
 			/** Defines valid sources for fonts */
 			fontSrc: ["'self'", 'https://fonts.gstatic.com'],
 
 			/** Defines valid sources for frames */
-			frameSrc: ["'none'"], // Disallow framing by default
+			frameSrc: ["'self'"], // Disallow framing by default
 
 			/** Defines valid sources for workers and nested browsing contexts */
 			childSrc: ["'self'"],
 
 			/** Defines valid sources for connections (e.g., WebSockets, fetch) */
-			connectSrc: ["'self'"],
+			connectSrc: ["'self'", 'http://localhost:*'],
 
 			/** Defines valid sources for object, embed, and applet elements */
 			objectSrc: ["'none'"], // Disallow plugins like Flash

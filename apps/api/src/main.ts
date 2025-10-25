@@ -72,7 +72,7 @@ async function bootstrap() {
 	// ✅ Логируем успешный старт
 	const graphqlPath = config.get<string>('GRAPHQL_PREFIX') || 'graphql'
 	bootstrapLogger.log(`🚀 Application is running on: http://localhost:${port}`)
-	bootstrapLogger.log(`📊 GraphQL Playground available at: http://localhost:${port}/${graphqlPath}`)
+	bootstrapLogger.log(`📊 GraphQL Playground available at: http://localhost:${port}${graphqlPath}`)
 }
 
 const bootstrapLogger = new Logger('Bootstrap')
