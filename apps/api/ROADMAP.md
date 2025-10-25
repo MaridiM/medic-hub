@@ -1,6 +1,6 @@
-# Roadmap & Tasks - MedicHub Authentication System
+# **Roadmap & Tasks - MedicHub Authentication System**
 
-### Статусные группы
+### **Статусные группы**
 
 * 🔴 **HIGH** — критически важные задачи для первого стабильного релиза.
 * 🟠 **MEDIUM** — важные улучшения для повышения безопасности и удобства (Enterprise-уровень).
@@ -15,23 +15,29 @@
 
 ---
 
-## 📊 Progress Overview
+## 📊 **Progress Overview**
 
 ```
-Authentication Core:  ████████░░ 80%
-2FA System:          ███████░░░ 70%
-Security Features:   █████░░░░░ 50%
-Admin Tools:         ███░░░░░░░ 30%
-Documentation:       ███████░░░ 70%
-Testing Coverage:    ███░░░░░░░ 30%
-Infrastructure:      ██░░░░░░░░ 20%
+Authentication Core:  [████████████████░░░░] 80%
+2FA System:           [██████████████░░░░░░] 70%
+Security Features:    [██████████░░░░░░░░░░] 50%
+Admin Tools:          [██████░░░░░░░░░░░░░░] 30%
+Documentation:        [██████████████░░░░░░] 70%
+Testing Coverage:     [██████░░░░░░░░░░░░░░] 30%
+Infrastructure:       [████░░░░░░░░░░░░░░░░] 20%
 ```
 
 ---
 
-## 🔴 HIGH: Критически важные для запуска
+## **Module: Core & Access Control**
 
-### ✅ База RBAC (Role‑Based Access Control)
+🎯 **Цель:** *Создать надежный фундамент для аутентификации, управления сессиями и контроля доступа на основе ролей (RBAC). Обеспечить базовую безопасность аккаунтов и соответствие современным практикам управления пользователями.*
+
+## 🔴 **HIGH: Критически важные для запуска**
+
+🎯 **Цель:** *Заложить нерушимую основу системы: реализовать базовую аутентификацию, ролевую модель доступа (RBAC) и подготовить схему данных для всех будущих функций безопасности, обеспечив минимально жизнеспособный и безопасный продукт.*
+
+### ✅ **База RBAC (Role‑Based Access Control)**
 
 - ✅ **[Шаг 0.1]** Уточнение типизации сессии TypeScript
   - ✅ Создан `session.types.ts` с declaration merging для `express-session`
@@ -48,7 +54,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - ✅ Добавлена подробная документация по RBAC (`docs/rbac/`)
   - ✅ Интегрирован `RbacModule` в `AppModule`
 
-### ✅ Архитектура и фундамент модуля 2FA
+### ✅ **Архитектура и фундамент модуля 2FA**
 
 - ✅ **[Schema]** Модернизация Prisma‑схемы
   - ✅ Модель `AuthenticationMethod` для унифицированного хранения методов
@@ -75,14 +81,14 @@ Infrastructure:      ██░░░░░░░░ 20%
   - ✅ Гварды (`TwoFactorVerifiedGuard`, `@Require2FAVerification`)
 - ✅ **[Module]** Финализация `TwoFactorModule` с корректными зависимостями
 
-### ✅ Интеграция с системами безопасности
+### ✅ **Интеграция с системами безопасности**
 
 - ✅ Интегрирован `SecurityEventService` во все критические операции
 - ✅ Логирование при добавлении/удалении методов 2FA
 - ✅ Типы для метаданных событий (`ISecurityEventMetadata`, `IAdminActionMetadata`)
 - ✅ Исправлена логическая ошибка при регенерации резервных кодов
 
-### ✅ Исправления типизации и GraphQL Schema
+### ✅ **Исправления типизации и GraphQL Schema**
 
 - ✅ Устранены ошибки `TypeScript` и `ESLint` (`no-case-declarations`, `private` access).
 - ✅ Исправлены небезопасные аргументы, корректно применён `Prisma.JsonValue`
@@ -97,7 +103,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 - ✅ **[i18n]** Исправлены ошибки типов и структуры в файлах переводов (en/ru).
 - ✅ **[DI]** Исправлена ошибка `UnknownDependenciesException` путем корректной организации глобальных модулей.
 
-### ✅ Интеграция провайдеров уведомлений
+### ✅ **Интеграция провайдеров уведомлений**
 
 - ✅ **[MailService]** Добавлен `sendOtpCodeEmail` для отправки OTP
 - ✅ **[MailService]** Реализован `canSendEmail` для защиты репутации домена
@@ -106,7 +112,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 - ✅ `SmsService (Twilio)` подключён в `TwoFactorMethodService`
 - ✅ Адаптированы шаблоны писем и SMS
 
-### ✅ TOTP & OTP - Верификация
+### ✅ **TOTP & OTP - Верификация**
 
 - ✅ **[Шаг 7]** Реализована полноценная верификация 2FA кодов
     - ✅ `TwoFactorMethodService` дополнен методами `verifyTotpCode` и `verifyOneTimeCode`.
@@ -114,7 +120,7 @@ Infrastructure:      ██░░░░░░░░ 20%
     - ✅ **[Security]** Устранена уязвимость, при которой коды не проверялись (удален `TODO`).
     - ✅ **[Security]** Реализован механизм anti-replay для OTP кодов (удаление из Redis после использования).
 
-### ✅ Административный функционал
+### ✅ **Административный функционал**
 
 - ✅ **[Шаг 1]** Модуль администрирования 2FA
   - ✅ Создан `AdminTwoFactorResolver` с защитой `@Roles(SUPER_ADMIN)`
@@ -132,7 +138,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - ✅ Создан интерфейс `IAdminActionMetadata`
   - ✅ Обновлён union‑тип `TSecurityEventMetadata`
 
-### ✅ Автоматизация обслуживания (Cron Jobs)
+### ✅ **Автоматизация обслуживания (Cron Jobs)**
 
 - ✅ **[Шаг 2]** Реализация задач обслуживания
   - ✅ Создан `TwoFactorCronService` на `@nestjs/schedule`
@@ -151,7 +157,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - ✅ Устранено предупреждение ESLint о «плавающем» промисе
   - ✅ Добавлен метод `getCronJobsStatusSafe`
 
-### 🟡 Тестирование
+### 🟡 **Тестирование**
 
 - [ ]  **Юнит‑тесты (Jest):** созданы файлы `.spec.ts` для:
   - [ ] `mail.service.spec.ts`
@@ -177,7 +183,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - [ ] Выполнение cron‑задач
   - [ ] E2E-тест для отправки email-уведомлений (с MailHog).
 
-### [ ] Наблюдаемость и метрики
+### [ ] **Наблюдаемость и метрики**
 
 - [ ] Сбор метрик для cron‑задач
 - [ ] Health‑checks для сервисов 2FA
@@ -186,9 +192,11 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 ---
 
-## 🟠 MEDIUM: Важные улучшения (Enterprise)
+## 🟠 **MEDIUM: Важные улучшения (Enterprise)**
 
-### [ ] NotificationService для событий безопасности
+🎯 **Цель:** *Расширить функционал системы до Enterprise-уровня: добавить поддержку передовых стандартов аутентификации (WebAuthn), реализовать продвинутые сценарии безопасности (Step-up) и повысить отказоустойчивость и гибкость системы уведомлений.*
+
+### [ ] **NotificationService для событий безопасности**
 
 - ✅ **[Шаг 5 & 6]** Реализован `NotificationService` и его интеграция
   - ✅ **[Service]** Создан глобальный `NotificationModule`.
@@ -206,7 +214,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 - 🟡 **[Feature]** Заложена основа для SMS‑уведомлений (требуется реализация шаблонов).
 - [ ] **[Feature]** Реализовать управление предпочтениями уведомлений (UI + API).
 
-### ✅ Поддержка WebAuthn / Passkeys
+### ✅ **Поддержка WebAuthn / Passkeys**
 
 - ✅  **[Шаг 3]** WebAuthn/Passkeys Implementation
   - ✅ Установлена библиотека `@simplewebauthn/server`
@@ -234,7 +242,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - ✅ Исправлены типы для `@simplewebauthn/server` API
   - ✅ Добавлены константы WebAuthn в общий файл констант
 
-### [ ] Step‑up аутентификация
+### [ ] **Step‑up аутентификация**
 
 - [ ] Создать `StepUpVerificationService`
 - [ ] Расширить `TwoFactorVerifiedGuard` проверкой «свежести»
@@ -245,7 +253,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 - [ ] Подготовить спецификации UI
 - [ ] Маркировать «чувствительные» операции
 
-### [ ] Rate Limiting для 2FA
+### [ ] **Rate Limiting для 2FA**
 
 - [ ] Ограничение частоты отправки OTP
 - [ ] Прогрессивные задержки при неудачных попытках
@@ -254,7 +262,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 - [ ] Исключения для доверенных устройств
 - [ ] Конфигурирование лимитов
 
-### [ ] Восстановление 2FA (Recovery Flow)
+### [ ] **Восстановление 2FA (Recovery Flow)**
 
 - [ ] Создать сервис восстановления учётной записи
 - [ ] Реализовать поток верификации личности
@@ -265,9 +273,11 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 ---
 
-## 🟢 LOW: Продвинутые возможности и развитие
+## 🟢 **LOW: Продвинутые возможности и развитие**
 
-### ✅ Документация API
+🎯 **Цель:** *Исследовать и внедрить перспективные технологии и функции, которые повысят удобство использования, расширят административные возможности и обеспечат соответствие будущим стандартам безопасности и регуляторным требованиям.*
+
+### ✅ **Документация API**
 - ✅ **[Шаг 4]** GraphQL API Documentation
   - ✅ Создана полная документация всех queries и mutations
   - ✅ Документированы WebAuthn и админские операции
@@ -279,7 +289,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 - ✅ Расширенная документация для моделей и DTO
 - ✅ SimpleWebAuthn integration guide
 
-### [ ] Админ‑панель
+### [ ] **Админ‑панель**
 
 - [ ] UI для управления 2FA
 - [ ] Дашборд мониторинга cron‑задач
@@ -288,7 +298,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 - [ ] Экспорт данных
 - [ ] Виджеты аналитики
 
-### [ ] Расширенный риск‑скоринг
+### [ ] **Расширенный риск‑скоринг**
 
 - [ ] ML‑оценка рисков
 - [ ] Поведенческая аналитика
@@ -297,7 +307,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 - [ ] Интеграция IP‑репутации
 - [ ] Гео‑правила
 
-### [ ] Дополнительные методы аутентификации
+### [ ] **Дополнительные методы аутентификации**
 
 - [ ] Push‑уведомления как 2FA
 - [ ] Аппаратные токены (FIDO U2F)
@@ -306,14 +316,14 @@ Infrastructure:      ██░░░░░░░░ 20%
 - [ ] Magic‑links
 - [ ] Биометрическая аутентификация
 
-### [ ] Геофенсинг
+### [ ] **Геофенсинг**
 
 - [ ] Разрешённые/запрещённые страны в настройках пользователя
 - [ ] Проверка страны в `RiskCalculatorUtil`
 - [ ] Политики геофенсинга
 - [ ] Организационные правила геофенсинга
 
-### [ ] Соответствие требованиям (Compliance) и отчётность
+### [ ] **Соответствие требованиям (Compliance) и отчётность**
 
 - [ ] Инструменты соответствия GDPR
 - [ ] Формирование отчётов аудита
@@ -322,7 +332,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 - [ ] Экспорт регуляторной отчётности
 - [ ] Регламентированные отчёты
 
-### [ ] Оптимизация производительности
+### [ ] **Оптимизация производительности**
 
 - [ ] Redis‑кеширование методов 2FA
 - [ ] Оптимизация запросов БД
@@ -333,7 +343,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 ---
 
-## 🔵 Definition of Done (Критерии готовности)
+## 🔵 **Definition of Done (Критерии готовности)**
 
 - **Тесты:** покрытие юнит‑тестами затронутых сервисов ≥ 80%; интеграционные и E2E‑тесты закрывают ключевые сценарии и регрессии.
 - **Безопасность:** настроены rate‑limit, TTL/anti‑reuse для кодов; все чувствительные данные шифруются; все действия аудируются.
@@ -344,9 +354,21 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 ---
 
-## Account & Session Modules
+## **Account & Session Modules**
+*(Этот блок является частью модуля Core Authentication)*
 
-### 🔴 HIGH: Критически важные задачи
+### 📊 **Progress Overview**
+```
+Schema & Model:        [████████████████████] 100%
+Core Services:         [████████████████████] 100%
+Security Features:     [░░░░░░░░░░░░░░░░░░░░] 0%
+Medium Features:       [██░░░░░░░░░░░░░░░░░░] 10%
+Low Features:          [░░░░░░░░░░░░░░░░░░░░] 0%
+```
+
+### 🔴 **HIGH: Критически важные задачи**
+
+🎯 **Цель:** *Обеспечить базовый жизненный цикл аккаунта пользователя: создание, обновление основных полей безопасности и подготовку к миграции на новую унифицированную систему аутентификации.*
 
 - ✅ **[Schema]** Migrate User model to unified 2FA system (удалены `isTotpEnabled`, `totpSecret`, `isOtpEnabled`, `otpSecret`).
 - ✅ **[Model]** Update GraphQL User model with new Prisma fields
@@ -363,7 +385,9 @@ Infrastructure:      ██░░░░░░░░ 20%
 - [ ] **[Security]** Send email notification on password change
 - [ ] **[Security]** Implement rate limiting for login attempts (brute-force protection)
 
-### 🟠 MEDIUM: Важные улучшения
+### 🟠 **MEDIUM: Важные улучшения**
+
+🎯 **Цель:** *Повысить безопасность и удобство управления аккаунтом, добавив автоматические защитные механизмы, административные функции и улучшив взаимодействие с пользователем.*
 
 - 🟡 **[Security]** Add `riskScore` calculation logic based on login patterns (foundation laid)
 - [ ] **[Security]** Implement automatic account locking after N failed login attempts
@@ -376,7 +400,9 @@ Infrastructure:      ██░░░░░░░░ 20%
 - [ ] **[Email]** Implement email bounce handling (update `emailBouncedAt` on bounce)
 - [ ] **[SMS]** Implement SMS bounce handling (update `phoneBouncedAt` on delivery failure)
 
-### 🟢 LOW: Продвинутые возможности
+### 🟢 **LOW: Продвинутые возможности**
+
+🎯 **Цель:** *Внедрить продвинутые аналитические и security-функции, основанные на AI/ML, обеспечить полное соответствие GDPR и расширить способы входа для максимального удобства пользователя.*
 
 - [ ] **[Analytics]** Add user activity dashboard (login history, device list, security events)
 - [ ] **[Security]** Implement "Unusual Location" detection (flag logins from new countries)
@@ -390,7 +416,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 ---
 
-## Notes
+## **Notes**
 
 - 🎯 **Next Priority**: Prisma migration script + rate limiting + security event logging.
 - 📚 **Documentation**: Consider adding Swagger/OpenAPI docs for REST endpoints (if applicable).
@@ -398,9 +424,25 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 ---
 
-## 🔴 HIGH: Критически важные для запуска
+## **Module: Notifications**
 
-### ✅ Уведомления о событиях безопасности
+---
+
+### 📊 **Progress Overview**
+```
+Service & Integration: [████████████████████] 100%
+Email Templates:     [████████████████████] 100%
+SMS Support:         [██░░░░░░░░░░░░░░░░░░] 10%
+Advanced Features:   [░░░░░░░░░░░░░░░░░░░░] 0%
+Testing:             [░░░░░░░░░░░░░░░░░░░░] 0%
+```
+---
+
+## 🔴 **HIGH: Критически важные для запуска**
+
+🎯 **Цель:** *Создать и интегрировать полнофункциональный сервис уведомлений, который немедленно информирует пользователей по email обо всех критических событиях безопасности.*
+
+### ✅ **Уведомления о событиях безопасности**
 
 - ✅ **[Шаг 5]** NotificationService для событий безопасности
   - ✅ **[Service]** Создан глобальный `NotificationModule` с `@Global()`
@@ -420,7 +462,7 @@ Infrastructure:      ██░░░░░░░░ 20%
 - 🟡 **[Feature]** Заложена основа для SMS-уведомлений (требуется реализация шаблонов).
 - [ ] **[Feature]** Реализовать управление предпочтениями уведомлений (UI + API).
 
-### [ ] Тестирование (Unit)
+### [ ] **Тестирование (Unit)**
 
 - [ ] `notification.service.spec.ts`: Написать юнит-тесты для `NotificationService`.
   - [ ] Проверить логику rate-limiting и duplicate-detection.
@@ -428,22 +470,24 @@ Infrastructure:      ██░░░░░░░░ 20%
   - [ ] Замокать зависимости и проверить обработку ошибок (например, если `canSendEmail` возвращает `false`).
 - [ ] Расширить тесты для `2fa-method.service.ts`, `backup-code.service.ts`, и других, добавив `verify` для вызовов `notificationService` (`.toHaveBeenCalledWith(...)`).
 
-### [ ] Тестирование (Integration & E2E)
+### [ ] **Тестирование (Integration & E2E)**
 
 - [ ] Написать E2E тест, который триггерит отправку email (например, добавление 2FA метода) и проверяет результат через mock email-сервиса (например, MailHog/Mailtrap).
 - [ ] Написать интеграционный тест для `AdminTwoFactorService`, который проверяет, что при отключении 2FA отправляется корректное уведомление.
 
 ---
 
-## 🟠 MEDIUM: Важные улучшения
+## 🟠 **MEDIUM: Важные улучшения**
 
-### [ ] Расширение NotificationService
+🎯 **Цель:** *Повысить отказоустойчивость, производительность и гибкость системы уведомлений, добавив поддержку новых каналов и возможность пользовательской настройки.*
+
+### [ ] **Расширение NotificationService**
 
 - [ ] Реализовать поддержку **SMS-уведомлений**. Сейчас `NotificationService` вызывает `smsMethod`, но сами методы в `SmsService` для конкретных событий (например, `send2FAMethodAddedSms`) не реализованы.
 - [ ] Добавить **очередь (Bull/BullMQ)** для отправки уведомлений, чтобы не блокировать основной поток выполнения при задержках у email/SMS провайдеров.
 - [ ] Добавить поддержку **Push-уведомлений** как задел на будущее.
 
-### [ ] Управление предпочтениями уведомлений
+### [ ] **Управление предпочтениями уведомлений**
 
 - [ ] Добавить в Prisma-схему поле `notificationPreferences` (например, `Json`) для модели `User`.
 - [ ] Реализовать GraphQL API для управления предпочтениями (какие уведомления и по каким каналам получать).
@@ -451,22 +495,39 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 ---
 
-## 🟢 LOW: Продвинутые возможности
+## 🟢 **LOW: Продвинутые возможности**
 
-### [ ] Аналитика уведомлений
+🎯 **Цель:** *Внедрить инструменты для анализа и мониторинга системы уведомлений, чтобы оценивать их эффективность и вовлеченность пользователей.*
+
+### [ ] **Аналитика уведомлений**
 
 - [ ] Собирать метрики по доставке уведомлений (открытия, клики) с помощью webhooks от email-провайдера.
 - [ ] Создать дашборд в админ-панели для мониторинга статуса уведомлений.
 
 ---
 
-## Account & Recovery Modules
+## **Account & Recovery Modules**
 
 ---
 
-## 🔴 HIGH: Критически важные задачи безопасности
+### 📊 **Progress Overview**
+```
+Security Management:   [████████████████████] 100%
+Audit & Events:        [████████████████████] 100%
+Error Handling:        [████████████████████] 100%
+User Experience:       [████████████████████] 100%
+Security Enhancements: [██████████░░░░░░░░░░] 50%
+Testing:               [████████████████████] 100%
+Documentation:         [██████████░░░░░░░░░░] 50%
+```
 
-### Security & Session Management
+---
+
+## 🔴 **HIGH: Критически важные задачи безопасности**
+
+🎯 **Цель:** *Реализовать полный, безопасный и аудируемый жизненный цикл управления паролями, включая смену, сброс, уведомления и защиту от атак.*
+
+### **Security & Session Management**
 
 - ✅ **[Security] Инвалидация сессий при смене пароля** *(Completed in Step 2)*
   - ✅ Создать метод `invalidateUserSessions(userId, excludeSessionId?)` в `SessionService`
@@ -491,7 +552,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - ✅ Создать React Email шаблон `ResetPasswordTemplate` (сейчас используется заглушка)
   - ✅ Добавить метаданные запроса (IP, location, device) в email
 
-### Audit & Security Events
+### **Audit & Security Events**
 
 - ✅ **[Audit] Создать базовый SecurityEventService** *(Completed in Step 1)*
   - ✅ Создать сервис с методами create(), findByUser(), resolve()
@@ -511,7 +572,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - ✅ Записывать полные метаданные запроса
   - ✅ Установить severity = `MEDIUM/HIGH` для сброса
 
-### Error Handling & Resilience
+### **Error Handling & Resilience**
 
 - ✅ **[Resilience] Улучшить обработку ошибок в `resetPassword`** *(Completed in Step 3)*
   - ✅ Сделать отправку email non-blocking (не прерывать flow при ошибке mail-сервиса)
@@ -526,9 +587,11 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 ---
 
-## 🟠 MEDIUM: Важные улучшения
+## 🟠 **MEDIUM: Важные улучшения**
 
-### User Experience
+🎯 **Цель:** *Улучшить пользовательский опыт (UX) при взаимодействии с функциями безопасности и добавить дополнительные слои защиты, такие как проверка на скомпрометированные пароли.*
+
+### **User Experience**
 
 - ✅ **[UX] Улучшить содержимое email-уведомлений** *(Completed in Step 3)*
   - ✅ Добавить красивый HTML-шаблон с брендингом (React Email + Tailwind)
@@ -541,7 +604,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - [ ] Показывать пользователю уведомление "Вы вышли со всех устройств"
   - [ ] Добавить возможность повторного входа одним кликом
 
-### Security Enhancements
+### **Security Enhancements**
 
 - 🟡 **[Security] Анализ риска при смене пароля** *(Partially completed in Step 2)*
   - ✅ Вычислять riskScore на основе факторов (новое устройство, новая локация, частота смены)
@@ -553,7 +616,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - [ ] Отклонять установку скомпрометированных паролей
   - [ ] Добавить кастомную валидацию в DTO
 
-### Testing
+### **Testing**
 
 - ✅ **[Testing] Unit-тесты для SecurityEventService** *(Completed in Step 1)*
   - ✅ Протестировать create() с минимальными и полными данными
@@ -583,9 +646,11 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 ---
 
-## 🟢 LOW: Продвинутые возможности
+## 🟢 **LOW: Продвинутые возможности**
 
-### Advanced Security
+🎯 **Цель:** *Внедрить продвинутые, Enterprise-уровня политики безопасности, расширенные административные функции и дополнительные каналы уведомлений для максимальной защиты и гибкости.*
+
+### **Advanced Security**
 
 - [ ] **[Security] Multi-factor подтверждение смены пароля**
   - [ ] Требовать 2FA для смены пароля, если он включен
@@ -603,7 +668,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - [ ] Реализовать принудительную смену пароля через N дней
   - [ ] Добавить Admin API для управления политиками
 
-### Notifications & Monitoring
+### **Notifications & Monitoring**
 
 - [ ] **[Monitoring] Dashboard активности безопасности**
   - [ ] GraphQL Query для получения истории SecurityEvents
@@ -615,7 +680,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - [ ] Отправлять push на доверенные устройства при смене пароля
   - [ ] Добавить настройку предпочтений уведомлений
 
-### Admin Features
+### **Admin Features**
 
 - [ ] **[Admin] Принудительный сброс пароля администратором**
   - [ ] Создать мутацию `adminForcePasswordReset(userId)` для SUPER_ADMIN
@@ -628,7 +693,7 @@ Infrastructure:      ██░░░░░░░░ 20%
   - [ ] Создавать `AccountLock` с причиной "SUSPICIOUS_PASSWORD_RESET"
   - [ ] Требовать ручной разблокировки через support
 
-### Documentation
+### **Documentation**
 
 - 🟡 **[Docs] Создать `PASSWORD_MANAGEMENT.md`** *(In progress - Step 3)*
   - 🟡 Документировать архитектуру смены и сброса пароля (создается сейчас)
@@ -641,34 +706,34 @@ Infrastructure:      ██░░░░░░░░ 20%
   - [ ] Описать используемые алгоритмы хеширования (Argon2id)
   - [ ] Документировать защиту от атак (enumeration, brute-force)
 
-## 📈 Выполнено в Steps 1-4
+## 📈 **Выполнено в Steps 1-4**
 
-### Step 1: Security Event Service Foundation
+### **Step 1: Security Event Service Foundation**
 - ✅ Глобальный сервис аудита безопасности
 - ✅ Risk scoring система
 - ✅ Unit-тесты с 100% покрытием
 
-### Step 2: Session Invalidation & Password Change Enhancement
+### **Step 2: Session Invalidation & Password Change Enhancement**
 - ✅ Инвалидация сессий при смене пароля
 - ✅ SecurityEvent логирование для PASSWORD_CHANGED
 - ✅ Динамический risk assessment
 - ✅ Unit-тесты для AccountService и SessionService
 
-### Step 3: Email Notifications for Password Operations
+### **Step 3: Email Notifications for Password Operations**
 - ✅ React Email шаблоны (PasswordChanged, PasswordResetConfirmation)
 - ✅ SecurityEvent логирование для PASSWORD_RESET_REQUESTED/COMPLETED
 - ✅ Email enumeration protection
 - ✅ i18n для EN/RU
 - ✅ Non-blocking error handling
 
-### Step 4: Password Reset Template & Recovery Service Testing
+### **Step 4: Password Reset Template & Recovery Service Testing**
 - ✅ React Email шаблон для password reset запросов
 - ✅ Полное покрытие RecoveryService unit-тестами (8 тестов)
 - ✅ Тесты для email enumeration protection
 - ✅ Тесты для token validation
 ---
 
-## 🎯 Следующие приоритеты
+## 🎯 **Следующие приоритеты**
 
 1. **Step 5**: E2E тесты для полного password flow
 2. **Step 6**: Rate limiting для password reset endpoint
@@ -678,154 +743,136 @@ Infrastructure:      ██░░░░░░░░ 20%
 
 ---
 
-*Последнее обновление: 2025-01-27 (Step 4 completed)*
-
-
-Понял. Я полностью переработаю TODO-список в формате детального Roadmap, как вы показали. Это отличный способ визуализировать прогресс и зависимости.
+# **Module: Rate Limiting & Security Hardening Module**
 
 ---
 
-# Module: Rate Limiting & Security Hardening Module
-
----
-
-## 📊 Progress Overview
+## 📊 **Progress Overview**
 
 ```
-Rate Limiting Core: ██████████ 100%
-Account Lockout:    [                    ] 0%
-Security Headers:   [                    ] 0%
-Brute-Force Guard:  █████░░░░░ 50%
-Documentation:      [                    ] 0%
-Testing Coverage:   [                    ] 0%
+Rate Limiting Core: [████████████████████] 100%
+Account Lockout:    [████████████████████] 100%
+Security Headers:   [████████████████████] 100%
+Brute-Force Guard:  [██████████░░░░░░░░░░] 50%
+Documentation:      [░░░░░░░░░░░░░░░░░░░░] 0%
+Testing Coverage:   [░░░░░░░░░░░░░░░░░░░░] 0%
 ```
 
 ---
 
-## Module: Rate Limiting & Security Hardening Module
+## 🔴 **HIGH: Критически важные для запуска**
 
----
+🎯 **Цель:** *Реализовать основные механизмы активной защиты от атак перебора и других автоматизированных угроз, обеспечив базовую отказоустойчивость системы при попытках компрометации.*
 
-## 📊 Progress Overview
+### ✅ **Step 1: Rate Limiting Module Foundation**
 
-```
-Rate Limiting Core: ██████████ 100%
-Account Lockout:    ██████████ 100%
-Security Headers:   ██████████ 100%
-Brute-Force Guard:  [█████░░░░░] 50%
-Documentation:      [                    ] 0%
-Testing Coverage:   [                    ] 0%
-```
-
----
-
-## 🔴 HIGH: Критически важные для запуска
-
-### ✅ Step 1: Rate Limiting Module Foundation
-
-- ✅ **[Module] Создать глобальный `RateLimitModule`**
+- ✅ **[Module]** Создать глобальный `RateLimitModule`
   - ✅ Определить `RateLimitService` и `RateLimitGuard` как провайдеры.
   - ✅ Экспортировать сервисы для доступности в других модулях.
-- ✅ **[Service] Реализовать `RateLimitService` на базе Redis**
+- ✅ **[Service]** Реализовать `RateLimitService` на базе Redis
   - ✅ Реализовать метод `consume()` с алгоритмом *sliding window* (Redis `ZSET`).
   - ✅ Реализовать методы для управления белыми/черными списками (`isWhitelisted`, `isBlacklisted`, `addToWhitelist`, `addToBlacklist`).
-- ✅ **[Guard] Реализовать `RateLimitGuard` как глобальный `APP_GUARD`**
+- ✅ **[Guard]** Реализовать `RateLimitGuard` как глобальный `APP_GUARD`
   - ✅ Определять ключ для ограничения (IP-адрес или `userId`).
   - ✅ Проверять белые/черные списки перед применением лимитов.
   - ✅ Обрабатывать исключение `ThrottlerException` (HTTP 429) при превышении лимита.
-- ✅ **[Decorators] Создать декораторы для гибкой настройки**
+- ✅ **[Decorators]** Создать декораторы для гибкой настройки
   - ✅ `@RateLimit(options)` для переопределения глобальных лимитов.
   - ✅ `@SkipRateLimit()` для исключения эндпоинтов из проверки.
-- ✅ **[Integration] Интегрировать модуль в ядро приложения**
+- ✅ **[Integration]** Интегрировать модуль в ядро приложения
   - ✅ Импортировать `RateLimitModule` в `CoreModule`.
   - ✅ Зарегистрировать `RateLimitGuard` как глобальный `APP_GUARD`.
-- ✅ **[Config] Вынести глобальные лимиты в `.env`**
+- ✅ **[Config]** Вынести глобальные лимиты в `.env`
   - ✅ `RATE_LIMIT_POINTS` и `RATE_LIMIT_DURATION` добавлены в `.env.example`.
 
-### ✅ Step 2: Account Lockout & Progressive Delays
+### ✅ **Step 2: Account Lockout & Progressive Delays**
 
-- ✅ **[Module] Создать `AccountLockModule`**
+- ✅ **[Module]** Создать `AccountLockModule`
   - ✅ Создать `src/modules/security/account-lock/account-lock.module.ts`.
   - ✅ Провайдить и экспортировать `AccountLockService`.
-- ✅ **[Service] Реализовать `AccountLockService`**
+- ✅ **[Service]** Реализовать `AccountLockService`
   - ✅ Создать `src/modules/security/account-lock/account-lock.service.ts`.
   - ✅ Реализовать метод `isAccountLocked(userId)` для проверки статуса блокировки в БД.
   - ✅ Реализовать `incrementFailedAttempts(userId, ip, userAgent)` для инкремента счетчика в Redis и применения прогрессивных задержек.
   - ✅ Реализовать `lockAccount(...)` для создания записи `AccountLock` в Prisma, логирования события и отправки уведомления.
   - ✅ Реализовать `clearFailedAttempts(userId)` для сброса счетчика при успехе.
-- ✅ **[Integration] Интегрировать сервис в `SessionService`**
+- ✅ **[Integration]** Интегрировать сервис в `SessionService`
   - ✅ Внедрить `AccountLockService` в `SessionService`.
   - ✅ Модифицировать метод `login()` для вызова `isAccountLocked`, `incrementFailedAttempts` и `clearFailedAttempts`.
-- ✅ **[Constants] Определить конфигурационные константы**
+- ✅ **[Constants]** Определить конфигурационные константы
   - ✅ `MAX_FAILED_ATTEMPTS` (порог блокировки).
   - ✅ `LOCKOUT_DURATION_SECONDS` (длительность блокировки).
   - ✅ `PROGRESSIVE_DELAYS` (массив с порогами и задержками).
 
-### ✅ Step 4: Brute-Force Protection Integration
+### ✅ **Step 4: Brute-Force Protection Integration**
 
-- ✅ **[Integration] Применить декоратор `@RateLimit()` к критическим эндпоинтам**
+- ✅ **[Integration]** Применить декоратор `@RateLimit()` к критическим эндпоинтам
   - ✅ `SessionResolver.login` (5 попыток / 15 минут).
   - ✅ `RecoveryResolver.resetPassword` (3 попытки / 1 час).
   - ✅ `TwoFactorResolver.verify2FA` (5 попыток / 5 минут).
   - ✅ `AccountResolver.changePassword` (5 попыток / 1 час).
   - ✅ `VerificationResolver.verificationEmail` (5 попыток / 1 час).
-- ✅ **[Audit] Логировать событие `BRUTE_FORCE_DETECTED`**
+- ✅ **[Audit]** Логировать событие `BRUTE_FORCE_DETECTED`
   - ✅ `RateLimitGuard` теперь логирует событие при превышении лимита.
 
 ---
 
-## 🟠 MEDIUM: Важные улучшения (Enterprise)
+## 🟠 **MEDIUM: Важные улучшения (Enterprise)**
 
-### ✅ Step 3: Security Headers Middleware
+🎯 **Цель:** *Укрепить периметр безопасности приложения, защитив его от распространенных веб-уязвимостей и предоставив администраторам инструменты для гибкого управления политиками доступа.*
 
-- ✅ **[Config] Создать конфигурационный файл для `helmet`**
+### ✅ **Step 3: Security Headers Middleware**
+
+- ✅ **[Config]** Создать конфигурационный файл для `helmet`
   - ✅ Создать `src/modules/security/config/helmet.config.ts`.
   - ✅ Настроить строгую, но рабочую `Content-Security-Policy` (CSP).
   - ✅ Включить HSTS, `nosniff`, `deny`, и `xssFilter`.
-- ✅ **[Integration] Интегрировать `helmet` в `main.ts`**
+- ✅ **[Integration]** Интегрировать `helmet` в `main.ts`
   - ✅ Добавить `app.use(helmet(helmetConfig))` в `bootstrap()`.
 
-### [ ] Расширение Rate Limiting
+### [ ] **Расширение Rate Limiting**
 
-- [ ] **[Whitelist/Blacklist] Добавить API для управления списками**
+- [ ] **[Whitelist/Blacklist]** Добавить API для управления списками
   - [ ] Создать GraphQL-мутации (`adminAddToWhitelist`, `adminRemoveFromBlacklist`) для `SUPER_ADMIN`.
-- [ ] **[Metrics] Реализовать сбор метрик**
+- [ ] **[Metrics]** Реализовать сбор метрик
   - [ ] Создать метод в `RateLimitService` для сбора статистики по заблокированным запросам (например, `getRateLimitStats`).
   - [ ] Хранить счетчики в Redis `HASH` для агрегации.
 
 ---
 
-## 🟢 LOW: Продвинутые возможности и развитие
+## 🟢 **LOW: Продвинутые возможности и развитие**
 
-### [ ] Динамические лимиты и адаптивная защита
+🎯 **Цель:** *Внедрить интеллектуальные и адаптивные механизмы защиты, которые могут динамически реагировать на изменяющийся уровень угрозы.*
 
-- [ ] **[Feature] Реализовать адаптивное ужесточение лимитов**
+### [ ] **Динамические лимиты и адаптивная защита**
+
+- [ ] **[Feature]** Реализовать адаптивное ужесточение лимитов
   - [ ] Создать механизм, который отслеживает IP-адреса с высокой частотой ошибок и временно понижает для них `points`.
-- [ ] **[Feature] Интегрировать с `RiskCalculatorUtil`**
+- [ ] **[Feature]** Интегрировать с `RiskCalculatorUtil`
   - [ ] Модифицировать `RateLimitGuard`, чтобы лимиты `points` и `duration` могли зависеть от `riskScore` пользователя.
 
-### [ ] Тестирование
+### [ ] **Тестирование**
 
-- [ ] **[Unit Tests] Написать юнит-тесты для новых сервисов**
+- [ ] **[Unit Tests]** Написать юнит-тесты для новых сервисов
   - [ ] `rate-limit.service.spec.ts`: проверить логику sliding window, граничные случаи и обработку ошибок.
   - [ ] `account-lock.service.spec.ts`: проверить логику блокировок, прогрессивных задержек и взаимодействия с Redis/Prisma.
-- [ ] **[Integration Tests] Написать интеграционные тесты для Guard**
+- [ ] **[Integration Tests]** Написать интеграционные тесты для Guard
   - [ ] `rate-limit.guard.spec.ts`: проверить, как Guard читает метаданные с декораторов и применяет разные лимиты.
-- [ ] **[E2E Tests] Написать сквозные тесты**
+- [ ] **[E2E Tests]** Написать сквозные тесты
   - [ ] Симулировать атаку перебора на `login` и проверить, что сначала срабатывает Rate Limiter (HTTP 429), а затем Account Lockout (HTTP 403).
 
-### [ ] Документация
+### [ ] **Документация**
 
-- [ ] **[Docs] Создать `docs/security/RATE_LIMITING.md`**
+- [ ] **[Docs]** Создать `docs/security/RATE_LIMITING.md`
   - [ ] Описать архитектуру, конфигурацию и использование модуля.
-- [ ] **[Docs] Создать `docs/security/ACCOUNT_LOCKOUT.md`**
+- [ ] **[Docs]** Создать `docs/security/ACCOUNT_LOCKOUT.md`
   - [ ] Описать механизм блокировки, его триггеры и способы разблокировки.
-- [ ] **[Docs] Обновить `CHANGELOG.md`**
+- [ ] **[Docs]** Обновить `CHANGELOG.md`
   - [ ] Добавить запись для каждого завершенного шага.
 
 ---
 
-## 🔵 Definition of Done (Критерии готовности)
+## 🔵 **Definition of Done (Критерии готовности)**
 
 - **Тесты:** Покрытие юнит-тестами новых сервисов ≥ 80%; интеграционные и E2E-тесты закрывают сценарии brute-force и блокировки.
 - **Безопасность:** Все критические эндпоинты защищены; все блокировки и превышения лимитов логируются в `SecurityEvent`.
@@ -836,104 +883,89 @@ Testing Coverage:   [                    ] 0%
 
 ---
 
-Отлично! Вот план по рефакторингу и улучшению архитектуры, оформленный в виде детализированного Roadmap/TODO-списка, как вы просили.
+# **Module: Architecture Refactoring & Improvement**
 
 ---
 
-# Module: Architecture Refactoring & Improvement
-
----
-
-## 📊 Progress Overview
+## 📊 **Progress Overview**
 
 ```
 Security Module Centralization:  [████████████████████] 100%
-Core Infrastructure Refactoring: [                    ] 0%
-Domain Events Implementation:    [                    ] 0%
+Core Infrastructure Refactoring: [████████████████████] 100%
+Domain Events Implementation:    [░░░░░░░░░░░░░░░░░░░░] 0%
 ```
 ---
 
-## 🔴 HIGH: Централизация модуля безопасности
+## 🔴 **HIGH: Централизация модуля безопасности**
 
 **Цель:** Объединить всю логику активной защиты (rate limiting, account locking) в едином, интуитивно понятном `SecurityModule`.
 
-### ✅Step 1: Centralize Security Features
+### ✅**Step 1: Centralize Security Features**
 
-- ✅ **[Refactor] Переместить модуль `rate-limit`**
+🎯 **Цель:** *Объединить всю логику активной защиты в едином, интуитивно понятном `SecurityModule` для упрощения поддержки и расширения.*
+
+- ✅ **[Refactor]** Переместить модуль `rate-limit`
   - ✅ Переместить директорию `src/modules/rate-limit` в `src/modules/security/rate-limit`.
   - ✅Обновить все пути импорта, ссылающиеся на `modules/rate-limit` (например, в резолверах и `CoreModule`).
-- ✅ **[Module] Создать и настроить `SecurityModule`**
+- ✅ **[Module]** Создать и настроить `SecurityModule`
   - ✅ Создать файл `src/modules/security/security.module.ts`.
   - ✅ В `SecurityModule` импортировать `RateLimitModule` и `AccountLockModule`.
   - ✅ Сделать `SecurityModule` глобальным (`@Global()`).
   - ✅ Экспортировать `RateLimitModule` и `AccountLockModule`, чтобы их сервисы (`RateLimitService`, `AccountLockService`) были доступны для DI в других модулях.
-- ✅ **[Integration] Обновить `CoreModule`**
+- ✅ **[Integration]** Обновить `CoreModule`
   - ✅ Удалить `RateLimitModule` из `imports` в `src/core/core.module.ts`.
   - ✅ Добавить `SecurityModule` в `imports` в `src/core/core.module.ts`.
-- ✅ **[Cleanup] Обновить `index` файлы**
+- ✅ **[Cleanup]** Обновить `index` файлы
   - ✅ Убедиться, что `src/modules/security/index.ts` корректно экспортирует все необходимые компоненты.
 
 ---
 
-## 🟠 MEDIUM: Реструктуризация инфраструктурных адаптеров
+## 🟠 **MEDIUM: Реструктуризация инфраструктурных адаптеров**
 
 **Цель:** Четко отделить инфраструктурный слой (адаптеры к внешним сервисам) от бизнес-логики, переместив `mail` и `sms` в `core`.
 
-### [ ] Step 2: Refactor Core Adapters
+### ✅ **Step 2.1 (Revised): Consolidate Communication Adapters**
 
-- ✅ **[Refactor] Переместить модуль `mail`**
-  - ✅ Переместить директорию `src/modules/libs/mail` в `src/core/mail`.
-  - ✅ Обновить пути импорта `MailModule` и `MailService` во всем приложении (особенно в `CoreModule` и `NotificationService`).
-- ✅ **[Refactor] Переместить модуль `sms`**
-  - ✅ Переместить директорию `src/modules/libs/sms` в `src/core/sms`.
-  - ✅ Обновить пути импорта `SmsModule` и `SmsService` во всем приложении.
-- ✅ **[Cleanup] Удалить директорию `src/modules/libs`**
-  - ✅ После перемещения всех модулей, директория `libs` должна стать пустой и ее можно удалить.
-- ✅ **[Docs] Обновить проектную документацию**
-  - ✅ Обновить файл `backend.md` или аналогичный, чтобы отразить новую структуру `core`.
-
-### ✅ Step 2.1 (Revised): Consolidate Communication Adapters
-
--   ✅ **[Module] Создать `CommunicationModule`**
+-   ✅ **[Module]** Создать `CommunicationModule`
     -   ✅ Создать директорию `src/core/communication`.
     -   ✅ Создать главный `CommunicationModule`, импортирующий `MailModule` и `SmsModule`.
--   ✅ **[Refactor] Переместить `mail` и `sms` модули**
+-   ✅ **[Refactor]** Переместить `mail` и `sms` модули
     -   ✅ Переместить `src/modules/libs/mail` в `src/core/communication/mail`.
     -   ✅ Переместить `src/modules/libs/sms` в `src/core/communication/sms`.
     -   ✅ Обновить все пути импорта в проекте.
--   ✅ **[Integration] Обновить `CoreModule`**
+-   ✅ **[Integration]** Обновить `CoreModule`
     -   ✅ Заменить импорты `MailModule` и `SmsModule` на единый `CommunicationModule`.
--   ✅ **[Cleanup] Удалить директорию `src/modules/libs`**.
+-   ✅ **[Cleanup]** Удалить директорию `src/modules/libs`.
 
 ---
 
-## 🟢 LOW / ADVANCED: Внедрение Domain Events
+## 🟢 **LOW / ADVANCED: Внедрение Domain Events**
 
 **Цель:** Уменьшить прямую связанность между сервисами, заменив прямые вызовы на систему событий и слушателей для улучшения расширяемости.
 
-### [ ] Step 3: Implement Domain Events Pattern
+### [ ] **Step 3: Implement Domain Events Pattern**
 
-- [ ] **[Infra] Настроить `EventEmitterModule`**
+- [ ] **[Infra]** Настроить `EventEmitterModule`
   - [ ] Добавить зависимость `@nestjs/event-emitter`.
   - [ ] Импортировать `EventEmitterModule.forRoot()` в `CoreModule`.
-- [ ] **[Core] Определить доменные события**
+- [ ] **[Core]** Определить доменные события
   - [ ] Создать файл `src/shared/events/domain-events.constants.ts` с перечислением всех событий (e.g., `user.password_changed`, `security.account_locked`).
   - [ ] Создать файл `src/shared/events/domain-events.types.ts` с интерфейсами `payload` для каждого события (e.g., `UserPasswordChangedPayload`).
-- [ ] **[Refactor] Модифицировать сервисы-источники для "излучения" событий**
+- [ ] **[Refactor]** Модифицировать сервисы-источники для "излучения" событий
   - [ ] Внедрить `EventEmitter2` в сервисы (`AccountService`, `TwoFactorMethodService` и т.д.).
   - [ ] Заменить прямые вызовы `securityEventService.create()` и `notificationService.notify...()` на `this.eventEmitter.emit('event.name', payload)`.
-- [ ] **[Refactor] Реализовать слушателей событий (Listeners)**
+- [ ] **[Refactor]** Реализовать слушателей событий (Listeners)
   - [ ] В `SecurityEventService` создать методы, декорированные `@OnEvent('event.name')`, которые будут принимать `payload` и вызывать `this.create()`.
   - [ ] В `NotificationService` создать методы, декорированные `@OnEvent('event.name')`, которые будут вызывать соответствующие методы `notify...()`.
-- [ ] **[Testing] Обновить юнит-тесты**
+- [ ] **[Testing]** Обновить юнит-тесты
   - [ ] Тесты для сервисов-источников теперь должны проверять, что `eventEmitter.emit` был вызван с правильными параметрами (`jest.spyOn(...)`).
   - [ ] Написать новые тесты для слушателей, чтобы проверить, что они корректно реагируют на события.
 
 ---
 
-# Module: Core Security Testing Initiative
+# **Module: Core Security Testing Initiative**
 
-## 📊 Progress Overview
+## 📊 **Progress Overview**
 
 ```
 Test Environment Setup: [████████████████████] 100% ✅ Complete
@@ -944,9 +976,11 @@ Documentation & CI:     [██████████████████�
 
 ---
 
-## 🔴 HIGH: Критически важные для стабилизации
+## 🔴 **HIGH: Критически важные для стабилизации**
 
-### ✅ Step 1: Test Environment & Mocks Setup
+🎯 **Цель:** *Добиться 100% покрытия тестами критически важного сервиса `AccountLockService`, чтобы гарантировать его надежность и корректную работу во всех пограничных случаях.*
+
+### ✅ **Step 1: Test Environment & Mocks Setup**
 
 - ✅ **[Test File]** Создать файл `src/modules/security/account-lock/account-lock.service.spec.ts`.
 - ✅ **[Boilerplate]** Настроить базовую структуру теста с использованием `Test.createTestingModule` из `@nestjs/testing`.
@@ -958,7 +992,7 @@ Documentation & CI:     [██████████████████�
 - ✅ **[DI]** Сконфигурировать `Test.createTestingModule` для инъекции моков вместо реальных сервисов.
 - ✅ **[Sanity Check]** Написать первый простой тест `it('should be defined', ...)` и убедиться, что он проходит.
 
-### ✅ Step 2: Unit Testing Core Logic
+### ✅ **Step 2: Unit Testing Core Logic**
 
 - ✅ **[Test Suite]** Написать `describe('isAccountLocked', ...)`:
     - ✅ `it('should return true if an active lock exists')`
@@ -978,7 +1012,7 @@ Documentation & CI:     [██████████████████�
     - ✅ `it('should handle Redis errors gracefully without crashing')`
 - ✅ **[TypeScript]** Исправить все ошибки типизации и линтинга.
 
-### ✅ Step 3: Finalization & Integration
+### ✅ **Step 3: Finalization & Integration**
 
 - ✅ **[CI]** Запустить тесты с флагом `--coverage` и убедиться, что покрытие для `account-lock.service.ts` **≥ 80%**.
 - ✅ **[Refactoring]** Провести ревью написанных тестов на предмет читаемости и эффективности.
@@ -986,7 +1020,7 @@ Documentation & CI:     [██████████████████�
 
 ---
 
-## 🔵 Definition of Done (Критерии готовности для этой задачи)
+## 🔵 **Definition of Done (Критерии готовности для этой задачи)**
 
 - ✅ **Тесты:** Покрытие юнит-тестами для `AccountLockService` составляет >90%. Все пограничные случаи проверены.
 - ✅ **Код:** Отсутствуют `TODO`, `any`, ошибки линтера в тестовом файле.
@@ -995,27 +1029,29 @@ Documentation & CI:     [██████████████████�
 
 ---
 
-# Module: Code Quality & Security Hardening
+# **Module: Code Quality & Security Hardening**
 
 ---
 
-## 📊 Progress Overview
+## 📊 **Progress Overview**
 
 ```
-Security Hardening:     [████████████████████] 100% ✅ Step 1 Complete
-Service Refactoring:    [████████████████████] 100% ✅ Step 2 Complete
-                        [████████████████████] 100% ✅ Step 3 Complete
-Template Architecture:  [████████████████████] 100% ✅ Step 4 Complete
-Type System Cleanup:    [████████████████████] 100% ✅ Step 5 Complete
-Error Handling:         [████████████████████] 100% ✅ Step 6 Complete
-Testing Coverage:       [████████████░░░░░░░░] 60%  ✅ Greatly Improved
+Security Hardening:   [████████████████████] 100% ✅ Step 1 Complete
+Service Refactoring:  [████████████████████] 100% ✅ Step 2 Complete
+Risk Logic Refactor:  [████████████████████] 100% ✅ Step 3 Complete
+Template Architecture:[████████████████████] 100% ✅ Step 4 Complete
+Type System Cleanup:  [████████████████████] 100% ✅ Step 5 Complete
+Error Handling:       [████████████████████] 100% ✅ Step 6 Complete
+Testing Coverage:     [████████████░░░░░░░░] 60%  ✅ Greatly Improved
 ```
 
 ---
 
-## 🔴 HIGH: Критическая безопасность
+## 🔴 **HIGH: Критическая безопасность**
 
-### ✅ Step 1: Encryption Verification & Implementation for 2FA Secrets
+🎯 **Цель:** *Устранить критические уязвимости и "запахи" в коде, гарантировав, что все чувствительные данные шифруются, а базовые операции безопасны.*
+
+### ✅ **Step 1: Encryption Verification & Implementation for 2FA Secrets**
 
 **Цель:** Гарантировать, что все чувствительные данные 2FA (TOTP-секреты, WebAuthn public keys) всегда шифруются перед записью в БД и расшифровываются при чтении.
 
@@ -1049,9 +1085,11 @@ Testing Coverage:       [████████████░░░░░░�
 
 ---
 
-## 🟠 MEDIUM: Рефакторинг и производительность
+## 🟠 **MEDIUM: Рефакторинг и производительность**
 
-### [ ] Step 2: Consolidate OTP Sending Logic in VerificationService
+🎯 **Цель:** *Улучшить поддерживаемость и консистентность кодовой базы путем устранения дублирования кода и централизации общей логики.*
+
+### ✅ **Step 2: Consolidate OTP Sending Logic in VerificationService**
 
 **Цель:** Устранить дублирование кода, объединив три похожих метода отправки токенов (`sendEmailVerificationToken`, `sendEmailVerificationOtpToken`, `sendSmsVerificationOtpToken`) в один универсальный приватный метод.
 
@@ -1069,7 +1107,7 @@ Testing Coverage:       [████████████░░░░░░�
 - [ ] **[Metrics]** Измерить улучшение
   - [ ] Количество удаленных строк дублированного кода
 
-### ✅ Step 3: Centralize Risk Score Calculation Logic
+### ✅ **Step 3: Centralize Risk Score Calculation Logic**
 
 **Цель:** Вынести логику расчета `riskScore` из `AccountService.changePassword` в `RiskCalculatorUtil` для обеспечения консистентности оценок во всей системе.
 
@@ -1094,7 +1132,7 @@ Testing Coverage:       [████████████░░░░░░�
   - [ ] Email change risk assessment
   - [ ] Login risk assessment
 
-### ✅ Step 4: Refactor Email Template URL Handling
+### ✅ **Step 4: Refactor Email Template URL Handling**
 
 **Цель:** Убрать хардкод `process.env.CLIENT_URL` из React Email шаблонов, передавая URL как пропсы из `MailService`.
 
@@ -1120,43 +1158,30 @@ Testing Coverage:       [████████████░░░░░░�
 
 ---
 
-## 🟢 LOW: Code Style & Clarity
+## 🟢 **LOW: Code Style & Clarity**
 
-### ✅ Step 5: Unify SessionMetadata Type Naming
+🎯 **Цель:** *Повысить читаемость и чистоту кода, исправив мелкие недочеты в именовании и логировании.*
+
+### ✅ **Step 5: Unify SessionMetadata Type Naming**
 
 **Цель:** Устранить путаницу между `ISessionMetadata` (shared/types) и `SessionMetadata` (GraphQL модель) путем унификации или четкого разделения назначения.
 
 - ✅ **[Analysis]** Проанализировать использование обоих типов
-  - ✅ Найти все места использования `ISessionMetadata`
-  - ✅ Найти все места использования `SessionMetadata` (GraphQL)
-  - ✅ Проверить структурную идентичность
-- ✅ **[Decision]** Выбрать стратегию
-  - ✅ **Вариант B:** Разделение с переименованием (`ISessionMetadataDTO` vs `SessionMetadataGraphQL`)
+- ✅ **[Decision]** Выбрать стратегию разделения с переименованием (`ISessionMetadataDTO` vs `SessionMetadataGraphQL`)
 - ✅ **[Refactor]** Применить выбранную стратегию
-  - ✅ Переименовать типы
-  - ✅ Обновить все импорты в проекте
-  - ✅ Обновить экспорты в `index.ts` файлах
 - ✅ **[Documentation]** Добавить JSDoc-комментарии
-  - ✅ Разъяснить назначение каждого типа
-  - ✅ Указать, где какой тип должен использоваться
 
-### ✅ Step 6: Improve Error Handling in Bootstrap
+### ✅ **Step 6: Improve Error Handling in Bootstrap**
 
 **Цель:** Заменить `console.error` в `main.ts` на полноценный `Logger` для консистентности логирования.
 
-- ✅ **[Fix]** Обновить обработку ошибок в `bootstrap()`
-  - ✅ Создать `bootstrapLogger = new Logger('Bootstrap')`
-  - ✅ Заменить `console.error` на `bootstrapLogger.error`
-  - ✅ Логировать stack trace корректно
-- ✅ **[Enhancement]** Добавить логирование успешного старта
-  - ✅ Логировать URL приложения после `app.listen()`
-  - ✅ Логировать URL GraphQL Playground
-- ✅ **[Graceful Shutdown]** Добавить обработку сигналов
-  - ✅ Включить `app.enableShutdownHooks()`
+- ✅ **[Fix]** Обновить обработку ошибок в `bootstrap()` с `new Logger('Bootstrap')`.
+- ✅ **[Enhancement]** Добавить логирование успешного старта (URL приложения и GraphQL Playground).
+- ✅ **[Graceful Shutdown]** Добавить обработку сигналов (`app.enableShutdownHooks()`).
 
 ---
 
-## 🔵 Definition of Done (Критерии готовности)
+## 🔵 **Definition of Done (Критерии готовности для модуля Code Quality)**
 
 - **Безопасность (Step 1):**
   - ✅ Все поля `AuthenticationMethod.data` шифруются/расшифровываются через `EncryptionUtil`.
