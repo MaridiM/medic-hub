@@ -2,6 +2,8 @@ import { addSeconds } from 'date-fns'
 
 import { CoreService } from '@/core/core.service'
 import type { Language } from '@/core/i18n'
+import { PrismaService } from '@/core/prisma'
+import { RedisService } from '@/core/redis'
 import { NotificationService } from '@/modules/notification'
 import { SecurityEventService } from '@/modules/security-event'
 import { Injectable, Logger } from '@nestjs/common'
@@ -23,10 +25,12 @@ export class AccountLockService extends CoreService {
 	private readonly logger = new Logger(AccountLockService.name)
 
 	constructor(
+		prisma: PrismaService,
+		redis: RedisService,
 		private readonly securityEventService: SecurityEventService,
 		private readonly notificationService: NotificationService,
 	) {
-		super({})
+		super({ prisma, redis })
 	}
 
 	/**

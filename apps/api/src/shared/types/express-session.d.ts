@@ -1,6 +1,6 @@
 import 'express-session'
 
-import type { ISessionMetadata } from './metadata.types'
+import type { ISessionMetadataDTO } from './session-metadata.types'
 
 // Предполагается, что этот тип существует. Если нет, замените на `any` или создайте его.
 
@@ -19,7 +19,7 @@ declare module 'express-session' {
 		createdAt?: Date
 
 		/** Additional metadata about the session */
-		metadata?: ISessionMetadata
+		metadata?: ISessionMetadataDTO
 
 		/** Flag indicating if 2FA has been verified for this session */
 		is2FAVerified?: boolean
