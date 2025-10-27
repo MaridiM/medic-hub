@@ -16,7 +16,11 @@ export class VerificationResolver {
 	 * Send a verification email with a one-time token.
 	 * The token is persisted and can be used to confirm the account.
 	 */
-	@RateLimit({ points: RATE_LIMIT_VERIFICATION_EMAIL_POINTS, duration: RATE_LIMIT_VERIFICATION_EMAIL_WINDOW_MS }) // ✅ 5 attempts per hour
+	@RateLimit({
+		points: RATE_LIMIT_VERIFICATION_EMAIL_POINTS,
+		duration: RATE_LIMIT_VERIFICATION_EMAIL_WINDOW_MS,
+		errorMessage: 'Too many verification email requests.',
+	}) // ✅ 5 attempts per hour
 	@Mutation(() => VerificationResponse, {
 		name: 'verificationEmail',
 		description: 'Send a verification email with a one-time token and return delivery/meta info.',

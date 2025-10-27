@@ -22,7 +22,11 @@ export class RecoveryResolver {
 	 * Generates a one-time reset token and sends a reset link to the user.
 	 * Protected against email enumeration (always returns true).
 	 */
-	@RateLimit({ points: RATE_LIMIT_RESET_PASSWORD_POINTS, duration: RATE_LIMIT_RESET_PASSWORD_WINDOW_MS }) // ✅ 5 attempts per 15 minutes
+	@RateLimit({
+		points: RATE_LIMIT_RESET_PASSWORD_POINTS,
+		duration: RATE_LIMIT_RESET_PASSWORD_WINDOW_MS,
+		errorMessage: 'Too many password reset attempts.',
+	}) // ✅ 5 attempts per 15 minutes
 	@Mutation(() => Boolean, {
 		name: 'resetPassword',
 		description:
@@ -45,7 +49,11 @@ export class RecoveryResolver {
 	 * Completes password reset using a valid token by setting a new password.
 	 * Consumes the token on success and sends confirmation email.
 	 */
-	@RateLimit({ points: RATE_LIMIT_NEW_PASSWORD_POINTS, duration: RATE_LIMIT_NEW_PASSWORD_WINDOW_MS }) // ✅ 5 attempts per 15 minutes
+	@RateLimit({
+		points: RATE_LIMIT_NEW_PASSWORD_POINTS,
+		duration: RATE_LIMIT_NEW_PASSWORD_WINDOW_MS,
+		errorMessage: 'Too many password change attempts.',
+	}) // ✅ 5 attempts per 15 minutes
 	@Mutation(() => Boolean, {
 		name: 'newPassword',
 		description:

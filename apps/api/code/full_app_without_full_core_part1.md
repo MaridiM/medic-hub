@@ -809,12 +809,9 @@ input LoginInput {
 }
 
 """Response after successful authentication"""
-type LoginResponse {
-  """JWT access token (null if using cookie-based sessions)"""
-  accessToken: String
-
-  """Authenticated user data"""
-  user: User
+  type LoginResponse {
+    """Authenticated user data"""
+    user: User
 }
 
 type Mutation {
@@ -2491,4 +2488,3 @@ export function DeviceRevokedByAdminTemplate({
 	)
 }
 ```
-

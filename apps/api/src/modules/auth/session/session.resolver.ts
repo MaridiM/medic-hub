@@ -19,7 +19,7 @@ export class SessionResolver {
 	@RateLimit({
 		points: RATE_LIMIT_LOGIN_POINTS,
 		duration: RATE_LIMIT_LOGIN_WINDOW_MS,
-		errorMessage: `Too many login attempts. Please try again in ${RATE_LIMIT_LOGIN_WINDOW_MS / 1000 / 60} minutes.`,
+		errorMessage: `Too many login attempts.`,
 	}) // ✅ 5 attempts per 15 minutes
 	@Mutation(() => LoginResponse, {
 		name: 'login',

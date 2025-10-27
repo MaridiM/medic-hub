@@ -32,6 +32,13 @@ export class SecurityEventService extends CoreService {
 	 */
 	async logEvent(input: ICreateSecurityEventInput): Promise<void> {
 		try {
+			if (!input.userId || input.userId === 'unknown') {
+				this.logger.warn(
+					`Security event skipped (no valid userId). Event=${input.event}, severity=${input.severity}`,
+				)
+				return
+			}
+
 			await this.prisma.securityEvent.create({
 				data: {
 					userId: input.userId,
@@ -98,7 +105,12 @@ export class SecurityEventService extends CoreService {
 	/**
 	 * Log failed login attempt
 	 */
-	async logLoginFailed(userId: string, session: ISessionMetadataDTO, reason: string, riskScore?: number): Promise<void> {
+	async logLoginFailed(
+		userId: string,
+		session: ISessionMetadataDTO,
+		reason: string,
+		riskScore?: number,
+	): Promise<void> {
 		await this.logEvent({
 			userId,
 			event: ESecurityEvent.LOGIN_FAILED,
@@ -137,7 +149,12 @@ export class SecurityEventService extends CoreService {
 	/**
 	 * Log 2FA verification failure
 	 */
-	async log2FAFailed(userId: string, methodType: string, session: ISessionMetadataDTO, attempts: number): Promise<void> {
+	async log2FAFailed(
+		userId: string,
+		methodType: string,
+		session: ISessionMetadataDTO,
+		attempts: number,
+	): Promise<void> {
 		const severity = attempts >= 3 ? ESecuritySeverity.HIGH : ESecuritySeverity.MEDIUM
 
 		await this.logEvent({

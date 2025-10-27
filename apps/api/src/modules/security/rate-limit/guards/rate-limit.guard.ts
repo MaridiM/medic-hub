@@ -9,6 +9,7 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { ESecurityEvent, ESecuritySeverity } from '@prisma/__generated__'
 
 import { DEFAULT_RATE_LIMIT, RATE_LIMIT_KEY, SKIP_RATE_LIMIT_KEY } from '../constants/rate-limit.constants'
+import { RateLimitException } from '../exceptions'
 import { RateLimitService } from '../rate-limit.service'
 import type { RateLimitOptions } from '../types/rate-limit.types'
 
@@ -78,37 +79,61 @@ export class RateLimitGuard implements CanActivate {
 			errorMessage: DEFAULT_RATE_LIMIT.ERROR_MESSAGE,
 		}
 
-		// 6. Determine rate limit key (user-based or IP-based)
-		const key = userId ? `user:${userId}` : `ip:${ip}`
+		// ✅ 6. Получаем имя метода для уникального ключа
+		const handlerName = context.getHandler().name // login, resetPassword, changePassword, etc.
+		const className = context.getClass().name // SessionResolver, RecoveryResolver, etc.
+		const endpoint = `${className}.${handlerName}` // SessionResolver.login
 
-		// 7. Consume rate limit
-		const result = await this.rateLimitService.consume(key, options.points, options.duration)
+		// ✅ 7. Формируем уникальный ключ для каждого endpoint
+		const baseKey = userId ? `user:${userId}` : `ip:${ip}`
+		const key = `${endpoint}:${baseKey}`
+		// Примеры:
+		// SessionResolver.login:ip:192.168.1.100
+		// RecoveryResolver.resetPassword:ip:192.168.1.100
+		// AccountResolver.changePassword:user:uuid-123
 
-		// 8. Handle rate limit exceeded
+		// 8. Используем keyPrefix из options или дефолтный
+		const keyPrefix = options.keyPrefix || ''
+
+		// 9. Consume rate limit
+		const result = await this.rateLimitService.consume(key, options.points, options.duration, keyPrefix)
+
+		// 10. Handle rate limit exceeded
 		if (!result.isAllowed) {
-			const retryAfter = Math.ceil(result.msBeforeNext / 1000)
+			const retryAfterSeconds = Math.ceil(result.msBeforeNext / 1000)
+
+			this.logger.warn(
+				`Rate limit exceeded: ${key} - ` +
+					`consumed: ${result.consumed}/${options.points}, ` +
+					`retry in: ${retryAfterSeconds}s (${this.formatSeconds(retryAfterSeconds)})`,
+			)
 
 			// Log security event
 			await this.logRateLimitExceeded(userId, ip, request.headers['user-agent'], key, options)
 
-			throw new HttpException(
-				{
-					statusCode: HttpStatus.TOO_MANY_REQUESTS,
-					message: options.errorMessage || DEFAULT_RATE_LIMIT.ERROR_MESSAGE,
-					retryAfter,
-				},
-				HttpStatus.TOO_MANY_REQUESTS,
+			throw new RateLimitException(
+				options.errorMessage || DEFAULT_RATE_LIMIT.ERROR_MESSAGE,
+				result.msBeforeNext,
+				options.points,
+				options.duration,
+				result.consumed,
 			)
 		}
 
-		// 9. Add rate limit info to response headers (optional)
+		// 11. Add rate limit info to response headers
 		if (request.res) {
 			request.res.setHeader('X-RateLimit-Limit', options.points.toString())
 			request.res.setHeader('X-RateLimit-Remaining', result.remaining.toString())
-			request.res.setHeader('X-RateLimit-Reset', new Date(Date.now() + options.duration * 1000).toISOString())
+			request.res.setHeader('X-RateLimit-Reset', new Date(Date.now() + result.msBeforeNext).toISOString())
 		}
 
 		return true
+	}
+
+	private formatSeconds(seconds: number): string {
+		if (seconds < 60) return `${seconds}s`
+		const minutes = Math.floor(seconds / 60)
+		return `${minutes}m ${seconds % 60}s`
 	}
 
 	/**
@@ -136,8 +161,15 @@ export class RateLimitGuard implements CanActivate {
 		options: RateLimitOptions,
 	): Promise<void> {
 		try {
+			if (!userId) {
+				this.logger.debug(
+					`Rate limit exceeded for anonymous context: key=${key}, ip=${ip}. Security event not persisted.`,
+				)
+				return
+			}
+
 			await this.securityEventService.create({
-				userId: userId || 'unknown',
+				userId,
 				event: ESecurityEvent.BRUTE_FORCE_DETECTED,
 				severity: ESecuritySeverity.MEDIUM,
 				ip,

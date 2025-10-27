@@ -162,7 +162,11 @@ export class TwoFactorResolver {
 	 * Verify 2FA code (works for TOTP, OTP, or backup codes)
 	 * Used during login or for sensitive operations
 	 */
-	@RateLimit({ points: RATE_LIMIT_2FA_POINTS, duration: RATE_LIMIT_2FA_WINDOW_MS }) // ✅ 5 attempts per 5 minutes
+	@RateLimit({
+		points: RATE_LIMIT_2FA_POINTS,
+		duration: RATE_LIMIT_2FA_WINDOW_MS,
+		errorMessage: 'Too many 2FA verification attempts.',
+	}) // ✅ 5 attempts per 5 minutes
 	@Authorization()
 	@Mutation(() => TwoFactorSuccessModel, {
 		name: 'verify2FA',

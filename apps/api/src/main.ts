@@ -1,6 +1,6 @@
 import cookieParser from 'cookie-parser'
-import * as dotenv from 'dotenv'
-import dotenvExpand from 'dotenv-expand'
+// import * as dotenv from 'dotenv'
+// import dotenvExpand from 'dotenv-expand'
 import { json, type NextFunction, type Request, Response } from 'express'
 import { graphqlUploadExpress } from 'graphql-upload-minimal'
 import helmet, { HelmetOptions } from 'helmet'
@@ -14,9 +14,10 @@ import { helmetConfig, i18n, initI18n, sessionConfig } from './core/config'
 import { CoreModule } from './core/core.module'
 import { DEFAULT_LANGUAGE } from './core/i18n'
 import { RedisService } from './core/redis'
+import { IS_DEV_ENV } from './shared/utils'
 
-const myEnv = dotenv.config({ path: 'backend/.env' })
-dotenvExpand.expand(myEnv)
+// const myEnv = dotenv.config({ path: '.env' })
+// dotenvExpand.expand(myEnv)
 
 async function bootstrap() {
 	// ✅ Create a logger for the bootstrap process
@@ -24,7 +25,11 @@ async function bootstrap() {
 
 	await initI18n()
 
-	const app = await NestFactory.create(CoreModule, { rawBody: true })
+	const app = await NestFactory.create(CoreModule, {
+		rawBody: true,
+		// ✅ Configuring logging based on the environment
+		logger: IS_DEV_ENV ? ['log', 'error', 'warn', 'debug', 'verbose'] : ['log', 'error', 'warn'],
+	})
 
 	const config = app.get(ConfigService)
 	const redis = app.get(RedisService)
@@ -69,10 +74,15 @@ async function bootstrap() {
 	const port = Number(config.get<string>('SERVER_PORT')) || 8000
 	await app.listen(port)
 
-	// ✅ Логируем успешный старт
-	const graphqlPath = config.get<string>('GRAPHQL_PREFIX') || 'graphql'
+	// ✅ Logging a successful launch
+	const graphqlPath = config.get<string>('GRAPHQL_PREFIX') || '/graphql'
+	const env = config.get<string>('NODE_ENV') || 'development'
+
 	bootstrapLogger.log(`🚀 Application is running on: http://localhost:${port}`)
-	bootstrapLogger.log(`📊 GraphQL Playground available at: http://localhost:${port}${graphqlPath}`)
+	bootstrapLogger.log(`📊 GraphQL Playground: http://localhost:${port}${graphqlPath}`)
+	bootstrapLogger.log(`🌍 Environment: ${env}`)
+	bootstrapLogger.log(`🔒 CORS enabled for: ${clientUrl}`)
+	bootstrapLogger.log(`📝 GraphQL logging: ${IS_DEV_ENV ? 'DETAILED' : 'COMPACT'}`)
 }
 
 const bootstrapLogger = new Logger('Bootstrap')

@@ -75,7 +75,11 @@ export class AccountResolver {
 	 * Changes the password of the authenticated user with enterprise security features.
 	 * Invalidates all other sessions and logs security event.
 	 */
-	@RateLimit({ points: RATE_LIMIT_CHANGE_PASSWORD_POINTS, duration: RATE_LIMIT_CHANGE_PASSWORD_WINDOW_MS }) // ✅ 5 attempts per hour
+	@RateLimit({
+		points: RATE_LIMIT_CHANGE_PASSWORD_POINTS,
+		duration: RATE_LIMIT_CHANGE_PASSWORD_WINDOW_MS,
+		errorMessage: 'Too many password change attempts.',
+	}) // ✅ 5 attempts per hour
 	@Authorization()
 	@Mutation(() => ChangePasswordResponse, {
 		name: 'changePassword',

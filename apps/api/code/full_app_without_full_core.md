@@ -799,12 +799,9 @@ input LoginInput {
 }
 
 """Response after successful authentication"""
-type LoginResponse {
-  """JWT access token (null if using cookie-based sessions)"""
-  accessToken: String
-
-  """Authenticated user data"""
-  user: User
+  type LoginResponse {
+    """Authenticated user data"""
+    user: User
 }
 
 type Mutation {
@@ -9228,18 +9225,12 @@ export class LoginInput {
 }
 
 /**
- * Login response with optional access token and user data
+ * Login response with user data
  */
 @ObjectType('LoginResponse', {
 	description: 'Response after successful authentication',
 })
 export class LoginResponse {
-	@Field({
-		nullable: true,
-		description: 'JWT access token (null if using cookie-based sessions)',
-	})
-	accessToken?: string
-
 	@Field(() => User, {
 		nullable: true,
 		description: 'Authenticated user data',
