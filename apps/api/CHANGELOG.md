@@ -3,6 +3,11 @@
 ## 📋 Table of Contents
 - [Changelog](#changelog)
   - [📋 Table of Contents](#-table-of-contents)
+  - [Module: Observability & Rate Limit Hardening](#module-observability--rate-limit-hardening)
+    - [Step 1: GraphQL Telemetry & Logging Middleware](#step-1-graphql-telemetry--logging-middleware)
+    - [Step 2: Rate Limit UX & Abuse Protection](#step-2-rate-limit-ux--abuse-protection)
+    - [Step 3: Configuration & Scheduler Reliability](#step-3-configuration--scheduler-reliability)
+    - [Step 4: Authentication Contract Alignment](#step-4-authentication-contract-alignment)
   - [Module: 2FA System Modernization](#module-2fa-system-modernization)
     - [Step 1: Prisma Schema Enhancement](#step-1-prisma-schema-enhancement)
     - [Step 2: Core Types \& Constants](#step-2-core-types--constants)
@@ -91,6 +96,103 @@
     - [Step 9.4: Final Linting Fix for RateLimitService Tests](#step-94-final-linting-fix-for-ratelimitservice-tests)
   - [Module: Core Security Testing Initiative](#module-core-security-testing-initiative)
     - [Step 1 (Testing): Setup Test Environment for AccountLockService](#step-1-testing-setup-test-environment-for-accountlockservice)
+
+---
+
+## Module: Observability & Rate Limit Hardening
+
+### Step 1: GraphQL Telemetry & Logging Middleware
+
+🗓️ 2025-10-27
+
+**Added**
+
+- ✨ Introduced `GraphQLLoggerMiddleware` with request/response telemetry, introspection filtering in production, and sensitive variable redaction.
+- 🧰 Exposed the middleware via `CoreModule` and centralised exports in `src/core/middleware/index.ts` for reuse.
+
+**Improved**
+
+- 📈 Bootstrapped Nest factory logging to honour environment-specific verbosity and surface GraphQL logging state during startup.
+- 📦 Declared `morgan` and `@types/morgan` in `package.json`/`bun.lock` to pave the way for HTTP access logging alongside GraphQL traces.
+
+**Files Impacted**
+
+- `src/core/middleware/graphql-logger.middleware.ts`
+- `src/core/middleware/index.ts`
+- `src/core/core.module.ts`
+- `src/main.ts`
+- `package.json`
+- `bun.lock`
+
+---
+
+### Step 2: Rate Limit UX & Abuse Protection
+
+🗓️ 2025-10-27
+
+**Added**
+
+- 🛡️ Created `RateLimitException` with structured metadata (retry window, limits, ISO timestamps) and exported it via the security module barrel.
+- 📚 Captured the full rate-limiting architecture in `code/rate-limit.md` for onboarding and troubleshooting.
+
+**Improved**
+
+- 🚦 Updated `RateLimitGuard` to derive endpoint-aware Redis keys, emit richer diagnostics, and skip redundant security events for anonymous actors.
+- 🔁 Extended `RateLimitService.consume` with configurable prefixes while preserving fail-open behaviour on Redis outages.
+- 💬 Normalised resolver error messages (`login`, `resetPassword`, `newPassword`, `changePassword`, `verify2FA`, `verificationEmail`) to surface user-friendly text backed by the new exception payload.
+
+**Files Impacted**
+
+- `src/modules/security/rate-limit/guards/rate-limit.guard.ts`
+- `src/modules/security/rate-limit/exceptions/rate-limit.exception.ts`
+- `src/modules/security/rate-limit/exceptions/index.ts`
+- `src/modules/security/rate-limit/index.ts`
+- `src/modules/security/rate-limit/rate-limit.service.ts`
+- `src/modules/auth/session/session.resolver.ts`
+- `src/modules/auth/account/account.resolver.ts`
+- `src/modules/auth/recovery/recovery.resolver.ts`
+- `src/modules/auth/2fa/resolvers/2fa.resolver.ts`
+- `src/modules/auth/verification/verification.resolver.ts`
+- `code/rate-limit.md`
+
+---
+
+### Step 3: Configuration & Scheduler Reliability
+
+🗓️ 2025-10-27
+
+**Improved**
+
+- ⚙️ Centralised environment bootstrapping inside `app.config.ts`, added dedicated cron expression constants, and ensured numeric config parsing via unary casts.
+- 🧭 Reworked `TwoFactorCronService` with singleton guarding, concurrency locks, manual triggers, typed status reporting, and shared cron schedules.
+- 🔒 Hardened `SecurityEventService` to skip events lacking a valid `userId`, preventing noisy audit records.
+- 🌐 Tightened `UrlService` to validate `CLIENT_URL` origins and surface actionable configuration errors.
+
+**Files Impacted**
+
+- `src/core/config/app.config.ts`
+- `src/modules/auth/2fa/services/2fa-cron.service.ts`
+- `src/modules/auth/2fa/services/security-event.service.ts`
+- `src/shared/utils/url/url.service.ts`
+
+---
+
+### Step 4: Authentication Contract Alignment
+
+🗓️ 2025-10-27
+
+**Changed**
+
+- 🧼 Removed the unused `accessToken` field from `LoginResponse`, aligning the GraphQL schema and DTOs with the session-cookie strategy.
+- 📝 Refreshed backend documentation and knowledge base excerpts to reflect the streamlined login payload.
+
+**Files Impacted**
+
+- `src/modules/auth/session/dtos/login.dto.ts`
+- `src/core/graphql/schema.gql`
+- `apps/api/backend.md`
+- `docs/backend.md`
+- `code/session.md`
 
 ---
 
