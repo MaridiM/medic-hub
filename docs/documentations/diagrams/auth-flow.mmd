@@ -1,0 +1,446 @@
+# MedicHub - Authentication Flow
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Browser
+    participant Frontend as Next.js Frontend
+    participant Apollo as Apollo Client
+    participant API as GraphQL API
+    participant Auth as Auth Service
+    participant Security as Security Service
+    participant Prisma as Prisma ORM
+    participant Redis
+    participant DB as PostgreSQL
+
+    %% Registration Flow
+    rect rgb(59, 130, 246, 0.1)
+        Note over User,DB: Registration Flow
+        User->>Frontend: Enter registration details
+        Frontend->>Frontend: Client-side validation (Zod)
+        Frontend->>Apollo: createAccount mutation
+        Apollo->>API: GraphQL request
+        API->>Auth: AccountService.createAccount()
+        Auth->>Auth: Validate & hash password (Argon2)
+        Auth->>Prisma: Create user
+        Prisma->>DB: INSERT INTO users
+        DB-->>Prisma: User created
+        Auth->>Auth: Generate verification token
+        Auth->>Prisma: Create token
+        Prisma->>DB: INSERT INTO tokens
+        Auth-->>API: User object
+        API-->>Apollo: Response
+        Apollo-->>Frontend: User data
+        Frontend-->>User: Registration success
+
+        Auth->>Auth: Send verification email
+        Auth-->>User: Verification email sent
+    end
+
+    %% Login Flow (Without 2FA)
+    rect rgb(16, 185, 129, 0.1)
+        Note over User,DB: Login Flow (No 2FA)
+        User->>Frontend: Enter credentials
+        Frontend->>Frontend: Client-side validation
+        Frontend->>Apollo: login mutation
+        Apollo->>API: GraphQL request
+        API->>Security: RateLimitGuard.canActivate()
+        Security->>Redis: Check rate limit
+        Redis-->>Security: Allowed
+        API->>Auth: SessionService.login()
+        Auth->>Prisma: Find user by email
+        Prisma->>DB: SELECT FROM users
+        DB-->>Prisma: User data
+        Auth->>Auth: Verify password (Argon2)
+        Auth->>Auth: Check if 2FA enabled
+
+        alt 2FA Not Enabled
+            Auth->>Auth: Create session
+            Auth->>Redis: Store session
+            Redis-->>Auth: Session stored
+            Auth->>Prisma: Create session record
+            Prisma->>DB: INSERT INTO sessions
+            Auth->>Prisma: Update lastLoginAt
+            Auth->>Security: Log security event
+            Security->>Prisma: Create security event
+            Prisma->>DB: INSERT INTO security_events
+            Auth-->>API: Session + User
+            API-->>Apollo: Response with cookie
+            Apollo-->>Frontend: Login success
+            Frontend-->>User: Redirect to dashboard
+        end
+    end
+
+    %% Login Flow (With 2FA)
+    rect rgb(245, 158, 11, 0.1)
+        Note over User,DB: Login Flow (With 2FA)
+        User->>Frontend: Enter credentials
+        Frontend->>Apollo: login mutation
+        Apollo->>API: GraphQL request
+        API->>Auth: SessionService.login()
+        Auth->>Prisma: Find user by email
+        Auth->>Auth: Verify password
+
+        alt 2FA Enabled
+            Auth->>Auth: Check preferred 2FA method
+
+            alt TOTP Method
+                Auth-->>API: 2FA required (TOTP)
+                API-->>Frontend: Require TOTP code
+                Frontend-->>User: Show TOTP input
+
+                User->>Frontend: Enter TOTP code
+                Frontend->>Apollo: verify2FA mutation
+                Apollo->>API: GraphQL request with code
+                API->>Auth: TwoFactorMethodService.verify()
+                Auth->>Prisma: Get authentication method
+                Prisma->>DB: SELECT FROM authentication_methods
+                Auth->>Auth: Verify TOTP code (OTPAuth)
+                Auth->>Auth: Valid, create session
+                Auth->>Redis: Store session
+                Auth->>Prisma: Update method lastUsedAt
+                Auth->>Prisma: Create session (is2FAVerified: true)
+                Auth-->>API: Session + User
+                API-->>Frontend: Login success
+                Frontend-->>User: Redirect to dashboard
+            else OTP (Email/SMS) Method
+                Auth->>Auth: Generate OTP code
+                Auth->>Redis: Store OTP with TTL
+                Auth-->>API: OTP sent
+                API-->>Frontend: Check email/SMS
+                Frontend-->>User: Show OTP input
+
+                User->>Frontend: Enter OTP code
+                Frontend->>Apollo: verify2FA mutation
+                Apollo->>API: GraphQL request with OTP
+                API->>Auth: TwoFactorMethodService.verify()
+                Auth->>Redis: Get stored OTP
+                Redis-->>Auth: OTP value
+                Auth->>Auth: Compare codes
+                Auth->>Redis: Delete OTP
+                Auth->>Auth: Create session
+                Auth->>Redis: Store session
+                Auth->>Prisma: Create session record
+                Auth-->>API: Session + User
+                API-->>Frontend: Login success
+                Frontend-->>User: Redirect to dashboard
+            else WebAuthn Method
+                Auth-->>API: WebAuthn challenge
+                API-->>Frontend: Challenge data
+                Frontend->>Browser: navigator.credentials.get()
+                Browser-->>User: Show biometric/key prompt
+                User->>Browser: Authenticate (Face ID/Key)
+                Browser-->>Frontend: Assertion response
+                Frontend->>Apollo: completeWebAuthnAuthentication mutation
+                Apollo->>API: GraphQL with assertion
+                API->>Auth: WebAuthnService.verifyAuthentication()
+                Auth->>Prisma: Get credential
+                Auth->>Auth: Verify assertion (@simplewebauthn)
+                Auth->>Prisma: Update counter, lastUsedAt
+                Auth->>Auth: Create session
+                Auth->>Redis: Store session
+                Auth-->>API: Session + User
+                API-->>Frontend: Login success
+                Frontend-->>User: Redirect to dashboard
+            end
+        end
+    end
+
+    %% Failed Login (Rate Limit & Account Lock)
+    rect rgb(220, 38, 38, 0.1)
+        Note over User,DB: Failed Login (Rate Limit)
+        User->>Frontend: Enter wrong credentials
+        Frontend->>Apollo: login mutation
+        Apollo->>API: GraphQL request
+        API->>Security: RateLimitGuard.canActivate()
+        Security->>Redis: Increment attempt counter
+
+        alt Rate Limit Exceeded
+            Security-->>API: RateLimitException (429)
+            API-->>Frontend: Too many requests
+            Frontend-->>User: Please wait X seconds
+        else Within Rate Limit
+            API->>Auth: SessionService.login()
+            Auth->>Prisma: Find user
+            Auth->>Auth: Verify password
+            Auth->>Auth: Password incorrect
+            Auth->>Security: AccountLockService.recordFailedAttempt()
+            Security->>Prisma: Get account locks
+            Security->>Security: Increment failed attempts
+
+            alt Failed Attempts >= Threshold
+                Security->>Prisma: Create account lock
+                Prisma->>DB: INSERT INTO account_locks
+                Security->>Redis: Set lock flag
+                Security->>Auth: Send lockout notification
+                Security-->>API: Account locked
+                API-->>Frontend: Account locked
+                Frontend-->>User: Account locked for X minutes
+            else Within Threshold
+                Security->>Prisma: Log security event
+                Auth-->>API: Invalid credentials
+                API-->>Frontend: Login failed
+                Frontend-->>User: Invalid credentials
+            end
+        end
+    end
+
+    %% Password Reset Flow
+    rect rgb(124, 58, 237, 0.1)
+        Note over User,DB: Password Reset Flow
+        User->>Frontend: Click "Forgot Password"
+        Frontend->>Apollo: resetPassword mutation (email)
+        Apollo->>API: GraphQL request
+        API->>Security: RateLimitGuard (reset password)
+        API->>Auth: RecoveryService.resetPassword()
+        Auth->>Prisma: Find user by email
+        Auth->>Auth: Generate reset token
+        Auth->>Prisma: Create token (PASSWORD_RESET)
+        Prisma->>DB: INSERT INTO tokens
+        Auth->>Auth: Send reset email with link
+        Auth-->>API: Email sent
+        API-->>Frontend: Success
+        Frontend-->>User: Check your email
+
+        Note over User,DB: User clicks email link
+        User->>Frontend: Click reset link (with token)
+        Frontend-->>User: Show new password form
+        User->>Frontend: Enter new password
+        Frontend->>Apollo: newPassword mutation (token, password)
+        Apollo->>API: GraphQL request
+        API->>Auth: RecoveryService.newPassword()
+        Auth->>Prisma: Find token
+        Prisma->>DB: SELECT FROM tokens WHERE token = ?
+        Auth->>Auth: Validate token (not expired, not used)
+        Auth->>Auth: Hash new password (Argon2)
+        Auth->>Prisma: Update user password
+        Prisma->>DB: UPDATE users SET password = ?
+        Auth->>Prisma: Mark token as used
+        Auth->>Prisma: Revoke all sessions
+        Auth->>Redis: Delete all sessions
+        Auth->>Security: Log password changed event
+        Auth-->>API: Password changed
+        API-->>Frontend: Success
+        Frontend-->>User: Redirect to login
+    end
+
+    %% Session Validation (Per Request)
+    rect rgb(34, 197, 94, 0.1)
+        Note over User,DB: Authenticated Request
+        User->>Frontend: Navigate to protected page
+        Frontend->>Apollo: GraphQL query (with cookie)
+        Apollo->>API: Request with session cookie
+        API->>Auth: GqlAuthGuard.canActivate()
+        Auth->>Redis: Get session by cookie ID
+        Redis-->>Auth: Session data
+
+        alt Session Valid
+            Auth->>Prisma: Get user by session userId
+            Prisma->>DB: SELECT FROM users
+            DB-->>Prisma: User data
+            Auth->>Auth: Attach user to request context
+            Auth-->>API: Authorized
+            API->>API: Execute resolver
+            API-->>Frontend: Response
+            Frontend-->>User: Show page
+        else Session Invalid/Expired
+            Auth-->>API: UnauthorizedException (401)
+            API-->>Frontend: Unauthorized
+            Frontend-->>User: Redirect to login
+        end
+    end
+
+    %% Logout Flow
+    rect rgb(107, 114, 128, 0.1)
+        Note over User,DB: Logout Flow
+        User->>Frontend: Click logout
+        Frontend->>Apollo: logout mutation
+        Apollo->>API: GraphQL request (with cookie)
+        API->>Auth: SessionService.logout()
+        Auth->>Redis: Delete session
+        Redis-->>Auth: Session removed
+        Auth->>Prisma: Update session (revokedAt)
+        Prisma->>DB: UPDATE sessions SET revokedAt = NOW()
+        Auth->>Security: Log logout event
+        Auth-->>API: Logged out
+        API-->>Frontend: Clear cookie
+        Frontend-->>User: Redirect to login
+    end
+```
+
+## Authentication Flow Components
+
+### 1. Registration Flow
+**Steps**:
+1. User submits registration form
+2. Client-side validation (Zod schema)
+3. Password hashing with Argon2
+4. User creation in database
+5. Email verification token generation
+6. Verification email dispatch
+7. Return user object
+
+**Security Measures**:
+- Password strength validation (min 8 chars)
+- Email format validation
+- Unique email/phone constraint
+- Verification token (15 min expiry)
+
+### 2. Login Flow (No 2FA)
+**Steps**:
+1. Rate limit check (Redis)
+2. User lookup by email
+3. Password verification (Argon2)
+4. 2FA status check
+5. Session creation (Redis + DB)
+6. Security event logging
+7. Return session cookie
+
+**Rate Limiting**:
+- 5 login attempts per 15 minutes
+- Tracked by IP address
+- Redis ZSET sliding window
+
+### 3. Login Flow (With 2FA)
+**TOTP Flow**:
+1. Credentials verified
+2. Return 2FA required response
+3. User enters TOTP code
+4. Code verification (30-second window)
+5. Session creation with 2FA verified flag
+6. Redirect to dashboard
+
+**OTP Flow (Email/SMS)**:
+1. Credentials verified
+2. Generate 6-digit OTP
+3. Store OTP in Redis (5 min TTL)
+4. Send OTP via email/SMS
+5. User enters OTP
+6. Verify against Redis
+7. Session creation
+
+**WebAuthn Flow**:
+1. Credentials verified
+2. Generate challenge
+3. Browser prompts for biometric/key
+4. User authenticates
+5. Verify assertion
+6. Update credential counter
+7. Session creation
+
+### 4. Failed Login Handling
+**Rate Limiting**:
+- Check rate limit before processing
+- Throw 429 if exceeded
+- Return retry-after header
+
+**Account Lockout**:
+- Track failed attempts per user
+- Lock after N attempts (default: 5)
+- Temporary lock (30 minutes)
+- Notification email sent
+- Progressive delays (50ms → 1s)
+
+**Security Events**:
+- LOG all failed attempts
+- HIGH severity for multiple failures
+- CRITICAL for brute force detection
+- Include IP, user agent, timestamp
+
+### 5. Password Reset Flow
+**Request Reset**:
+1. User provides email
+2. Rate limit check (3 per 3 hours)
+3. Generate unique token
+4. Store token in DB (15 min expiry)
+5. Send email with reset link
+
+**Complete Reset**:
+1. User clicks link with token
+2. Validate token (exists, not expired, not used)
+3. User enters new password
+4. Hash new password
+5. Update user password
+6. Mark token as used
+7. Revoke all sessions
+8. Log security event
+
+**Security**:
+- Token single-use only
+- Short expiration (15 min)
+- Session revocation on password change
+- Email notification
+
+### 6. Session Validation
+**Per-Request**:
+1. Extract session cookie
+2. Lookup session in Redis (fast)
+3. Validate session (not expired, not revoked)
+4. Fetch user from DB if needed
+5. Attach user to request context
+6. Update lastUsedAt timestamp
+
+**Session Metadata**:
+- Device fingerprint
+- IP address, location
+- User agent, browser, OS
+- 2FA verification status
+- Risk score
+
+### 7. Logout Flow
+**Steps**:
+1. Delete session from Redis
+2. Mark session as revoked in DB (revokedAt)
+3. Log logout security event
+4. Clear session cookie
+5. Redirect to login
+
+**Options**:
+- Single session logout (current)
+- All sessions logout (account-wide)
+- Remote session removal (from session list)
+
+## Key Security Features
+
+### Multi-Factor Authentication
+- Support for multiple 2FA methods simultaneously
+- User-selectable preferred method
+- Backup codes for recovery
+- Device trust management
+
+### Rate Limiting
+Per-endpoint rate limits:
+- Login: 5 / 15 min
+- Password reset: 3 / 3 hours
+- 2FA verification: 5 / 5 min
+- Email verification: 3 / 15 min
+
+### Account Protection
+- Account lockout after failed attempts
+- Progressive delays on failures
+- Automatic unlock after timeout
+- Email notifications on security events
+
+### Session Management
+- Redis for fast session lookup
+- DB for persistent session history
+- Session expiration (configurable)
+- Device tracking and management
+- Session revocation support
+
+### Risk Scoring
+Real-time calculation based on:
+- New device detection
+- Unusual location
+- Failed attempt history
+- Time of day
+- IP reputation
+
+### Audit Trail
+Comprehensive logging:
+- All login attempts (success/failure)
+- 2FA setup and verification
+- Password changes
+- Session creation/revocation
+- Account locks
+- Suspicious activities

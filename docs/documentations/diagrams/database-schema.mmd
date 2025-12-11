@@ -1,0 +1,363 @@
+# MedicHub - Database Schema (ER Diagram)
+
+```mermaid
+erDiagram
+    User ||--o{ AuthenticationMethod : "has"
+    User ||--o{ BackupCode : "has"
+    User ||--o{ TrustedDevice : "has"
+    User ||--o{ Session : "has"
+    User ||--o{ AccountLock : "has"
+    User ||--o{ SecurityEvent : "has"
+    User ||--o{ Token : "has"
+    User ||--o{ AuditLog : "has"
+
+    User {
+        String id PK "UUID"
+        String fullName
+        String firstName
+        String lastName
+        String phone UK "Unique"
+        String email UK "Unique"
+        String avatar
+        String bio
+        String password "Argon2 hashed"
+        EUserRole[] roles "Default: USER"
+        Boolean is2FAEnabled "Default: false"
+        E2FAMethod preferred2FAMethod "Nullable"
+        Boolean require2FA "Default: false"
+        Boolean isEmailVerified
+        DateTime emailVerifiedAt
+        Boolean isUnsubscribed
+        DateTime emailBouncedAt
+        Boolean isPhoneVerified
+        DateTime phoneVerifiedAt
+        DateTime phoneBouncedAt
+        DateTime lastLoginAt
+        String lastLoginIp
+        DateTime passwordChangedAt
+        Float riskScore "0-100"
+        DateTime lastRiskAssessAt
+        DateTime deletedAt "Soft delete"
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    AuthenticationMethod {
+        String id PK "UUID"
+        String userId FK
+        E2FAMethod method "TOTP|OTP_EMAIL|OTP_SMS|WEBAUTHN|PASSKEY"
+        Json data "Encrypted method-specific data"
+        String name "User-defined label"
+        Boolean isActive
+        Boolean isPrimary
+        DateTime lastUsedAt
+        Int useCount
+        String credentialId UK "For WebAuthn, Nullable"
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    BackupCode {
+        String id PK "UUID"
+        String userId FK
+        String authenticationMethodId FK
+        String code "Argon2 hashed"
+        Boolean isUsed
+        DateTime usedAt
+        String usedIp
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    TrustedDevice {
+        String id PK "UUID"
+        String userId FK
+        String deviceId UK "SHA256 hash"
+        Json fingerprint
+        String name
+        String userAgent
+        String browser
+        String os
+        String device
+        Float trustScore "0-100, default: 50"
+        String lastIp
+        String lastCountry
+        String lastCity
+        Boolean isActive
+        DateTime lastSeenAt
+        DateTime expiresAt
+        DateTime revokedAt
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    Session {
+        String id PK "UUID"
+        String userId FK
+        String token UK "Unique"
+        String refreshToken UK "Nullable, Unique"
+        String deviceId
+        String userAgent
+        String ip
+        String country
+        String city
+        String browser
+        String os
+        String device
+        Boolean isTrusted
+        Float riskScore "0-100"
+        Boolean is2FAVerified
+        DateTime verified2FAAt
+        DateTime expiresAt
+        DateTime lastUsedAt
+        DateTime revokedAt
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    AccountLock {
+        String id PK "UUID"
+        String userId FK
+        String reason
+        Int failedAttempts
+        DateTime lockedAt
+        DateTime expiresAt
+        DateTime unlockedAt
+        String ip
+        String userAgent
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    SecurityEvent {
+        String id PK "UUID"
+        String userId FK
+        ESecurityEvent event "LOGIN_SUCCESS|TWO_FA_FAILED|etc."
+        ESecuritySeverity severity "LOW|MEDIUM|HIGH|CRITICAL"
+        String ip
+        String userAgent
+        String country
+        String city
+        String deviceId
+        Float riskScore "0-100"
+        Json riskFactors
+        Boolean resolved
+        DateTime resolvedAt
+        String resolvedBy
+        Json metadata
+        DateTime createdAt
+    }
+
+    Token {
+        String id PK "UUID"
+        String token UK "Unique"
+        ETokenType type "PASSWORD_RESET|EMAIL_VERIFICATION|etc."
+        DateTime expiresIn
+        DateTime usedAt
+        Int maxUses
+        Int useCount
+        String userId FK "Nullable"
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    AuditLog {
+        String id PK "UUID"
+        String userId FK
+        EAuditCategory category "SECURITY|PROFILE|ADMIN|etc."
+        String action
+        Json metadata
+        String ip
+        String userAgent
+        DateTime createdAt
+    }
+```
+
+## Database Models Overview
+
+### Core Models
+
+#### User (users)
+Central entity representing system users.
+
+**Key Features**:
+- Multiple authentication methods support
+- 2FA configuration (enabled, preferred method, required)
+- Email and phone verification tracking
+- Risk scoring (0-100) for security monitoring
+- Soft delete support
+- Role-based access control (RBAC)
+
+**Indexes**:
+- email, phone (unique)
+- is2FAEnabled, preferred2FAMethod
+- deletedAt (for active users filter)
+- lastLoginAt, riskScore
+
+#### AuthenticationMethod (authentication_methods)
+Unified storage for all 2FA methods.
+
+**Supported Methods**:
+- **TOTP**: Time-based One-Time Password (Google Authenticator, Authy)
+- **OTP_EMAIL**: One-time password via email
+- **OTP_SMS**: One-time password via SMS
+- **WEBAUTHN**: FIDO2 hardware keys
+- **PASSKEY**: Platform authenticators (Face ID, Windows Hello)
+
+**Data Storage**:
+- Encrypted JSON field for method-specific data
+- User-defined labels for multiple devices
+- Primary method designation
+- Usage tracking (last used, count)
+
+#### BackupCode (backup_codes)
+Emergency 2FA recovery codes.
+
+**Features**:
+- One-time use only
+- Argon2 hashed storage
+- Associated with specific authentication method
+- Usage tracking (timestamp, IP)
+- Auto-generated on 2FA setup (12 codes)
+
+#### TrustedDevice (trusted_devices)
+Device fingerprinting and trust management.
+
+**Trust Scoring**:
+- Initial trust: 50/100
+- Increases with consistent usage
+- Decreases on suspicious activity
+- Can exempt user from 2FA on trusted devices
+
+**Tracking**:
+- Device fingerprint (JSON)
+- User agent, browser, OS, device type
+- Location (IP, country, city)
+- Automatic expiration
+- Manual revocation support
+
+#### Session (sessions)
+Active user sessions with metadata.
+
+**Features**:
+- JWT token storage
+- Optional refresh token
+- Device identification
+- 2FA verification status per session
+- Risk scoring per session
+- Session revocation support
+
+**Metadata**:
+- Device info (user agent, browser, OS, device type)
+- Location (IP, country, city)
+- Trust status
+- Last used timestamp
+
+### Security Models
+
+#### AccountLock (account_locks)
+Brute-force protection mechanism.
+
+**Features**:
+- Failed attempt counter
+- Automatic lockout after N attempts
+- Temporary lock with expiration
+- Unlock tracking
+- Context capture (IP, user agent)
+
+#### SecurityEvent (security_events)
+Comprehensive audit logging.
+
+**Event Types** (30+ events):
+- Login events: SUCCESS, FAILED, LOCKED_OUT
+- 2FA events: SETUP, VERIFIED, FAILED
+- Password events: CHANGED, RESET_REQUESTED
+- Security: BRUTE_FORCE_DETECTED, SUSPICIOUS_LOGIN
+- Account: DELETED, EMAIL_CHANGED, PHONE_CHANGED
+
+**Severity Levels**:
+- LOW: Normal operations
+- MEDIUM: Notable but not alarming
+- HIGH: Suspicious activity
+- CRITICAL: Confirmed security incident
+
+**Risk Factors**:
+- Stored as JSON
+- Includes: new device, unusual location, unusual time, failed attempts
+
+**Resolution**:
+- Can be marked as resolved
+- Resolution timestamp and resolver tracking
+
+#### Token (tokens)
+Multi-purpose token storage.
+
+**Token Types**:
+- PASSWORD_RESET: Password recovery links
+- EMAIL_VERIFICATION: Email confirmation
+- PHONE_VERIFICATION: Phone confirmation
+- TWO_FA_SETUP: 2FA setup completion
+
+**Features**:
+- Unique token string
+- Expiration timestamp
+- Max uses limit
+- Use counter
+- Optional user association
+
+#### AuditLog (audit_logs)
+General activity logging.
+
+**Categories**:
+- SECURITY: Auth events
+- PROFILE: Profile updates
+- ADMIN: Admin actions
+- SYSTEM: System events
+- ACCOUNT: Account changes
+- AUTHENTICATION: Login/logout
+- AUTHORIZATION: Permission changes
+- DATA: Data access/modification
+
+**Metadata**:
+- JSON field for flexible data
+- IP and user agent tracking
+- User association
+
+## Key Relationships
+
+### One-to-Many
+- User → AuthenticationMethod (multiple 2FA methods)
+- User → BackupCode (12+ backup codes per method)
+- User → TrustedDevice (multiple trusted devices)
+- User → Session (multiple concurrent sessions)
+- User → AccountLock (lock history)
+- User → SecurityEvent (event history)
+- User → Token (multiple tokens for different purposes)
+- User → AuditLog (activity log)
+- AuthenticationMethod → BackupCode (codes per method)
+
+### Indexes Strategy
+- **Primary Keys**: UUID for distributed system compatibility
+- **Unique Constraints**: email, phone, token strings, device IDs, credential IDs
+- **Performance Indexes**: On frequently queried fields (email, is2FAEnabled, deletedAt)
+- **Composite Indexes**: For complex queries (userId + event type, userId + category)
+
+## Data Retention
+
+Configurable retention policies:
+- **BackupCode**: 90 days after use (default)
+- **TrustedDevice**: 180 days after last seen (default)
+- **SecurityEvent**: 365 days (default)
+- **Session**: Automatic expiration based on SESSION_MAX_AGE
+- **Token**: Expires based on type (15 min to 24 hours)
+
+## Security Features
+
+1. **Password Hashing**: Argon2id (industry standard)
+2. **Token Hashing**: Backup codes hashed with Argon2
+3. **Encrypted Storage**: AuthenticationMethod data encrypted
+4. **Soft Delete**: User accounts soft-deleted for audit trail
+5. **Risk Scoring**: Real-time calculation based on behavior
+6. **Device Fingerprinting**: Unique device identification
+7. **Session Tracking**: Full session lifecycle management
+8. **Audit Trail**: Comprehensive event logging

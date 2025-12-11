@@ -1,0 +1,116 @@
+# MedicHub - Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "MedicHub Monorepo"
+        subgraph "Frontend Layer"
+            WEB[Next.js 16.0<br/>React 19.1<br/>TypeScript 5.9]
+            APOLLO[Apollo Client 4.0<br/>GraphQL Client]
+            ZUSTAND[Zustand 5.0<br/>State Management]
+            NEXTINTL[next-intl 4.3<br/>i18n]
+        end
+
+        subgraph "Backend Layer"
+            API[NestJS 11.1<br/>GraphQL API]
+            GRAPHQL[Apollo Server 4.12<br/>Code-First Schema]
+            SERVICES[Business Services]
+            PRISMA[Prisma 6.17<br/>ORM]
+        end
+
+        subgraph "Documentation"
+            DOCS[Technical Docs<br/>Markdown]
+        end
+    end
+
+    subgraph "Infrastructure"
+        subgraph "Database"
+            PG[(PostgreSQL 17<br/>Primary Database)]
+        end
+
+        subgraph "Cache & Sessions"
+            REDIS[(Redis 8<br/>Sessions, Cache,<br/>Rate Limiting)]
+        end
+
+        subgraph "External Services"
+            MAIL[Email Providers<br/>Brevo, SendGrid, SMTP]
+            SMS[Twilio<br/>SMS Service]
+            STORAGE[Cloudinary<br/>File Storage]
+            PAYMENT[Stripe<br/>Payments]
+        end
+    end
+
+    subgraph "Client Devices"
+        BROWSER[Web Browser]
+        MOBILE[Mobile Browser]
+    end
+
+    %% Frontend connections
+    BROWSER --> WEB
+    MOBILE --> WEB
+    WEB --> APOLLO
+    APOLLO --> GRAPHQL
+    WEB --> ZUSTAND
+    WEB --> NEXTINTL
+
+    %% Backend connections
+    GRAPHQL --> API
+    API --> SERVICES
+    SERVICES --> PRISMA
+    API --> REDIS
+    PRISMA --> PG
+
+    %% External services
+    API --> MAIL
+    API --> SMS
+    API --> STORAGE
+    API --> PAYMENT
+
+    %% WebSocket connection
+    APOLLO -.WebSocket.-> GRAPHQL
+
+    %% Session flow
+    API -.Sessions.-> REDIS
+
+    %% Data flow
+    PRISMA -.Queries.-> PG
+    PG -.Data.-> PRISMA
+
+    style WEB fill:#3b82f6,color:#fff
+    style API fill:#10b981,color:#fff
+    style PG fill:#2570eb,color:#fff
+    style REDIS fill:#dc2626,color:#fff
+    style GRAPHQL fill:#e535ab,color:#fff
+```
+
+## Architecture Description
+
+### Frontend Layer
+- **Next.js 16.0**: React meta-framework with App Router for SSR
+- **Apollo Client**: GraphQL client with WebSocket support for subscriptions
+- **Zustand**: Lightweight state management
+- **next-intl**: Internationalization (en, ru)
+
+### Backend Layer
+- **NestJS 11.1**: Backend framework with dependency injection
+- **Apollo Server**: GraphQL server with code-first schema generation
+- **Business Services**: Core business logic (Auth, Security, Notification, etc.)
+- **Prisma 6.17**: Type-safe ORM for PostgreSQL
+
+### Infrastructure
+- **PostgreSQL 17**: Primary relational database
+- **Redis 8**: Session storage, caching, rate limiting
+- **Email Providers**: Brevo (primary), SendGrid (fallback), SMTP
+- **Twilio**: SMS service for 2FA and notifications
+- **Cloudinary**: Image and file storage
+- **Stripe**: Payment processing
+
+### Communication Patterns
+- **HTTP/HTTPS**: Primary REST-like communication via GraphQL
+- **WebSocket**: Real-time subscriptions
+- **Docker Network**: Internal service communication
+
+### Key Features
+- **Monorepo**: Single repository for frontend and backend
+- **TypeScript**: Full type safety across stack
+- **Docker**: Containerized infrastructure
+- **Security**: Multi-layer (Rate limiting, 2FA, Session management)

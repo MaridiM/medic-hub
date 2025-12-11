@@ -1,0 +1,184 @@
+# MedicHub - Backend Structure
+
+```mermaid
+graph TB
+    subgraph "Entry Point"
+        MAIN[main.ts<br/>Bootstrap & Middleware]
+    end
+
+    subgraph "Core Layer"
+        CONFIG[Configuration<br/>GraphQL, Helmet,<br/>Session, i18n]
+        PRISMA[Prisma Service<br/>Database Access]
+        REDIS_SVC[Redis Service<br/>Cache & Sessions]
+        I18N[i18n Service<br/>Translations]
+        MAIL[Mail Service<br/>Email Providers]
+        SMS[SMS Service<br/>Twilio]
+        CORE_SVC[Core Service<br/>Base Service Class]
+    end
+
+    subgraph "Business Modules"
+        subgraph "Auth Module"
+            AUTH_ACCOUNT[Account<br/>Service & Resolver]
+            AUTH_SESSION[Session<br/>Service & Resolver]
+            AUTH_RECOVERY[Recovery<br/>Service & Resolver]
+            AUTH_VERIFY[Verification<br/>Service & Resolver]
+            AUTH_2FA[2FA<br/>TOTP, OTP, WebAuthn]
+        end
+
+        subgraph "Security Module"
+            SEC_RATE[Rate Limit<br/>Service & Guard]
+            SEC_LOCK[Account Lock<br/>Service]
+            SEC_EVENT[Security Event<br/>Service]
+            SEC_TRUST[Device Trust<br/>Service]
+        end
+
+        subgraph "Notification Module"
+            NOTIF[Notification Service<br/>Email & SMS Dispatch]
+        end
+
+        subgraph "RBAC Module"
+            RBAC[Role-Based Access<br/>Control]
+        end
+    end
+
+    subgraph "Shared Layer"
+        DECORATORS[@Authorization<br/>@Authorized<br/>@UserAgent<br/>@Lang]
+        GUARDS[GqlAuthGuard<br/>RolesGuard]
+        PIPES[ValidationPipe<br/>FilePipe]
+        MIDDLEWARE[GraphQL Logger<br/>Raw Body]
+        UTILS[Hash Utils<br/>Token Utils<br/>Error Utils]
+    end
+
+    subgraph "Database"
+        DB[(PostgreSQL<br/>Prisma Schema<br/>545 lines)]
+    end
+
+    subgraph "Cache"
+        CACHE[(Redis<br/>Sessions & Cache)]
+    end
+
+    %% Entry flow
+    MAIN --> CONFIG
+    MAIN --> CORE_SVC
+
+    %% Core connections
+    CORE_SVC --> PRISMA
+    CORE_SVC --> REDIS_SVC
+    CORE_SVC --> I18N
+    CORE_SVC --> CONFIG
+
+    %% Auth module
+    AUTH_ACCOUNT --> CORE_SVC
+    AUTH_SESSION --> CORE_SVC
+    AUTH_RECOVERY --> CORE_SVC
+    AUTH_VERIFY --> CORE_SVC
+    AUTH_2FA --> CORE_SVC
+
+    %% Security module
+    SEC_RATE --> REDIS_SVC
+    SEC_LOCK --> CORE_SVC
+    SEC_EVENT --> CORE_SVC
+    SEC_TRUST --> CORE_SVC
+
+    %% Notification
+    NOTIF --> MAIL
+    NOTIF --> SMS
+    MAIL --> CORE_SVC
+    SMS --> CORE_SVC
+
+    %% RBAC
+    RBAC --> CORE_SVC
+
+    %% Shared layer usage
+    GUARDS --> CORE_SVC
+    PIPES --> I18N
+    MIDDLEWARE --> CONFIG
+
+    %% Database connections
+    PRISMA --> DB
+    REDIS_SVC --> CACHE
+
+    %% Cross-module dependencies
+    AUTH_SESSION --> SEC_RATE
+    AUTH_SESSION --> SEC_LOCK
+    AUTH_SESSION --> SEC_EVENT
+    AUTH_SESSION --> SEC_TRUST
+    AUTH_ACCOUNT --> NOTIF
+    AUTH_VERIFY --> NOTIF
+
+    style MAIN fill:#10b981,color:#fff
+    style CORE_SVC fill:#3b82f6,color:#fff
+    style DB fill:#2570eb,color:#fff
+    style CACHE fill:#dc2626,color:#fff
+```
+
+## Backend Architecture Layers
+
+### 1. Entry Point (main.ts)
+- Application bootstrap
+- Middleware chain configuration
+- Provider initialization
+- Port binding and server start
+
+### 2. Core Layer
+Central infrastructure services:
+- **Configuration**: Environment-based config for all modules
+- **Prisma Service**: Type-safe database access
+- **Redis Service**: Caching and session management
+- **i18n Service**: Multi-language support (en, ru)
+- **Mail Service**: Email dispatch (Brevo, SendGrid, SMTP)
+- **SMS Service**: SMS via Twilio
+- **Core Service**: Base class with helper methods
+
+### 3. Business Modules
+
+#### Auth Module
+- **Account**: User registration, profile management, deletion
+- **Session**: Login, logout, session tracking
+- **Recovery**: Password reset flow
+- **Verification**: Email/phone verification
+- **2FA**: TOTP, OTP (Email/SMS), WebAuthn, Passkeys
+
+#### Security Module
+- **Rate Limit**: Redis-based sliding window rate limiting
+- **Account Lock**: Brute-force protection
+- **Security Event**: Comprehensive audit logging
+- **Device Trust**: Device fingerprinting and trust scoring
+
+#### Notification Module
+- Unified notification dispatch
+- Email and SMS with deduplication
+- Template rendering
+
+#### RBAC Module
+- Role-based access control
+- Permission management
+
+### 4. Shared Layer
+Reusable components:
+- **Decorators**: Custom parameter decorators for resolvers
+- **Guards**: Authentication and authorization guards
+- **Pipes**: Validation pipes with i18n
+- **Middleware**: Request/response processing
+- **Utils**: Common utilities (hashing, tokens, errors)
+
+### 5. Data Layer
+- **PostgreSQL**: Primary relational database
+- **Redis**: Session store, cache, rate limit counters
+
+## Key Patterns
+
+### Dependency Injection
+All services use NestJS DI container for loose coupling
+
+### Service Inheritance
+Business services extend `CoreService` for access to infrastructure
+
+### Resolver Pattern
+Thin resolvers delegate to services for business logic
+
+### Transaction Support
+Prisma transactions for complex multi-step operations
+
+### Error Handling
+Centralized error serialization and i18n error messages

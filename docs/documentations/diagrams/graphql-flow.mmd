@@ -1,0 +1,499 @@
+# MedicHub - GraphQL Request Flow
+
+```mermaid
+sequenceDiagram
+    participant Client as Browser/Mobile
+    participant Apollo as Apollo Client
+    participant HTTP as HTTP/WebSocket
+    participant Server as Apollo Server
+    participant Middleware as Middleware Chain
+    participant RateLimit as RateLimitGuard
+    participant Auth as GqlAuthGuard
+    participant Resolver as GraphQL Resolver
+    participant Service as Business Service
+    participant Prisma as Prisma ORM
+    participant Redis as Redis Cache
+    participant DB as PostgreSQL
+
+    %% Query Flow
+    rect rgb(59, 130, 246, 0.1)
+        Note over Client,DB: GraphQL Query Flow
+        Client->>Apollo: Execute query/mutation
+        Apollo->>Apollo: Add auth headers (cookie)
+        Apollo->>Apollo: Serialize variables
+        Apollo->>HTTP: POST /graphql
+
+        HTTP->>Server: GraphQL request
+        Server->>Middleware: Helmet (security headers)
+        Middleware->>Middleware: i18next (language detection)
+        Middleware->>Middleware: Body parser (JSON)
+        Middleware->>Middleware: Cookie parser
+        Middleware->>Middleware: Session middleware
+
+        Server->>Server: Parse GraphQL query
+        Server->>Server: Validate query syntax
+
+        alt Rate Limited Endpoint
+            Server->>RateLimit: Check rate limit
+            RateLimit->>Redis: ZADD, ZCOUNT (sliding window)
+            Redis-->>RateLimit: Attempt count
+
+            alt Limit Exceeded
+                RateLimit-->>Server: RateLimitException (429)
+                Server-->>HTTP: Error response
+                HTTP-->>Apollo: Rate limit error
+                Apollo-->>Client: Show error (retry after X seconds)
+            else Within Limit
+                RateLimit-->>Server: Proceed
+            end
+        end
+
+        alt Protected Endpoint
+            Server->>Auth: @Authorization() decorator
+            Auth->>Auth: Extract session from cookie
+            Auth->>Redis: Get session data
+            Redis-->>Auth: Session object
+
+            alt Session Valid
+                Auth->>Prisma: Find user by userId
+                Prisma->>DB: SELECT FROM users WHERE id = ?
+                DB-->>Prisma: User data
+                Prisma-->>Auth: User object
+                Auth->>Auth: Attach user to context
+                Auth-->>Server: Authorized
+            else Session Invalid
+                Auth-->>Server: UnauthorizedException (401)
+                Server-->>HTTP: Unauthorized response
+                HTTP-->>Apollo: Auth error
+                Apollo->>Apollo: Clear cache
+                Apollo-->>Client: Redirect to login
+            end
+        end
+
+        Server->>Resolver: Execute resolver
+        Resolver->>Resolver: Extract decorators (@Lang, @Authorized, @UserAgent)
+        Resolver->>Resolver: Validate DTOs (class-validator)
+
+        alt Validation Failed
+            Resolver-->>Server: BadRequestException (400)
+            Server-->>HTTP: Validation error
+            HTTP-->>Apollo: Error with details
+            Apollo-->>Client: Show validation errors
+        else Validation Passed
+            Resolver->>Service: Call business method
+            Service->>Service: Business logic
+
+            alt Needs Cache
+                Service->>Redis: GET key
+
+                alt Cache Hit
+                    Redis-->>Service: Cached data
+                else Cache Miss
+                    Service->>Prisma: Query database
+                    Prisma->>DB: SQL query
+                    DB-->>Prisma: Query result
+                    Prisma-->>Service: Data
+                    Service->>Redis: SET key (with TTL)
+                end
+            else Direct DB Query
+                Service->>Prisma: Query/mutation
+                Prisma->>DB: SQL operation
+                DB-->>Prisma: Result
+                Prisma-->>Service: Data
+            end
+
+            Service-->>Resolver: Return data
+            Resolver->>Resolver: Transform to GraphQL type
+            Resolver-->>Server: Response data
+        end
+
+        Server->>Server: Serialize response
+        Server->>Middleware: GraphQL Logger
+        Middleware->>Middleware: Log operation (dev: detailed, prod: compact)
+
+        Server-->>HTTP: GraphQL response
+        HTTP-->>Apollo: JSON response
+        Apollo->>Apollo: Update cache
+        Apollo->>Apollo: Trigger subscriptions
+        Apollo-->>Client: Return data
+        Client->>Client: Update UI
+    end
+
+    %% Subscription Flow
+    rect rgb(16, 185, 129, 0.1)
+        Note over Client,DB: GraphQL Subscription Flow
+        Client->>Apollo: Subscribe to event
+        Apollo->>Apollo: Open WebSocket connection
+        Apollo->>HTTP: WS handshake /graphql
+        HTTP->>Server: WebSocket upgrade
+        Server-->>HTTP: Connection established
+        HTTP-->>Apollo: WebSocket open
+        Apollo->>HTTP: subscription { event }
+        HTTP->>Server: Subscription message
+        Server->>Server: Register subscription
+        Server-->>HTTP: Subscription ID
+        HTTP-->>Apollo: Subscribed
+
+        loop Event Occurs
+            Note over Resolver,Server: Event triggered
+            Resolver->>Server: Publish event
+            Server->>Server: Match subscriptions
+            Server->>HTTP: Send event data
+            HTTP->>Apollo: WebSocket message
+            Apollo->>Apollo: Update cache
+            Apollo-->>Client: Trigger callback
+            Client->>Client: Update UI
+        end
+
+        Client->>Apollo: Unsubscribe
+        Apollo->>HTTP: Stop subscription
+        HTTP->>Server: Unsubscribe message
+        Server->>Server: Remove subscription
+    end
+
+    %% Error Flow
+    rect rgb(220, 38, 38, 0.1)
+        Note over Client,DB: Error Handling Flow
+        Client->>Apollo: Execute operation
+        Apollo->>HTTP: GraphQL request
+        HTTP->>Server: Request
+        Server->>Resolver: Execute
+        Resolver->>Service: Call method
+
+        alt Service Error
+            Service->>Service: Throw exception
+            Service-->>Resolver: Error
+            Resolver->>Resolver: Catch & transform
+            Resolver-->>Server: GraphQL error
+        else Prisma Error
+            Service->>Prisma: Query
+            Prisma->>DB: SQL
+            DB-->>Prisma: Database error
+            Prisma-->>Service: Prisma error
+            Service->>Service: Transform error (P2002 → ConflictException)
+            Service-->>Resolver: Handled error
+            Resolver-->>Server: GraphQL error
+        end
+
+        Server->>Server: Format error (hide internals in prod)
+        Server->>Middleware: Log error (full stack in dev)
+        Server-->>HTTP: Error response (errors array)
+        HTTP-->>Apollo: GraphQL errors
+
+        Apollo->>Apollo: onError link
+        Apollo->>Apollo: Check error type
+
+        alt Network Error
+            Apollo->>Apollo: Retry with exponential backoff
+        else Auth Error (401)
+            Apollo->>Apollo: Clear cache
+            Apollo->>Apollo: Redirect to login
+        else Other GraphQL Error
+            Apollo-->>Client: Show error message
+        end
+    end
+
+    %% File Upload Flow
+    rect rgb(245, 158, 11, 0.1)
+        Note over Client,DB: File Upload Flow (Multipart)
+        Client->>Apollo: Upload file mutation
+        Apollo->>Apollo: Create multipart request
+        Apollo->>HTTP: POST /graphql (multipart/form-data)
+        HTTP->>Server: Multipart request
+        Server->>Middleware: graphql-upload handler
+        Middleware->>Middleware: Parse file stream
+        Middleware->>Middleware: Validate file (size, type)
+
+        alt Validation Failed
+            Middleware-->>Server: ValidationException
+            Server-->>Apollo: Validation error
+        else Validation Passed
+            Server->>Resolver: Execute with file
+            Resolver->>Service: Process file
+            Service->>Service: Transform file (Sharp)
+            Service->>Service: Upload to Cloudinary
+            Service->>Prisma: Save file URL
+            Prisma->>DB: UPDATE users SET avatar = ?
+            Service-->>Resolver: File URL
+            Resolver-->>Server: Response
+            Server-->>Apollo: Success
+            Apollo-->>Client: Show uploaded file
+        end
+    end
+```
+
+## GraphQL Request Flow Components
+
+### 1. Request Entry
+**Apollo Client**:
+- Serializes GraphQL query/mutation
+- Adds authentication headers (cookies)
+- Handles variables and file uploads
+- Manages local cache
+
+**HTTP Layer**:
+- POST to `/graphql` endpoint
+- Content-Type: `application/json` or `multipart/form-data` (uploads)
+- Includes session cookie
+- WebSocket upgrade for subscriptions
+
+### 2. Middleware Chain
+Executed in order:
+1. **Helmet**: Security headers (CSP, XSS protection)
+2. **i18next**: Language detection from headers/cookies
+3. **Body Parser**: JSON parsing
+4. **Cookie Parser**: Session cookie extraction
+5. **Session Middleware**: Session restoration from Redis
+6. **GraphQL Upload**: Multipart file handling
+
+### 3. Apollo Server Processing
+**Steps**:
+1. Parse GraphQL query string
+2. Validate syntax against schema
+3. Determine operation type (query, mutation, subscription)
+4. Extract operation name and variables
+5. Build execution context
+
+**Context Injection**:
+```typescript
+{
+  req: Request,          // Express request
+  res: Response,         // Express response
+  language: string,      // Detected language
+  user?: User           // Populated by auth guard
+}
+```
+
+### 4. Rate Limiting
+**RateLimitGuard**:
+- Applies to specific resolvers via `@RateLimit()` decorator
+- Uses Redis ZSET for sliding window algorithm
+- Tracks attempts per IP (unauthenticated) or userId (authenticated)
+- Returns 429 with `Retry-After` header if exceeded
+
+**Rate Limit Headers**:
+```
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 7
+X-RateLimit-Reset: 1639584000
+```
+
+### 5. Authentication Guard
+**GqlAuthGuard**:
+- Checks for session cookie
+- Validates session in Redis
+- Fetches user from database
+- Attaches user to context
+- Throws `UnauthorizedException` if invalid
+
+**Session Validation**:
+- Check expiration (`expiresAt`)
+- Check revocation (`revokedAt`)
+- Update last used timestamp
+
+### 6. Resolver Execution
+**Decorators**:
+- `@Authorization()`: Apply auth guard
+- `@Authorized()`: Inject current user
+- `@Lang()`: Inject language
+- `@UserAgent()`: Inject user agent
+- `@Context()`: Inject full context
+
+**DTO Validation**:
+- Class-validator decorators
+- Custom validators
+- I18n error messages
+
+**Example Resolver**:
+```typescript
+@Mutation(() => User)
+@Authorization()
+async updateProfile(
+  @Authorized() user: User,
+  @Args('data') data: UpdateProfileInput,
+  @Lang() lang: string
+): Promise<User> {
+  return this.service.updateProfile(user.id, data, lang);
+}
+```
+
+### 7. Service Layer
+**Business Logic**:
+- Extends `CoreService` for infrastructure access
+- Implements business rules
+- Calls Prisma for data operations
+- Uses Redis for caching
+
+**Caching Strategy**:
+- Cache frequently accessed data
+- Set appropriate TTLs
+- Invalidate on mutations
+- Use key namespacing
+
+**Transaction Support**:
+```typescript
+await this.prisma.$transaction(async (tx) => {
+  await tx.user.update(...);
+  await tx.auditLog.create(...);
+});
+```
+
+### 8. Prisma ORM
+**Query Building**:
+- Type-safe query construction
+- Relation loading (include, select)
+- Filtering, sorting, pagination
+- Aggregations
+
+**Error Handling**:
+- `P2002`: Unique constraint violation → `ConflictException`
+- `P2025`: Record not found → `NotFoundException`
+- `P2003`: Foreign key violation → `BadRequestException`
+
+### 9. Redis Caching
+**Operations**:
+- `GET/SET`: Simple key-value cache
+- `ZADD/ZCOUNT`: Rate limiting (sorted sets)
+- `SETEX`: Cache with TTL
+- `DEL`: Cache invalidation
+- `INCR/DECR`: Counters
+
+**Key Patterns**:
+- `user:${userId}`: User cache
+- `session:${sessionId}`: Session data
+- `ratelimit:${endpoint}:${identifier}`: Rate limit counter
+
+### 10. Response Serialization
+**GraphQL Response**:
+```typescript
+{
+  data: {
+    // Query/mutation result
+  },
+  errors: [
+    // GraphQL errors (if any)
+  ]
+}
+```
+
+**Error Format**:
+```typescript
+{
+  message: "Error message",
+  extensions: {
+    code: "UNAUTHENTICATED",
+    statusCode: 401
+  },
+  path: ["fieldName"],
+  locations: [{ line: 1, column: 1 }]
+}
+```
+
+### 11. Logging
+**GraphQLLoggerMiddleware**:
+- Development: Full query, variables, result
+- Production: Operation name, duration, errors only
+
+**Log Format**:
+```
+[GraphQL] login (123ms) - User login successful
+[GraphQL] updateProfile (45ms) - ERROR: Validation failed
+```
+
+### 12. Apollo Client Response Handling
+**Cache Update**:
+- Normalize response data
+- Update Apollo cache
+- Trigger reactive queries
+- Optimistic updates support
+
+**Error Link**:
+- Intercept errors
+- Handle authentication errors (401 → redirect)
+- Network errors (retry with backoff)
+- Log errors to console/service
+
+### 13. Subscription Flow
+**WebSocket Connection**:
+- Initial HTTP upgrade request
+- `graphql-ws` protocol
+- Connection authentication
+- Heartbeat/ping-pong
+
+**Subscription Lifecycle**:
+1. Client sends `subscribe` message
+2. Server registers subscription
+3. Events trigger `pubsub.publish()`
+4. Server sends updates to subscribed clients
+5. Client receives real-time updates
+6. Client sends `complete` to unsubscribe
+
+**Use Cases**:
+- Real-time notifications
+- Live data updates
+- Chat messages
+- Status changes
+
+### 14. File Upload Flow
+**Multipart Request**:
+- `graphql-upload-minimal` library
+- Stream processing for large files
+- File size limits (configurable)
+- MIME type validation
+
+**Upload Process**:
+1. Parse multipart form data
+2. Validate file (size, type)
+3. Stream to temporary storage
+4. Process file (resize, compress)
+5. Upload to Cloudinary
+6. Delete temporary file
+7. Save URL in database
+
+**Validation**:
+- Max file size: 5MB (configurable)
+- Allowed types: image/jpeg, image/png, image/webp
+- Filename sanitization
+
+## Performance Optimizations
+
+### Caching
+- Redis for session data (fast lookup)
+- Apollo Client cache (reduce network requests)
+- Database query result caching
+
+### Query Optimization
+- Prisma relation loading (avoid N+1)
+- Pagination for large datasets
+- Field selection (only fetch needed fields)
+
+### Rate Limiting
+- Prevent abuse
+- Protect against DDoS
+- Per-endpoint configuration
+
+### Connection Pooling
+- PostgreSQL connection pool (Prisma)
+- Redis connection pool
+
+## Security Features
+
+### Input Validation
+- DTO validation with class-validator
+- SQL injection prevention (Prisma)
+- XSS prevention (output escaping)
+
+### Authentication
+- Session-based auth
+- Cookie security (HttpOnly, Secure, SameSite)
+- CSRF protection
+
+### Rate Limiting
+- Sliding window algorithm
+- Per-user and per-IP tracking
+- Configurable limits per endpoint
+
+### Error Handling
+- Hide internal errors in production
+- Sanitize error messages
+- Log full stack traces for debugging

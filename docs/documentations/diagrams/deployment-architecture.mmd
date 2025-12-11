@@ -1,0 +1,581 @@
+# MedicHub - Deployment Architecture
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        BROWSER[Web Browser]
+        MOBILE[Mobile Browser]
+    end
+
+    subgraph "CDN & Load Balancer"
+        CDN[Content Delivery Network<br/>Static Assets]
+        LB[Load Balancer<br/>Nginx/Cloud LB]
+    end
+
+    subgraph "Application Layer"
+        subgraph "Frontend Containers"
+            WEB1[Next.js Container 1<br/>Port 3000]
+            WEB2[Next.js Container 2<br/>Port 3000]
+            WEB3[Next.js Container N<br/>Port 3000]
+        end
+
+        subgraph "Backend Containers"
+            API1[NestJS Container 1<br/>Port 8000]
+            API2[NestJS Container 2<br/>Port 8000]
+            API3[NestJS Container N<br/>Port 8000]
+        end
+    end
+
+    subgraph "Data Layer"
+        subgraph "PostgreSQL Cluster"
+            PG_MASTER[(PostgreSQL Master<br/>Read/Write)]
+            PG_REPLICA1[(PostgreSQL Replica 1<br/>Read Only)]
+            PG_REPLICA2[(PostgreSQL Replica 2<br/>Read Only)]
+        end
+
+        subgraph "Redis Cluster"
+            REDIS_MASTER[(Redis Master<br/>Sessions & Cache)]
+            REDIS_REPLICA1[(Redis Replica 1)]
+            REDIS_REPLICA2[(Redis Replica 2)]
+        end
+    end
+
+    subgraph "External Services"
+        MAIL_SERVICE[Email Services<br/>Brevo, SendGrid, SMTP]
+        SMS_SERVICE[Twilio<br/>SMS Service]
+        STORAGE_SERVICE[Cloudinary<br/>File Storage]
+        PAYMENT_SERVICE[Stripe<br/>Payment Processing]
+    end
+
+    subgraph "Monitoring & Logging"
+        LOGGING[Logging Service<br/>ELK/CloudWatch]
+        MONITORING[Monitoring Service<br/>Prometheus/Grafana]
+        APM[APM Service<br/>New Relic/DataDog]
+    end
+
+    subgraph "Docker Infrastructure"
+        DOCKER_NETWORK[Docker Bridge Network<br/>medic-hub]
+    end
+
+    %% Client connections
+    BROWSER --> CDN
+    MOBILE --> CDN
+    CDN --> LB
+    LB --> WEB1
+    LB --> WEB2
+    LB --> WEB3
+
+    %% Frontend to Backend
+    WEB1 --> LB
+    WEB2 --> LB
+    WEB3 --> LB
+    LB --> API1
+    LB --> API2
+    LB --> API3
+
+    %% Backend to Data Layer
+    API1 --> PG_MASTER
+    API2 --> PG_MASTER
+    API3 --> PG_MASTER
+
+    API1 --> PG_REPLICA1
+    API2 --> PG_REPLICA2
+    API3 --> PG_REPLICA1
+
+    API1 --> REDIS_MASTER
+    API2 --> REDIS_MASTER
+    API3 --> REDIS_MASTER
+
+    %% Database replication
+    PG_MASTER -.Replication.-> PG_REPLICA1
+    PG_MASTER -.Replication.-> PG_REPLICA2
+
+    REDIS_MASTER -.Replication.-> REDIS_REPLICA1
+    REDIS_MASTER -.Replication.-> REDIS_REPLICA2
+
+    %% Backend to External Services
+    API1 --> MAIL_SERVICE
+    API2 --> MAIL_SERVICE
+    API3 --> MAIL_SERVICE
+
+    API1 --> SMS_SERVICE
+    API2 --> SMS_SERVICE
+    API3 --> SMS_SERVICE
+
+    API1 --> STORAGE_SERVICE
+    API2 --> STORAGE_SERVICE
+    API3 --> STORAGE_SERVICE
+
+    API1 --> PAYMENT_SERVICE
+    API2 --> PAYMENT_SERVICE
+    API3 --> PAYMENT_SERVICE
+
+    %% Monitoring
+    WEB1 -.Logs.-> LOGGING
+    API1 -.Logs.-> LOGGING
+    API1 -.Metrics.-> MONITORING
+    API1 -.Traces.-> APM
+
+    %% Docker Network
+    DOCKER_NETWORK -.Contains.-> WEB1
+    DOCKER_NETWORK -.Contains.-> API1
+    DOCKER_NETWORK -.Contains.-> PG_MASTER
+    DOCKER_NETWORK -.Contains.-> REDIS_MASTER
+
+    style LB fill:#3b82f6,color:#fff
+    style PG_MASTER fill:#2570eb,color:#fff
+    style REDIS_MASTER fill:#dc2626,color:#fff
+    style API1 fill:#10b981,color:#fff
+    style WEB1 fill:#f59e0b,color:#fff
+```
+
+## Deployment Architecture Components
+
+### 1. Client Layer
+**Web Browser**:
+- Desktop browsers (Chrome, Firefox, Safari, Edge)
+- Mobile browsers (iOS Safari, Chrome Mobile)
+- Progressive Web App (PWA) support
+
+**Mobile Browser**:
+- Responsive design
+- Touch-optimized interface
+- Mobile-specific features
+
+### 2. CDN & Load Balancer
+**Content Delivery Network**:
+- Static asset distribution (JS, CSS, images)
+- Edge caching for performance
+- GZIP/Brotli compression
+- Global presence for low latency
+
+**Load Balancer**:
+- **Technology**: Nginx or cloud-based (AWS ALB, Google Cloud LB)
+- **Features**:
+  - Round-robin or least-connections algorithm
+  - Health checks for backend containers
+  - SSL/TLS termination
+  - WebSocket support
+  - Session affinity (sticky sessions) for WebSocket
+
+**Load Balancer Configuration**:
+```nginx
+upstream frontend {
+    server web1:3000;
+    server web2:3000;
+    server web3:3000;
+}
+
+upstream backend {
+    server api1:8000;
+    server api2:8000;
+    server api3:8000;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name medichub.com;
+
+    location / {
+        proxy_pass http://frontend;
+    }
+
+    location /graphql {
+        proxy_pass http://backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+### 3. Application Layer
+
+#### Frontend Containers
+**Next.js Standalone Build**:
+- Built with `output: 'standalone'` for Docker
+- Runs on Node.js 20+
+- Port 3000 (internal)
+- Server-side rendering (SSR)
+- Static generation (SSG) for public pages
+
+**Container Specs**:
+- **Base Image**: `node:20-alpine`
+- **Memory**: 512MB - 1GB per container
+- **CPU**: 0.5 - 1 vCPU
+- **Replicas**: 3+ (for high availability)
+
+**Health Check**:
+```
+GET / HTTP/1.1
+Expected: 200 OK
+Interval: 30s
+Timeout: 5s
+Retries: 3
+```
+
+#### Backend Containers
+**NestJS Application**:
+- CommonJS build output
+- Port 8000 (internal)
+- GraphQL endpoint at `/graphql`
+- WebSocket support for subscriptions
+
+**Container Specs**:
+- **Base Image**: `node:20-alpine`
+- **Memory**: 1GB - 2GB per container
+- **CPU**: 1 - 2 vCPU
+- **Replicas**: 3+ (for high availability)
+
+**Health Check**:
+```
+GET /health HTTP/1.1
+Expected: 200 OK {"status": "ok"}
+Interval: 30s
+Timeout: 5s
+Retries: 3
+```
+
+**Environment Variables**:
+- Loaded from `.env` file or secrets manager
+- 166+ variables configured
+- Database connection strings
+- Redis URLs
+- External service API keys
+
+### 4. Data Layer
+
+#### PostgreSQL Cluster
+**Master Node**:
+- Read/write operations
+- Handles all mutations
+- Automatic failover to replica on failure
+
+**Replica Nodes**:
+- Read-only operations
+- Asynchronous replication from master
+- Query distribution for performance
+
+**Configuration**:
+- **Version**: PostgreSQL 17
+- **Container Image**: `postgres:17-alpine`
+- **Port**: 5432
+- **Storage**: Persistent volume (SSD)
+- **Backup**: Daily automated backups
+- **Replication**: Streaming replication
+
+**Connection Pooling**:
+- Prisma manages connection pool
+- Max connections: 100 per backend container
+- Idle timeout: 10 minutes
+
+#### Redis Cluster
+**Master Node**:
+- Write operations
+- Session storage
+- Cache writes
+- Rate limit counters
+
+**Replica Nodes**:
+- Read operations
+- Failover candidates
+- Replication from master
+
+**Configuration**:
+- **Version**: Redis 8
+- **Container Image**: `redis:8-alpine`
+- **Port**: 6379
+- **Persistence**: AOF (Append-Only File) enabled
+- **Memory**: 2GB - 4GB
+- **Eviction Policy**: `allkeys-lru` (Least Recently Used)
+
+**Redis Usage**:
+- Sessions: `session:${sessionId}`
+- Rate limiting: `ratelimit:${endpoint}:${identifier}`
+- Cache: `user:${userId}`, `query:${hash}`
+- OTP codes: `otp:${userId}:${method}`
+
+### 5. External Services
+
+#### Email Services
+**Brevo (Primary)**:
+- Transactional emails
+- Email templates
+- Delivery tracking
+
+**SendGrid (Fallback)**:
+- Backup email provider
+- High deliverability
+
+**SMTP (Last Resort)**:
+- Generic SMTP server
+- Used if both Brevo and SendGrid fail
+
+**Email Types**:
+- Account verification
+- Password reset
+- 2FA codes (OTP)
+- Security alerts
+- Account lockout notifications
+
+#### Twilio (SMS Service)
+**Features**:
+- SMS delivery worldwide
+- 2FA OTP codes
+- Security notifications
+
+**Configuration**:
+- Account SID
+- Auth token
+- Phone number (sender)
+
+#### Cloudinary (File Storage)
+**Features**:
+- Image uploads (avatars, documents)
+- Automatic resizing and optimization
+- CDN delivery
+- Image transformations
+
+**Configuration**:
+- Cloud name
+- API key
+- API secret
+- Upload preset
+- Folder structure
+
+#### Stripe (Payment Processing)
+**Features**:
+- Payment intent creation
+- Subscription management
+- Webhook handling (invoice.paid, etc.)
+
+**Configuration**:
+- Secret key
+- Webhook secret
+- Currency settings
+
+### 6. Monitoring & Logging
+
+#### Logging Service
+**Options**:
+- **ELK Stack**: Elasticsearch, Logstash, Kibana
+- **AWS CloudWatch**: Managed logging
+- **Google Cloud Logging**: Managed logging
+
+**Log Levels**:
+- ERROR: Critical errors
+- WARN: Warnings and issues
+- LOG: General information
+- DEBUG: Detailed debug info (dev only)
+- VERBOSE: Very detailed (dev only)
+
+**Log Aggregation**:
+- Centralized logging from all containers
+- Structured JSON logs
+- Searchable and filterable
+- Retention: 30-90 days
+
+#### Monitoring Service
+**Options**:
+- **Prometheus + Grafana**: Open-source metrics
+- **AWS CloudWatch**: Managed monitoring
+- **Google Cloud Monitoring**: Managed monitoring
+
+**Metrics Tracked**:
+- Request rate (req/s)
+- Response time (p50, p95, p99)
+- Error rate (%)
+- CPU usage (%)
+- Memory usage (MB)
+- Database connections
+- Redis connections
+- Cache hit rate
+
+**Alerts**:
+- High error rate (> 5%)
+- Slow response time (> 1s)
+- High CPU usage (> 80%)
+- High memory usage (> 90%)
+- Database connection exhaustion
+- Service downtime
+
+#### APM Service (Application Performance Monitoring)
+**Options**:
+- **New Relic**: Full-stack monitoring
+- **DataDog**: Infrastructure and APM
+- **AWS X-Ray**: Distributed tracing
+
+**Features**:
+- Distributed tracing
+- Transaction monitoring
+- Database query performance
+- External service calls
+- Error tracking
+- User experience monitoring
+
+### 7. Docker Infrastructure
+
+#### Docker Compose (Development)
+**Services**:
+- PostgreSQL
+- Redis
+- (Optional) Frontend and Backend
+
+**Networks**:
+- Bridge network: `medic-hub`
+- Internal service communication
+
+**Volumes**:
+- `postgres_data`: Database persistence
+- `redis_data`: Cache persistence
+
+#### Docker Production Deployment
+**Orchestration Options**:
+- **Docker Swarm**: Simple orchestration
+- **Kubernetes**: Advanced orchestration
+- **AWS ECS/Fargate**: Managed containers
+- **Google Cloud Run**: Serverless containers
+
+**Container Registry**:
+- Docker Hub
+- AWS ECR
+- Google Container Registry
+- Private registry
+
+## Deployment Strategies
+
+### Blue-Green Deployment
+1. Deploy new version (green) alongside old (blue)
+2. Test green environment
+3. Switch traffic from blue to green
+4. Keep blue as rollback option
+5. Decommission blue after stability
+
+### Rolling Update
+1. Deploy new version to one container
+2. Health check passes
+3. Deploy to next container
+4. Repeat until all updated
+5. Automatic rollback on failure
+
+### Canary Deployment
+1. Deploy new version to small percentage (e.g., 10%)
+2. Monitor metrics and errors
+3. Gradually increase traffic (25%, 50%, 100%)
+4. Rollback if issues detected
+
+## High Availability
+
+### Frontend HA
+- **Load Balancing**: Distribute traffic across multiple containers
+- **Health Checks**: Remove unhealthy containers from pool
+- **Auto-scaling**: Scale based on CPU/memory usage
+- **CDN**: Serve static assets from edge locations
+
+### Backend HA
+- **Load Balancing**: Distribute API requests
+- **Stateless Design**: No server-side session state (use Redis)
+- **Health Checks**: Remove unhealthy containers
+- **Auto-scaling**: Scale based on request rate
+
+### Database HA
+- **Replication**: Master-replica setup
+- **Automatic Failover**: Promote replica to master on failure
+- **Backup & Restore**: Daily automated backups
+- **Point-in-Time Recovery**: Restore to specific timestamp
+
+### Redis HA
+- **Replication**: Master-replica setup
+- **Sentinel**: Automatic failover
+- **Persistence**: AOF for data durability
+- **Backup**: Periodic snapshots
+
+## Disaster Recovery
+
+### Backup Strategy
+**Database**:
+- Daily full backups
+- Hourly incremental backups
+- Offsite storage (S3, Cloud Storage)
+- Retention: 30 days
+
+**Application**:
+- Docker images versioned and stored
+- Configuration stored in Git
+- Environment variables in secrets manager
+
+**Files**:
+- User-uploaded files in Cloudinary (cloud-native)
+- Automatic backup by provider
+
+### Recovery Plan
+1. **Database Failure**: Restore from latest backup, replay transaction logs
+2. **Container Failure**: Auto-restart container, replace with healthy instance
+3. **Service Failure**: Failover to replica/secondary service
+4. **Complete Outage**: Deploy from scratch using IaC (Infrastructure as Code)
+
+## Security Measures
+
+### Network Security
+- **TLS/SSL**: HTTPS for all traffic
+- **Firewall**: Restrict inbound traffic to necessary ports
+- **VPC**: Isolate application in virtual private cloud
+- **Security Groups**: Per-service access control
+
+### Application Security
+- **Rate Limiting**: Prevent DDoS and abuse
+- **Input Validation**: Prevent injection attacks
+- **Authentication**: Session-based with Redis
+- **Authorization**: Role-based access control
+- **CORS**: Restrict cross-origin requests
+
+### Data Security
+- **Encryption at Rest**: Database encryption
+- **Encryption in Transit**: TLS for all connections
+- **Secret Management**: AWS Secrets Manager, Vault
+- **Password Hashing**: Argon2 for passwords
+- **2FA**: Multi-factor authentication support
+
+### Container Security
+- **Base Images**: Use official, minimal images (alpine)
+- **Vulnerability Scanning**: Scan images for CVEs
+- **Non-root User**: Run containers as non-root
+- **Read-only Filesystem**: Where possible
+- **Resource Limits**: CPU and memory limits
+
+## Scaling Strategy
+
+### Horizontal Scaling
+- **Frontend**: Add more Next.js containers
+- **Backend**: Add more NestJS containers
+- **Database**: Add read replicas
+- **Redis**: Add replica nodes
+
+### Vertical Scaling
+- Increase CPU/memory per container
+- Upgrade database instance size
+- Upgrade Redis instance size
+
+### Auto-scaling
+**Metrics-based**:
+- CPU utilization > 70%: Scale up
+- Request rate > threshold: Scale up
+- CPU utilization < 30%: Scale down
+
+**Time-based**:
+- Scale up during peak hours (9 AM - 6 PM)
+- Scale down during off-peak hours
+
+## Cost Optimization
+
+### Resource Optimization
+- Right-size containers (avoid over-provisioning)
+- Use spot instances for non-critical workloads
+- Implement caching to reduce database queries
+- Use CDN to reduce bandwidth costs
+
+### Monitoring Costs
+- Track cloud costs by service
+- Set budget alerts
+- Identify and eliminate unused resources
+- Use reserved instances for predictable workloads

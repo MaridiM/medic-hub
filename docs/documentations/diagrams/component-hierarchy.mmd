@@ -1,0 +1,520 @@
+# MedicHub - Component Hierarchy
+
+```mermaid
+graph TB
+    subgraph "Root Level"
+        ROOT_LAYOUT[Root Layout<br/>Providers & Global Styles]
+    end
+
+    subgraph "Providers"
+        APOLLO_PROVIDER[Apollo Provider<br/>GraphQL Client]
+        THEME_PROVIDER[Theme Provider<br/>Dark/Light Mode]
+        I18N_PROVIDER[next-intl Provider<br/>Internationalization]
+        TOAST_PROVIDER[Toaster Provider<br/>Notifications]
+    end
+
+    subgraph "Layout Components"
+        PUBLIC_LAYOUT[Public Layout<br/>Auth Pages]
+        PROTECTED_LAYOUT[Protected Layout<br/>Authenticated Pages]
+        HEADER[Header Widget<br/>Navigation & User Menu]
+        SIDEBAR[Sidebar Widget<br/>Navigation Menu]
+    end
+
+    subgraph "Page Components"
+        subgraph "Auth Pages"
+            LOGIN_PAGE[Login Page]
+            REGISTER_PAGE[Register Page]
+            VERIFY_PAGE[Verify Email Page]
+            RECOVERY_PAGE[Password Recovery]
+        end
+
+        subgraph "Protected Pages"
+            DASHBOARD_PAGE[Dashboard Page]
+            SETTINGS_PAGE[Settings Page]
+            ORG_PAGE[Organization Page]
+        end
+    end
+
+    subgraph "Feature Components"
+        subgraph "Auth Features"
+            LOGIN_FORM[Login Form<br/>Multi-step with 2FA]
+            REGISTER_FORM[Register Form<br/>Multi-step]
+            RESET_FORM[Reset Password Form]
+            VERIFY_FORM[Email Verification Form]
+            OTP_FORM[OTP Form<br/>6-digit input]
+            WEBAUTHN_FLOW[WebAuthn Flow<br/>Biometric/Key auth]
+        end
+
+        subgraph "Dashboard Features"
+            STATS_WIDGET[Stats Widget<br/>Key Metrics]
+            CHART_WIDGET[Chart Widget<br/>Data Visualization]
+            ACTIVITY_FEED[Activity Feed<br/>Recent Actions]
+        end
+
+        subgraph "Settings Features"
+            PROFILE_FORM[Profile Form<br/>User Details]
+            PASSWORD_FORM[Change Password Form]
+            TWO_FA_SETUP[2FA Setup<br/>TOTP/OTP/WebAuthn]
+            SESSION_LIST[Session List<br/>Active Sessions]
+        end
+
+        subgraph "Organization Features"
+            ORG_LIST[Organization List<br/>Table View]
+            ORG_FORM[Organization Form<br/>Create/Edit]
+            MEMBER_LIST[Member List<br/>Team Management]
+        end
+
+        subgraph "Shared Features"
+            NAVBAR[Navbar<br/>Top Navigation]
+            USER_DROPDOWN[User Dropdown<br/>Profile Menu]
+            LANGUAGE_SELECTOR[Language Selector<br/>en/ru]
+            THEME_SWITCHER[Theme Switcher<br/>Light/Dark]
+        end
+    end
+
+    subgraph "Atomic UI Components (42+)"
+        subgraph "Form Components"
+            BUTTON[Button<br/>Primary, Outline, Ghost]
+            INPUT[Input<br/>Text, Email, Password]
+            INPUT_PHONE[Input Phone<br/>International Format]
+            INPUT_OTP[Input OTP<br/>6-digit Code]
+            TEXTAREA[Textarea<br/>Multi-line Text]
+            SELECT[Select<br/>Dropdown]
+            CHECKBOX[Checkbox<br/>Toggle]
+            SWITCH[Switch<br/>On/Off]
+            LABEL[Label<br/>Form Label]
+            FORM_FIELD[Form Field<br/>Controller Wrapper]
+        end
+
+        subgraph "Layout Components"
+            CARD[Card<br/>Container]
+            DIALOG[Dialog<br/>Modal]
+            POPOVER[Popover<br/>Tooltip Container]
+            DROPDOWN[Dropdown Menu<br/>Context Menu]
+            SHEET[Sheet<br/>Side Panel]
+            TABS[Tabs<br/>Tab Navigation]
+            ACCORDION[Accordion<br/>Collapsible]
+        end
+
+        subgraph "Display Components"
+            AVATAR[Avatar<br/>User Image]
+            BADGE[Badge<br/>Status Tag]
+            ALERT[Alert<br/>Message Box]
+            TOOLTIP[Tooltip<br/>Hover Info]
+            SEPARATOR[Separator<br/>Divider]
+            SCROLL_AREA[Scroll Area<br/>Custom Scrollbar]
+        end
+
+        subgraph "Data Components"
+            TABLE[Table<br/>Data Grid]
+            COMMAND[Command<br/>Search Palette]
+            CALENDAR[Calendar<br/>Date Picker]
+            SLIDER[Slider<br/>Range Input]
+        end
+
+        subgraph "Feedback Components"
+            TOAST[Toast<br/>Notification<br/>(Sonner)]
+            PROGRESS[Progress<br/>Loading Bar]
+            SKELETON[Skeleton<br/>Loading Placeholder]
+            SPINNER[Spinner<br/>Loading Icon]
+        end
+
+        subgraph "Logo Components"
+            LOGO_FULL[Logo Full<br/>Icon + Text]
+            LOGO_ICON[Logo Icon<br/>Icon Only]
+            LOGO_MINI[Logo Mini<br/>Small Version]
+            LOGO_TEXT[Logo Text<br/>Text Only]
+        end
+
+        subgraph "Utility Components"
+            USER_AVATAR[User Avatar<br/>With Fallback]
+            COUNTDOWN[Countdown<br/>Timer Display]
+            HINT[Hint<br/>Info Hint]
+        end
+    end
+
+    %% Root connections
+    ROOT_LAYOUT --> APOLLO_PROVIDER
+    ROOT_LAYOUT --> THEME_PROVIDER
+    ROOT_LAYOUT --> I18N_PROVIDER
+    ROOT_LAYOUT --> TOAST_PROVIDER
+
+    %% Layout connections
+    ROOT_LAYOUT --> PUBLIC_LAYOUT
+    ROOT_LAYOUT --> PROTECTED_LAYOUT
+    PROTECTED_LAYOUT --> HEADER
+    PROTECTED_LAYOUT --> SIDEBAR
+
+    %% Page connections
+    PUBLIC_LAYOUT --> LOGIN_PAGE
+    PUBLIC_LAYOUT --> REGISTER_PAGE
+    PUBLIC_LAYOUT --> VERIFY_PAGE
+    PUBLIC_LAYOUT --> RECOVERY_PAGE
+
+    PROTECTED_LAYOUT --> DASHBOARD_PAGE
+    PROTECTED_LAYOUT --> SETTINGS_PAGE
+    PROTECTED_LAYOUT --> ORG_PAGE
+
+    %% Feature to page connections
+    LOGIN_PAGE --> LOGIN_FORM
+    LOGIN_FORM --> OTP_FORM
+    LOGIN_FORM --> WEBAUTHN_FLOW
+
+    REGISTER_PAGE --> REGISTER_FORM
+
+    VERIFY_PAGE --> VERIFY_FORM
+
+    RECOVERY_PAGE --> RESET_FORM
+
+    DASHBOARD_PAGE --> STATS_WIDGET
+    DASHBOARD_PAGE --> CHART_WIDGET
+    DASHBOARD_PAGE --> ACTIVITY_FEED
+
+    SETTINGS_PAGE --> PROFILE_FORM
+    SETTINGS_PAGE --> PASSWORD_FORM
+    SETTINGS_PAGE --> TWO_FA_SETUP
+    SETTINGS_PAGE --> SESSION_LIST
+
+    ORG_PAGE --> ORG_LIST
+    ORG_PAGE --> ORG_FORM
+    ORG_PAGE --> MEMBER_LIST
+
+    HEADER --> NAVBAR
+    HEADER --> USER_DROPDOWN
+    HEADER --> LANGUAGE_SELECTOR
+    HEADER --> THEME_SWITCHER
+
+    %% Feature to UI component connections
+    LOGIN_FORM --> BUTTON
+    LOGIN_FORM --> INPUT
+    LOGIN_FORM --> CARD
+    LOGIN_FORM --> LABEL
+    LOGIN_FORM --> FORM_FIELD
+
+    REGISTER_FORM --> INPUT
+    REGISTER_FORM --> INPUT_PHONE
+    REGISTER_FORM --> BUTTON
+    REGISTER_FORM --> FORM_FIELD
+
+    OTP_FORM --> INPUT_OTP
+    OTP_FORM --> BUTTON
+    OTP_FORM --> COUNTDOWN
+
+    PROFILE_FORM --> INPUT
+    PROFILE_FORM --> TEXTAREA
+    PROFILE_FORM --> AVATAR
+    PROFILE_FORM --> USER_AVATAR
+
+    TWO_FA_SETUP --> TABS
+    TWO_FA_SETUP --> BUTTON
+    TWO_FA_SETUP --> DIALOG
+
+    SESSION_LIST --> TABLE
+    SESSION_LIST --> BADGE
+    SESSION_LIST --> BUTTON
+
+    ORG_LIST --> TABLE
+    ORG_LIST --> BUTTON
+    ORG_LIST --> BADGE
+
+    USER_DROPDOWN --> DROPDOWN
+    USER_DROPDOWN --> AVATAR
+    USER_DROPDOWN --> SEPARATOR
+
+    LANGUAGE_SELECTOR --> SELECT
+    THEME_SWITCHER --> BUTTON
+
+    %% Feedback
+    TOAST_PROVIDER --> TOAST
+
+    style ROOT_LAYOUT fill:#3b82f6,color:#fff
+    style APOLLO_PROVIDER fill:#e535ab,color:#fff
+    style BUTTON fill:#10b981,color:#fff
+    style CARD fill:#f59e0b,color:#fff
+```
+
+## Component Hierarchy Layers
+
+### Layer 1: Root Layout
+**Root Layout** (`app/layout.tsx`):
+- Top-level component
+- Wraps entire application
+- Configures global providers
+- Loads global styles and fonts
+- Sets metadata (SEO)
+
+### Layer 2: Providers
+Global context providers that wrap the application:
+
+#### Apollo Provider
+- GraphQL client configuration
+- Cache management
+- Error handling
+- WebSocket for subscriptions
+
+#### Theme Provider (`next-themes`)
+- Dark/Light mode support
+- System preference detection
+- Theme persistence (localStorage)
+- CSS class-based theming
+
+#### i18n Provider (`next-intl`)
+- Internationalization (en, ru)
+- Message loading and aggregation
+- Typed translations
+- Language switching
+
+#### Toaster Provider (`sonner`)
+- Toast notification system
+- Success, error, info, warning types
+- Auto-dismiss configuration
+- Position control
+
+### Layer 3: Layout Components
+Layout wrappers for different page types:
+
+#### Public Layout
+- Minimal layout for auth pages
+- No navigation
+- Logo and language selector
+- Centered content area
+
+#### Protected Layout
+- Full application layout
+- Requires authentication
+- Header with navigation
+- Sidebar (optional)
+- Content area with max-width
+
+#### Header Widget
+Composed of:
+- **Navbar**: Logo, navigation links
+- **User Dropdown**: Profile menu, logout
+- **Language Selector**: en/ru switching
+- **Theme Switcher**: Light/dark toggle
+
+#### Sidebar Widget
+- Navigation menu
+- Collapsible on mobile
+- Active state indication
+- Icon + text labels
+
+### Layer 4: Page Components
+Top-level page components mapped to routes:
+
+#### Auth Pages (Public)
+- **Login Page**: Multi-step login with 2FA support
+- **Register Page**: Two-step registration (contact info → password)
+- **Verify Email Page**: Email verification flow
+- **Password Recovery**: Reset password flow
+
+#### Protected Pages
+- **Dashboard Page**: Main application dashboard
+- **Settings Page**: User profile and security settings
+- **Organization Page**: Organization management
+
+### Layer 5: Feature Components
+Business logic components with state and API interactions:
+
+#### Auth Features
+- **Login Form**: Email/password → Optional 2FA
+- **Register Form**: Multi-step with validation
+- **Reset Password Form**: Email input → Token validation → New password
+- **OTP Form**: 6-digit code input with countdown
+- **WebAuthn Flow**: Biometric/security key authentication
+
+#### Dashboard Features
+- **Stats Widget**: Key metrics display (cards)
+- **Chart Widget**: Data visualization (charts, graphs)
+- **Activity Feed**: Recent user actions timeline
+
+#### Settings Features
+- **Profile Form**: Name, email, phone, avatar
+- **Change Password Form**: Current → New → Confirm
+- **2FA Setup**: Tabs for TOTP, OTP Email, OTP SMS, WebAuthn
+- **Session List**: Active sessions table with device info
+
+#### Organization Features
+- **Organization List**: Table with pagination and filters
+- **Organization Form**: Create/edit organization details
+- **Member List**: Team member management
+
+#### Shared Features
+- **Navbar**: Top navigation with links
+- **User Dropdown**: Avatar + menu (profile, settings, logout)
+- **Language Selector**: Dropdown for language switching
+- **Theme Switcher**: Button to toggle dark/light mode
+
+### Layer 6: Atomic UI Components
+Reusable design system components (42+ components):
+
+#### Form Components (10)
+- **Button**: 4 variants (primary, outline, ghost, destructive), 4 sizes
+- **Input**: Text, email, password with validation states
+- **Input Phone**: International phone number with formatting
+- **Input OTP**: 6-digit code input (2FA)
+- **Textarea**: Multi-line text input
+- **Select**: Dropdown select with search
+- **Checkbox**: Boolean toggle
+- **Switch**: On/off toggle
+- **Label**: Form field label
+- **Form Field**: React Hook Form integration wrapper
+
+#### Layout Components (7)
+- **Card**: Container with padding, border, shadow
+- **Dialog**: Modal dialog with overlay
+- **Popover**: Floating popover container
+- **Dropdown Menu**: Context menu with items
+- **Sheet**: Slide-in panel (mobile menu)
+- **Tabs**: Tab navigation with panels
+- **Accordion**: Collapsible sections
+
+#### Display Components (6)
+- **Avatar**: Circular user image with fallback
+- **Badge**: Colored tag for status/labels
+- **Alert**: Message box (info, success, warning, error)
+- **Tooltip**: Hover tooltip
+- **Separator**: Horizontal/vertical divider
+- **Scroll Area**: Custom scrollbar styling
+
+#### Data Components (4)
+- **Table**: Data table with header, body, footer
+- **Command**: Command palette with search
+- **Calendar**: Date picker calendar
+- **Slider**: Range slider input
+
+#### Feedback Components (4)
+- **Toast**: Notification toast (success, error, info)
+- **Progress**: Progress bar
+- **Skeleton**: Loading placeholder
+- **Spinner**: Loading spinner icon
+
+#### Logo Components (4)
+- **Logo Full**: Icon + text (full logo)
+- **Logo Icon**: Icon only
+- **Logo Mini**: Smaller icon version
+- **Logo Text**: Text only
+
+#### Utility Components (3)
+- **User Avatar**: Avatar with fallback to initials
+- **Countdown**: Timer display (seconds remaining)
+- **Hint**: Info hint icon with popover
+
+## Component Patterns
+
+### Composition Pattern
+Components compose smaller components:
+```
+LoginPage
+  └─ LoginForm
+       ├─ Card
+       ├─ Input (email)
+       ├─ Input (password)
+       ├─ Button (submit)
+       └─ OTPForm (conditional)
+            ├─ InputOTP
+            ├─ Countdown
+            └─ Button (verify)
+```
+
+### Form Pattern
+All forms use React Hook Form + Zod:
+```
+Form (Provider)
+  └─ form.onSubmit
+       ├─ FormField (controller)
+       │    ├─ FormLabel
+       │    ├─ FormControl
+       │    │    └─ Input
+       │    ├─ FormDescription
+       │    └─ FormMessage (errors)
+       └─ Button (submit)
+```
+
+### Feature-Sliced Design
+Modules follow consistent structure:
+```
+modules/auth/
+  ├─ pages/         # Page exports
+  ├─ features/      # Forms, flows
+  ├─ widgets/       # Composed blocks
+  └─ shared/        # Utils, API, i18n
+```
+
+### Atomic Design
+Components hierarchically organized:
+- **Atoms**: Button, Input, Label (basic)
+- **Molecules**: FormField, UserAvatar (composed)
+- **Organisms**: LoginForm, Header (complex)
+- **Templates**: Layout components
+- **Pages**: Full pages
+
+### Prop Drilling vs Context
+- Use Zustand for global state (auth, app UI)
+- Use Context for provider-based state (theme, i18n)
+- Pass props directly for component-specific data
+
+### Component Styling
+All components use Tailwind CSS with CVA (Class Variance Authority):
+```typescript
+const buttonVariants = cva('base-classes', {
+  variants: {
+    variant: { primary: '...', outline: '...' },
+    size: { default: '...', lg: '...', sm: '...' }
+  }
+})
+```
+
+## State Management
+
+### Zustand Stores
+- **App Store**: UI state (sidebar open/closed)
+- **Auth Store**: 2FA state, status pages, password step
+
+### React Hook Form
+- Form state management
+- Validation (Zod schemas)
+- Error handling
+- Submission
+
+### Apollo Client Cache
+- GraphQL query caching
+- Automatic cache updates
+- Optimistic updates
+
+## Styling System
+
+### Tailwind CSS
+- Utility-first styling
+- JIT compilation
+- Custom theme tokens
+- Responsive utilities
+
+### CSS Variables
+- Theme colors
+- Typography scale
+- Spacing scale
+- Border radius
+
+### Component Variants
+- CVA for variant management
+- Size variants
+- Color variants
+- State variants (hover, active, disabled)
+
+## Accessibility
+
+### ARIA
+- All components have proper ARIA attributes
+- Keyboard navigation support
+- Screen reader friendly
+
+### Focus Management
+- Visible focus indicators
+- Logical tab order
+- Focus trap in dialogs
+
+### Semantic HTML
+- Proper heading hierarchy
+- Semantic landmarks
+- Form labels associated with inputs

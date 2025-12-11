@@ -1,0 +1,253 @@
+# MedicHub - Frontend Structure
+
+```mermaid
+graph TB
+    subgraph "Entry Point"
+        ROOT_LAYOUT[Root Layout<br/>app/layout.tsx<br/>Providers Setup]
+    end
+
+    subgraph "Route Groups"
+        PUBLIC_GROUP["(root) Group<br/>Public Pages"]
+        PROTECTED_GROUP["(protected) Group<br/>Auth Required"]
+    end
+
+    subgraph "Modules (Feature-Sliced)"
+        subgraph "Auth Module"
+            AUTH_PAGES[Pages<br/>Login, Register,<br/>Verify, Recovery]
+            AUTH_FEATURES[Features<br/>Forms & Flows]
+            AUTH_WIDGETS[Widgets<br/>Auth Card]
+            AUTH_SHARED[Shared<br/>API, Schemas, i18n]
+        end
+
+        subgraph "Dashboard Module"
+            DASH_PAGES[Pages<br/>Main Dashboard]
+            DASH_FEATURES[Features<br/>Stats, Charts]
+            DASH_WIDGETS[Widgets<br/>Dashboard Widgets]
+            DASH_SHARED[Shared<br/>Utils, Components]
+        end
+
+        subgraph "Organization Module"
+            ORG_PAGES[Pages<br/>List, Create, Edit]
+            ORG_FEATURES[Features<br/>Org Management]
+            ORG_SHARED[Shared<br/>API, Types]
+        end
+
+        subgraph "Settings Module"
+            SET_PAGES[Pages<br/>User Settings]
+            SET_FEATURES[Features<br/>Profile, Security]
+            SET_SHARED[Shared<br/>Forms, Schemas]
+        end
+    end
+
+    subgraph "Packages (Cross-Domain)"
+        subgraph "Components"
+            UI[UI Components<br/>Button, Input, Card,<br/>Dialog (42+ components)]
+            FEATURES_COMP[Feature Components<br/>Navbar, UserDropdown]
+            WIDGETS[Widgets<br/>Header, Sidebar]
+            PROVIDERS[Providers<br/>Toast, Theme]
+        end
+
+        subgraph "API Layer"
+            APOLLO_CLIENT[Apollo Client<br/>Config & Setup]
+            GQL_OPS[GraphQL Operations<br/>Codegen Output]
+            MOCKS[Mock Data<br/>Development]
+        end
+
+        subgraph "State Management"
+            STORE_APP[App Store<br/>Zustand Slices]
+            STORE_AUTH[Auth Store<br/>2FA, Status]
+        end
+
+        subgraph "Internationalization"
+            I18N_CONFIG[i18n Config<br/>next-intl]
+            I18N_LOCALES[Locales<br/>en, ru]
+            I18N_TYPES[Typed Messages]
+        end
+
+        subgraph "Other Packages"
+            CONFIG[Config<br/>Routes, Theme]
+            HOOKS[Custom Hooks<br/>useDebounce, etc.]
+            SCHEMAS[Zod Schemas<br/>Validation]
+            UTILS[Utils<br/>Helpers]
+            CONSTANTS[Constants<br/>SEO, URLs]
+        end
+    end
+
+    subgraph "Styling System"
+        GLOBALS[globals.css<br/>Tailwind Import]
+        VARS[CSS Variables<br/>Colors, Typography]
+        TAILWIND[Tailwind Config<br/>Theme Extension]
+    end
+
+    subgraph "External Services"
+        GRAPHQL_API[GraphQL API<br/>Backend NestJS]
+    end
+
+    %% Entry point flow
+    ROOT_LAYOUT --> PUBLIC_GROUP
+    ROOT_LAYOUT --> PROTECTED_GROUP
+
+    %% Route groups to modules
+    PUBLIC_GROUP --> AUTH_PAGES
+    PROTECTED_GROUP --> DASH_PAGES
+    PROTECTED_GROUP --> ORG_PAGES
+    PROTECTED_GROUP --> SET_PAGES
+
+    %% Module structure
+    AUTH_PAGES --> AUTH_FEATURES
+    AUTH_FEATURES --> AUTH_WIDGETS
+    AUTH_FEATURES --> AUTH_SHARED
+
+    DASH_PAGES --> DASH_FEATURES
+    DASH_FEATURES --> DASH_WIDGETS
+    DASH_FEATURES --> DASH_SHARED
+
+    ORG_PAGES --> ORG_FEATURES
+    ORG_FEATURES --> ORG_SHARED
+
+    SET_PAGES --> SET_FEATURES
+    SET_FEATURES --> SET_SHARED
+
+    %% Packages usage
+    AUTH_FEATURES --> UI
+    AUTH_FEATURES --> APOLLO_CLIENT
+    AUTH_SHARED --> SCHEMAS
+    AUTH_SHARED --> I18N_LOCALES
+
+    DASH_FEATURES --> UI
+    DASH_FEATURES --> APOLLO_CLIENT
+    DASH_FEATURES --> STORE_APP
+
+    %% API layer
+    APOLLO_CLIENT --> GQL_OPS
+    GQL_OPS --> GRAPHQL_API
+
+    %% State
+    AUTH_FEATURES --> STORE_AUTH
+    DASH_FEATURES --> STORE_APP
+
+    %% i18n
+    I18N_CONFIG --> I18N_LOCALES
+    I18N_CONFIG --> I18N_TYPES
+
+    %% Styling
+    ROOT_LAYOUT --> GLOBALS
+    GLOBALS --> VARS
+    UI --> TAILWIND
+
+    %% Providers
+    ROOT_LAYOUT --> PROVIDERS
+    PROVIDERS --> APOLLO_CLIENT
+    PROVIDERS --> I18N_CONFIG
+
+    style ROOT_LAYOUT fill:#3b82f6,color:#fff
+    style APOLLO_CLIENT fill:#e535ab,color:#fff
+    style UI fill:#10b981,color:#fff
+    style GRAPHQL_API fill:#2570eb,color:#fff
+```
+
+## Frontend Architecture Layers
+
+### 1. Entry Point
+- **Root Layout** (`app/layout.tsx`):
+  - Provider composition (Apollo, Theme, i18n, Toast)
+  - Global styles and fonts
+  - Metadata configuration
+
+### 2. Route Groups (App Router)
+
+#### Public Group `(root)`
+- Home page
+- Authentication pages (login, register, verify, recovery)
+- Policy pages (privacy, terms)
+
+#### Protected Group `(protected)`
+- Dashboard
+- Organization management
+- User settings
+- Requires authentication middleware
+
+### 3. Modules (Feature-Sliced Design)
+
+Each module follows consistent structure:
+- **pages/**: Page exports to App Router
+- **features/**: Self-contained business features (forms, flows)
+- **widgets/**: Composed UI blocks
+- **shared/**: Module-specific code
+  - api/graphql/: GraphQL operations (.graphql files)
+  - libs/: i18n locales, store slices
+  - schemas/: Zod validation schemas
+  - utils/: Pure functions
+  - components/: Module-specific UI
+
+#### Auth Module
+Login, registration, email verification, password recovery, 2FA flows
+
+#### Dashboard Module
+Main application dashboard with stats and charts
+
+#### Organization Module
+Organization management (create, edit, list)
+
+#### Settings Module
+User profile and security settings
+
+### 4. Packages (Cross-Domain Layer)
+
+#### Components
+- **UI**: 42+ atomic components (Button, Input, Card, Dialog, etc.)
+- **Features**: Higher-level components (Navbar, UserDropdown)
+- **Widgets**: Page-level components (Header, Sidebar)
+- **Providers**: Context providers (Toast, Theme)
+
+#### API Layer
+- **Apollo Client**: GraphQL client configuration
+- **GraphQL Operations**: Auto-generated from .graphql files
+- **Mocks**: Development mock data
+
+#### State Management
+- **Zustand stores**: Modular slices
+  - App store (UI state)
+  - Auth store (2FA state, status pages)
+
+#### Internationalization
+- **next-intl**: Type-safe i18n
+- **Locales**: en, ru translations
+- **Typed messages**: Full type safety for translation keys
+
+#### Other Packages
+- **Config**: Routes (typed path generator), themes
+- **Hooks**: Custom React hooks (useDebounce, useAutoValidateForm)
+- **Schemas**: Zod validation schemas
+- **Utils**: Pure utility functions
+- **Constants**: SEO metadata, URLs
+
+### 5. Styling System
+- **Tailwind CSS 4**: Utility-first styling
+- **CSS Variables**: Theme tokens (colors, spacing, typography)
+- **Global Styles**: Base styles, animations
+- **shadcn/ui**: Component design system based on Radix UI
+
+### 6. External Communication
+- **GraphQL API**: HTTP/HTTPS to backend NestJS
+- **WebSocket**: Real-time subscriptions via GraphQL WS
+
+## Key Patterns
+
+### Feature-Sliced Design
+Modules organized by business domain with clear boundaries
+
+### Atomic Design
+Components hierarchically organized (atoms → molecules → organisms)
+
+### Type Safety
+Full TypeScript with path aliases and strict mode
+
+### Form Handling
+React Hook Form + Zod for validation + auto-validation hooks
+
+### Code Generation
+GraphQL operations auto-generated from .graphql files
+
+### Internationalization
+Typed translations with message aggregation
