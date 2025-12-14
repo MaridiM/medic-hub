@@ -3,7 +3,10 @@
     "allow": [
       "Bash(find:*)",
       "Bash(mkdir:*)",
-      "Bash(node complete-generation.js:*)"
+      "Bash(node complete-generation.js:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(del \"G:\\Projects\\doctor_lab\\medic_hub_gemini\\docs\\APP_GENERATOR_PROMPT_temp.md\")"
     ]
   }
 }
